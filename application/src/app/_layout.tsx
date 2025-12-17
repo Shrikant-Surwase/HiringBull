@@ -5,7 +5,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -59,6 +59,11 @@ function RootNavigator() {
   // const isAuthenticated = true;
   // const hasCompletedOnboarding = true;
   // const isSubscribed = true;
+
+    // Hide splash once we have initial state
+    useEffect(() => {
+        SplashScreen.hideAsync();
+      }, []);
 
   return (
     <Stack>

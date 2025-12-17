@@ -15,23 +15,7 @@ const TAB_SCREENS = [
 
 const HIDDEN_SCREENS = ['style', 'settings'] as const;
 
-function useSplashScreen() {
-  const status = useAuth.use.status();
-
-  const hideSplash = useCallback(async () => {
-    await SplashScreen.hideAsync();
-  }, []);
-
-  useEffect(() => {
-    if (status !== 'idle') {
-      setTimeout(() => hideSplash(), 1000);
-    }
-  }, [hideSplash, status]);
-}
-
 function TabLayout() {
-  useSplashScreen();
-
   return (
     <Tabs>
       {TAB_SCREENS.map(({ name, title, icon }) => (

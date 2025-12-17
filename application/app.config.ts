@@ -32,6 +32,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
+  runtimeVersion: '1.0.0',
   updates: {
     fallbackToCacheTimeout: 0,
   },
