@@ -1,6 +1,36 @@
 module.exports = {
   white: '#ffffff',
   black: '#000000',
+
+  // Primary accent - Green (main app: tabs, buttons, highlights)
+  primary: {
+    50: '#f0fdf4',
+    100: '#dcfce7',
+    200: '#bbf7d0',
+    300: '#86efac',
+    400: '#4ade80',
+    500: '#22c55e',
+    600: '#16a34a',
+    700: '#15803d',
+    800: '#166534',
+    900: '#14532d',
+  },
+
+  // Secondary accent - Blue (onboarding, special flows)
+  secondary: {
+    50: '#eff6ff',
+    100: '#dbeafe',
+    200: '#bfdbfe',
+    300: '#93c5fd',
+    400: '#60a5fa',
+    500: '#3b82f6',
+    600: '#2563eb',
+    700: '#1d4ed8',
+    800: '#1e40af',
+    900: '#1e3a8a',
+  },
+
+  // Neutrals
   charcoal: {
     50: '#F2F2F2',
     100: '#E5E5E5',
@@ -27,18 +57,8 @@ module.exports = {
     800: '#262626',
     900: '#171717',
   },
-  primary: {
-    50: '#FFE2CC',
-    100: '#FFC499',
-    200: '#FFA766',
-    300: '#FF984C',
-    400: '#FF8933',
-    500: '#FF7B1A',
-    600: '#FF6C00',
-    700: '#E56100',
-    800: '#CC5600',
-    900: '#B24C00',
-  },
+
+  // Semantic colors
   success: {
     50: '#F0FDF4',
     100: '#DCFCE7',

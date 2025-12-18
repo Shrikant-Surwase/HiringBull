@@ -6,7 +6,7 @@ import { tv } from 'tailwind-variants';
 
 const button = tv({
   slots: {
-    container: 'my-2 flex flex-row items-center justify-center rounded-md px-4',
+    container: 'flex flex-row items-center justify-center rounded-xl px-4',
     label: 'font-inter text-base font-semibold',
     indicator: 'h-6 text-white',
   },
@@ -14,57 +14,62 @@ const button = tv({
   variants: {
     variant: {
       default: {
-        container: 'bg-black dark:bg-white',
-        label: 'text-white dark:text-black',
-        indicator: 'text-white dark:text-black',
+        container: 'bg-primary-500',
+        label: 'text-white',
+        indicator: 'text-white',
       },
       secondary: {
-        container: 'bg-primary-600',
-        label: 'text-secondary-600',
+        container: 'bg-secondary-500',
+        label: 'text-white',
         indicator: 'text-white',
       },
       outline: {
-        container: 'border border-neutral-400',
-        label: 'text-black dark:text-neutral-100',
-        indicator: 'text-black dark:text-neutral-100',
+        container: 'border-2 border-primary-500 bg-transparent',
+        label: 'text-primary-600',
+        indicator: 'text-primary-600',
+      },
+      'outline-secondary': {
+        container: 'border-2 border-secondary-500 bg-transparent',
+        label: 'text-secondary-600',
+        indicator: 'text-secondary-600',
       },
       destructive: {
-        container: 'bg-red-600',
+        container: 'bg-danger-500',
         label: 'text-white',
         indicator: 'text-white',
       },
       ghost: {
         container: 'bg-transparent',
-        label: 'text-black underline dark:text-white',
-        indicator: 'text-black dark:text-white',
+        label: 'text-neutral-700 dark:text-neutral-300',
+        indicator: 'text-neutral-700 dark:text-neutral-300',
       },
       link: {
         container: 'bg-transparent',
-        label: 'text-black',
-        indicator: 'text-black',
+        label: 'text-primary-600 underline',
+        indicator: 'text-primary-600',
       },
     },
     size: {
       default: {
-        container: 'h-10 px-4',
+        container: 'h-12 px-4',
         label: 'text-base',
       },
       lg: {
-        container: 'h-12 px-8',
-        label: 'text-xl',
+        container: 'h-14 px-8',
+        label: 'text-lg',
       },
       sm: {
-        container: 'h-8 px-3',
+        container: 'h-10 px-3',
         label: 'text-sm',
         indicator: 'h-2',
       },
-      icon: { container: 'size-9' },
+      icon: { container: 'size-10' },
     },
     disabled: {
       true: {
-        container: 'bg-neutral-300 dark:bg-neutral-300',
-        label: 'text-neutral-600 dark:text-neutral-600',
-        indicator: 'text-neutral-400 dark:text-neutral-400',
+        container: 'bg-neutral-200 dark:bg-neutral-700',
+        label: 'text-neutral-400 dark:text-neutral-500',
+        indicator: 'text-neutral-400 dark:text-neutral-500',
       },
     },
     fullWidth: {
@@ -85,12 +90,13 @@ const button = tv({
 });
 
 type ButtonVariants = VariantProps<typeof button>;
-interface Props extends ButtonVariants, Omit<PressableProps, 'disabled'> {
-  label?: string;
-  loading?: boolean;
-  className?: string;
-  textClassName?: string;
-}
+type Props = ButtonVariants &
+  Omit<PressableProps, 'disabled'> & {
+    label?: string;
+    loading?: boolean;
+    className?: string;
+    textClassName?: string;
+  };
 
 export const Button = React.forwardRef<View, Props>(
   (

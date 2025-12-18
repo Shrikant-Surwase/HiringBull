@@ -70,6 +70,64 @@ src
 - Use declarative JSX
 - Implement proper TypeScript discriminated unions for message types
 
+## UI Design Guidelines
+
+### Reference Files
+
+- Onboarding style: `src/app/onboarding.tsx` - Clean, minimal selection UI pattern
+- Main app screens follow the same pattern with green accent
+
+### Design Principles
+
+- Light, clean, minimal - avoid visual clutter
+- White/light backgrounds (`bg-white`, `bg-neutral-100`)
+- Generous whitespace and padding
+- Rounded corners (`rounded-xl` for cards/buttons/inputs)
+- Icons: Ionicons outline style, keep them subtle (not prominent)
+- Emojis can be used for visual interest where appropriate
+
+### Color System (from `src/components/ui/colors.js`)
+
+| Color                | Usage                                                         |
+| -------------------- | ------------------------------------------------------------- |
+| `primary-*` (green)  | Main app accent: buttons, active tabs, selections, highlights |
+| `secondary-*` (blue) | Onboarding flows, special actions                             |
+| `neutral-*`          | Text, backgrounds, borders                                    |
+| `danger-*`           | Destructive actions, errors                                   |
+| `warning-*`          | Warnings                                                      |
+| `success-*`          | Success states                                                |
+
+**IMPORTANT:** Always use semantic color names (`primary-500`, `secondary-500`). Never hardcode hex values or use Tailwind defaults like `blue-500` or `green-500`.
+
+### Button Component (`@/components/ui/Button`)
+
+Use the Button component with these variants:
+
+- `default` - Primary green button (main CTAs)
+- `secondary` - Blue button (onboarding, special flows)
+- `outline` - Green outlined button
+- `outline-secondary` - Blue outlined button
+- `destructive` - Red button for destructive actions
+- `ghost` - Transparent with subtle text
+- `link` - Text link style
+
+Sizes: `sm`, `default`, `lg`
+
+### Standard UI Patterns
+
+- **Selection cards:** `rounded-xl border-2 p-4`, colored border + bg when selected
+- **Full-width buttons:** Use `<Button size="lg" />` for main CTAs
+- **Inputs:** `rounded-xl border border-neutral-200 bg-neutral-100 px-4 py-3`
+- **Typography:** `text-3xl font-bold` for headings, `text-neutral-500` for muted text
+- **Screen containers:** `bg-white dark:bg-neutral-900` with `px-6` horizontal padding
+
+### Don'ts
+
+- No heavy shadows or gradients
+- No bright/loud colors outside the defined palette
+- No overly prominent icons - keep them secondary to content
+- No hardcoded color values - always use the color system
+
 ## UI and Styling
 
 - Use Nativewind for styling and components
