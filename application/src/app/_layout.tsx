@@ -56,7 +56,7 @@ function RootNavigator() {
 
   //   temporary flags for testing
   const isFirstTime = false;
-  const isAuthenticated = true;
+  const isAuthenticated = false;
   const hasCompletedOnboarding = false;
   const isSubscribed = true;
 

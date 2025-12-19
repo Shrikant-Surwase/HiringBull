@@ -642,7 +642,7 @@ export default function Onboarding() {
         </View>
       </SafeAreaView>
 
-      {step === -1 ? (
+      {step === 1 ? (
 
         <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
           <View className="border-t border-neutral-200 bg-white px-6 pb-8 pt-4 dark:border-neutral-700 dark:bg-neutral-900">
