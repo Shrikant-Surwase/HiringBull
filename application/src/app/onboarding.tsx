@@ -10,6 +10,7 @@ import {
   Checkbox,
   FocusAwareStatusBar,
   Image,
+  Input,
   SafeAreaView,
   ScrollView,
   Text,
@@ -85,49 +86,148 @@ type StepIndicatorProps = {
 };
 
 function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
-  const progress = (currentStep / totalSteps) * 100;
-
   return (
     <View className="mb-8 w-full flex-row items-center px-2">
-      <View
-        className={`size-8 items-center justify-center rounded-full ${
-          currentStep >= 1
-            ? 'bg-black dark:bg-white'
-            : 'bg-neutral-200 dark:bg-neutral-700'
-        }`}
-      >
-        <Text
-          className={`text-sm font-semibold ${
-            currentStep >= 1 ? 'text-white dark:text-black' : 'text-neutral-500'
-          }`}
-        >
-          1
-        </Text>
-      </View>
-
-      <View className="mx-3 h-1 flex-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
-        <View
-          className="h-full rounded-full bg-black dark:bg-white"
-          style={{ width: `${progress}%` }}
-        />
-      </View>
-
-      <View
-        className={`size-8 items-center justify-center rounded-full ${
-          currentStep >= 2
-            ? 'bg-black dark:bg-white'
-            : 'bg-neutral-200 dark:bg-neutral-700'
-        }`}
-      >
-        <Text
-          className={`text-sm font-semibold ${
-            currentStep >= 2 ? 'text-white dark:text-black' : 'text-neutral-500'
-          }`}
-        >
-          2
-        </Text>
-      </View>
+      {[1, 2, 3].map((step) => (
+        <React.Fragment key={step}>
+          <View
+            className={`size-8 items-center justify-center rounded-full ${
+              currentStep >= step
+                ? 'bg-black dark:bg-white'
+                : 'bg-neutral-200 dark:bg-neutral-700'
+            }`}
+          >
+            <Text
+              className={`text-sm font-semibold ${
+                currentStep >= step
+                  ? 'text-white dark:text-black'
+                  : 'text-neutral-500'
+              }`}
+            >
+              {step}
+            </Text>
+          </View>
+          {step < 3 && (
+            <View className="mx-2 h-1 flex-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+              <View
+                className="h-full rounded-full bg-black dark:bg-white"
+                style={{
+                  width: `${
+                    currentStep > step ? 100 : currentStep === step ? 50 : 0
+                  }%`,
+                }}
+              />
+            </View>
+          )}
+        </React.Fragment>
+      ))}
     </View>
+  );
+}
+
+type ProfileData = {
+  name: string;
+  isExperienced: boolean;
+  collegeOrCompany: string;
+  cgpaOrYoe: string;
+  resumeLink: string;
+};
+
+type Step0Props = {
+  data: ProfileData;
+  onChange: (data: ProfileData) => void;
+};
+
+function Step0({ data, onChange }: Step0Props) {
+  const updateField = (field: keyof ProfileData, value: any) => {
+    onChange({ ...data, [field]: value });
+  };
+
+  return (
+    <Animated.View
+      entering={FadeInRight.duration(300)}
+      exiting={FadeOutLeft.duration(300)}
+      className="flex-1"
+    >
+      <View className="px-6">
+        <Text className="mb-2 text-3xl font-bold dark:text-white">
+          Tell us about you
+        </Text>
+        <Text className="mb-8 text-base text-neutral-500">
+          We&apos;ll personalize your experience based on this
+        </Text>
+
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View className="gap-5">
+            <View>
+              <Text className="mb-2 font-medium text-neutral-900 dark:text-white">
+                Full Name
+              </Text>
+              <Input
+                placeholder="Enter your full name"
+                value={data.name}
+                onChangeText={(text) => updateField('name', text)}
+              />
+            </View>
+
+            <Pressable
+              onPress={() => updateField('isExperienced', !data.isExperienced)}
+              className="flex-row items-center gap-3 py-2"
+            >
+              <Checkbox
+                checked={data.isExperienced}
+                onChange={() =>
+                  updateField('isExperienced', !data.isExperienced)
+                }
+                accessibilityLabel="I am an experienced professional"
+              />
+              <Text className="text-base text-neutral-900 dark:text-white">
+                I am an experienced professional
+              </Text>
+            </Pressable>
+
+            <View>
+              <Text className="mb-2 font-medium text-neutral-900 dark:text-white">
+                {data.isExperienced ? 'Current Company' : 'College Name'}
+              </Text>
+              <Input
+                placeholder={
+                  data.isExperienced ? 'e.g. Google' : 'e.g. IIT Delhi'
+                }
+                value={data.collegeOrCompany}
+                onChangeText={(text) => updateField('collegeOrCompany', text)}
+              />
+            </View>
+
+            <View>
+              <Text className="mb-2 font-medium text-neutral-900 dark:text-white">
+                {data.isExperienced
+                  ? 'Years of Experience'
+                  : 'CGPA / Percentage'}
+              </Text>
+              <Input
+                placeholder={data.isExperienced ? 'e.g. 3.5' : 'e.g. 9.0'}
+                value={data.cgpaOrYoe}
+                onChangeText={(text) => updateField('cgpaOrYoe', text)}
+                keyboardType={data.isExperienced ? 'numeric' : 'default'}
+              />
+            </View>
+
+            <View>
+              <Text className="mb-2 font-medium text-neutral-900 dark:text-white">
+                Resume Link <Text className="text-neutral-400">(Optional)</Text>
+              </Text>
+              <Input
+                placeholder="Google Drive / Dropbox link"
+                value={data.resumeLink}
+                onChangeText={(text) => updateField('resumeLink', text)}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    </Animated.View>
   );
 }
 
@@ -160,6 +260,7 @@ function OptionCard({ selected, onPress, children }: OptionCardProps) {
 type Step1Props = {
   selectedLevel: ExperienceLevel | null;
   onSelect: (level: ExperienceLevel) => void;
+  onBack: () => void;
 };
 
 type ExperienceCardProps = {
@@ -197,7 +298,8 @@ function ExperienceCard({
   );
 }
 
-function Step1({ selectedLevel, onSelect }: Step1Props) {
+function Step1({ selectedLevel, onSelect, onBack }: Step1Props) {
+  const { colorScheme } = useColorScheme();
   return (
     <Animated.View
       entering={FadeInRight.duration(300)}
@@ -205,6 +307,19 @@ function Step1({ selectedLevel, onSelect }: Step1Props) {
       className="flex-1"
     >
       <View className="px-6">
+        <Pressable
+          onPress={onBack}
+          className="mb-4 flex-row items-center self-start"
+        >
+          <Ionicons
+            name="arrow-back"
+            size={16}
+            color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'}
+          />
+          <Text className="ml-1 text-sm font-medium text-neutral-500 underline dark:text-neutral-400">
+            Back
+          </Text>
+        </Pressable>
         <Text className="mb-2 text-3xl font-bold dark:text-white">
           What&apos;s your experience level?
         </Text>
@@ -395,6 +510,13 @@ export default function Onboarding() {
   const router = useRouter();
 
   const [step, setStep] = useState(1);
+  const [profileData, setProfileData] = useState<ProfileData>({
+    name: '',
+    isExperienced: false,
+    collegeOrCompany: '',
+    cgpaOrYoe: '',
+    resumeLink: '',
+  });
   const [experienceLevel, setExperienceLevel] =
     useState<ExperienceLevel | null>(null);
   const [selectedCompanies, setSelectedCompanies] = useState<CompanyId[]>([]);
@@ -422,20 +544,32 @@ export default function Onboarding() {
   );
 
   const handleContinue = useCallback(() => {
-    setStep(2);
+    setStep((prev) => prev + 1);
   }, []);
 
   const handleBack = useCallback(() => {
-    setStep(1);
+    setStep((prev) => prev - 1);
   }, []);
 
   const handleFinish = useCallback(() => {
-    // TODO: Save experienceLevel and selectedCompanies to storage/API
+    // TODO: Save all data to storage/API
     completeOnboarding();
     router.replace('/');
   }, [router]);
 
-  const canContinue = step === 1 ? experienceLevel !== null : true;
+  const canContinue = useMemo(() => {
+    if (step === 1) {
+      return (
+        profileData.name.trim().length > 0 &&
+        profileData.collegeOrCompany.trim().length > 0 &&
+        profileData.cgpaOrYoe.trim().length > 0
+      );
+    }
+    if (step === 2) {
+      return experienceLevel !== null;
+    }
+    return true; // Step 3
+  }, [step, profileData, experienceLevel]);
 
   return (
     <View className="flex-1 bg-white dark:bg-neutral-900">
@@ -443,13 +577,16 @@ export default function Onboarding() {
       <SafeAreaView className="flex-1">
         <View className="flex-1 pt-4">
           <View className="px-6">
-            <StepIndicator currentStep={step} totalSteps={2} />
+            <StepIndicator currentStep={step} totalSteps={3} />
           </View>
 
           {step === 1 ? (
+            <Step0 data={profileData} onChange={setProfileData} />
+          ) : step === 2 ? (
             <Step1
               selectedLevel={experienceLevel}
               onSelect={setExperienceLevel}
+              onBack={handleBack}
             />
           ) : (
             <Step2
@@ -463,14 +600,14 @@ export default function Onboarding() {
       </SafeAreaView>
 
       <View className="border-t border-neutral-200 bg-white px-6 pb-8 pt-4 dark:border-neutral-700 dark:bg-neutral-900">
-        {step === 2 && selectedCompanies.length > 0 && (
+        {step === 3 && selectedCompanies.length > 0 && (
           <Text className="mb-3 text-center text-sm font-medium text-neutral-600 dark:text-neutral-400">
             You will be notified for {selectedCompanies.length} companies info
             🚀
           </Text>
         )}
         <Pressable
-          onPress={step === 1 ? handleContinue : handleFinish}
+          onPress={step < 3 ? handleContinue : handleFinish}
           disabled={!canContinue}
           className={`h-14 items-center justify-center rounded-xl ${
             canContinue ? 'bg-black dark:bg-white' : 'bg-neutral-300'
@@ -481,7 +618,7 @@ export default function Onboarding() {
               canContinue ? 'text-white dark:text-black' : 'text-neutral-500'
             }`}
           >
-            {step === 1 ? 'Continue' : 'Finish'}
+            {step < 3 ? 'Continue' : 'Finish'}
           </Text>
         </Pressable>
       </View>
