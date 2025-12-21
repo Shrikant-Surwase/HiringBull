@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth, useUser } from '@clerk/clerk-expo';
 import React from 'react';
-import { Pressable } from 'react-native';
+import { Alert, Pressable } from 'react-native';
 
 import {
   FocusAwareStatusBar,
@@ -9,6 +10,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
+import { resetOnboarding } from '@/lib';
 
 type SettingsItem = {
   label: string;
@@ -19,32 +21,12 @@ type SettingsItem = {
   onPress?: () => void;
 };
 
-const SETTINGS: SettingsItem[] = [
-  {
-    label: 'Report issue',
-    icon: 'warning-outline',
-    iconColor: '#f59e0b', // amber-500
-  },
-  {
-    label: 'Change segment',
-    icon: 'layers-outline',
-    iconColor: '#3b82f6', // blue-500
-  },
-  {
-    label: 'Update Companies',
-    icon: 'business-outline',
-    iconColor: '#8b5cf6', // violet-500
-  },
-  {
-    label: 'Logout',
-    icon: 'log-out-outline',
-    isDestructive: true,
-  },
-];
-
 function SettingsItemRow({ item }: { item: SettingsItem }) {
   return (
-    <Pressable className="mb-4 flex-row items-center justify-between rounded-xl border border-neutral-200 bg-white p-5 shadow-sm active:opacity-70 dark:border-neutral-800 dark:bg-neutral-900">
+    <Pressable
+      onPress={item.onPress}
+      className="mb-4 flex-row items-center justify-between rounded-xl border border-neutral-200 bg-white p-5 shadow-sm active:opacity-70 dark:border-neutral-800 dark:bg-neutral-900"
+    >
       <View className="flex-row items-center gap-4">
         <View
           className={`size-10 items-center justify-center rounded-full ${
@@ -79,6 +61,65 @@ function SettingsItemRow({ item }: { item: SettingsItem }) {
 }
 
 export default function Profile() {
+  const { signOut } = useAuth();
+  const { user } = useUser();
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Reset onboarding state on logout
+              resetOnboarding();
+              // Sign out from Clerk
+              await signOut();
+            } catch (error) {
+              console.error('Logout error:', error);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const SETTINGS: SettingsItem[] = [
+    {
+      label: 'Report issue',
+      icon: 'warning-outline',
+      iconColor: '#f59e0b', // amber-500
+    },
+    {
+      label: 'Change segment',
+      icon: 'layers-outline',
+      iconColor: '#3b82f6', // blue-500
+    },
+    {
+      label: 'Update Companies',
+      icon: 'business-outline',
+      iconColor: '#8b5cf6', // violet-500
+    },
+    {
+      label: 'Logout',
+      icon: 'log-out-outline',
+      isDestructive: true,
+      onPress: handleLogout,
+    },
+  ];
+
+  // Get user display info
+  const displayName =
+    user?.fullName ||
+    user?.firstName ||
+    user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ||
+    'User';
+  const email = user?.primaryEmailAddress?.emailAddress || '';
+
   return (
     <SafeAreaView
       className="flex-1 bg-white dark:bg-neutral-950"
@@ -110,14 +151,16 @@ export default function Profile() {
               Signed in as
             </Text>
             <Text className="mt-1 text-2xl font-black text-neutral-900 dark:text-white">
-              Atanu Nayak
+              {displayName}
             </Text>
-            <View className="mt-4 flex-row items-center gap-2 rounded-lg bg-neutral-100 px-3 py-2 self-start dark:bg-neutral-800">
-              <Ionicons name="mail-outline" size={16} color="#737373" />
-              <Text className="text-sm font-medium text-neutral-600 dark:text-neutral-300">
-                nayak.primary@gmail.com
-              </Text>
-            </View>
+            {email ? (
+              <View className="mt-4 flex-row items-center gap-2 rounded-lg bg-neutral-100 px-3 py-2 self-start dark:bg-neutral-800">
+                <Ionicons name="mail-outline" size={16} color="#737373" />
+                <Text className="text-sm font-medium text-neutral-600 dark:text-neutral-300">
+                  {email}
+                </Text>
+              </View>
+            ) : null}
           </View>
 
           {/* Referral/Info Card */}

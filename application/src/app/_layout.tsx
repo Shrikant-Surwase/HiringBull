@@ -10,13 +10,14 @@ import { StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-expo'
+import { tokenCache } from '@clerk/clerk-expo/token-cache'
 
 import { APIProvider } from '@/api';
 import {
-  hydrateAuth,
   hydrateOnboarding,
   loadSelectedTheme,
-  useAuth,
+  resetOnboarding,
   useIsFirstTime,
   useNotificationObserver,
   useNotifications,
@@ -30,7 +31,6 @@ export const unstable_settings = {
   initialRouteName: '(app)',
 };
 
-hydrateAuth();
 hydrateOnboarding();
 loadSelectedTheme();
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -89,10 +89,15 @@ function NotificationInitializer() {
 
 function RootNavigator() {
     const [isFirstTime] = useIsFirstTime();
+  const { isSignedIn } = useAuth()
     const hasCompletedOnboarding = useOnboarding.use.hasCompletedOnboarding();
     const isSubscribed = useOnboarding.use.isSubscribed();
-    const status = useAuth.use.status();
-    const isAuthenticated = status === 'signIn';
+    // const status = useAuth.use.status();
+    // const isAuthenticated = status === 'signIn';
+    const isAuthenticated = isSignedIn || false;
+
+    console.log("😈 isSignedIn from clerk ", isSignedIn)
+
 
     // Notifications should only be initialized for paying users
     const shouldInitNotifications = isAuthenticated && isSubscribed;
@@ -149,12 +154,14 @@ function Providers({ children }: { children: React.ReactNode }) {
     >
       <KeyboardProvider>
         <ThemeProvider value={theme}>
+          <ClerkProvider tokenCache={tokenCache}>
           <APIProvider>
             <BottomSheetModalProvider>
               {children}
               <FlashMessage position="top" />
             </BottomSheetModalProvider>
           </APIProvider>
+      </ClerkProvider>
         </ThemeProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
