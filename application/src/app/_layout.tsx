@@ -49,6 +49,18 @@ export default function RootLayout() {
   );
 }
 
+/**
+ * Initializes push notifications only for authenticated, subscribed users.
+ * This component renders nothing - it only runs the notification hooks.
+ */
+function NotificationInitializer() {
+  const { expoPushToken } = useNotifications();
+  useNotificationObserver();
+
+  console.log('Push Token:', expoPushToken);
+  return null;
+}
+
 function RootNavigator() {
     const [isFirstTime] = useIsFirstTime();
     const hasCompletedOnboarding = useOnboarding.use.hasCompletedOnboarding();
@@ -56,12 +68,8 @@ function RootNavigator() {
     const status = useAuth.use.status();
     const isAuthenticated = status === 'signIn';
 
-    // Initialize push notifications
-    const { expoPushToken } = useNotifications();
-    console.log('Push Token:', expoPushToken);
-
-    // Handle notification tap navigation (official Expo pattern)
-    useNotificationObserver();
+    // Notifications should only be initialized for paying users
+    const shouldInitNotifications = isAuthenticated && isSubscribed;
 
   //   temporary flags for testing
 //   const isFirstTime = false;
@@ -75,7 +83,9 @@ function RootNavigator() {
   }, []);
 
   return (
-    <Stack>
+    <>
+      {shouldInitNotifications && <NotificationInitializer />}
+      <Stack>
       <Stack.Protected guard={isFirstTime}>
         <Stack.Screen name="landing" options={{ headerShown: false }} />
       </Stack.Protected>
@@ -99,7 +109,8 @@ function RootNavigator() {
       >
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
       </Stack.Protected>
-    </Stack>
+      </Stack>
+    </>
   );
 }
 
