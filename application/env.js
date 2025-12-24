@@ -40,7 +40,7 @@ const PACKAGE = 'com.myapp'; // android package name
 const NAME = 'MyApp'; // app name
 const EXPO_ACCOUNT_OWNER = 'kabeerx9'; // expo account owner
 const EAS_PROJECT_ID = 'ff51dd3b-8704-4e38-85cd-b3e44c543e84'; // eas project id
-const SCHEME = 'MyApp'; // app scheme
+const SCHEME = 'myapp'; // app scheme
 
 /**
  * We declare a function withEnvSuffix that will add a suffix to the variable name based on the APP_ENV
