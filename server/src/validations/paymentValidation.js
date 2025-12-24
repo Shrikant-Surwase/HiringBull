@@ -2,16 +2,17 @@ import Joi from 'joi';
 
 export const createOrder = {
     body: Joi.object().keys({
-        amount: Joi.number().min(1).required(),
+        // Generic amount field might still be useful, or we might depend on planId
+        amount: Joi.number().min(1).optional(),
         userId: Joi.string().uuid().required()
     }),
 };
 
 export const verifyPayment = {
     body: Joi.object().keys({
-        razorpay_order_id: Joi.string().required(),
-        razorpay_payment_id: Joi.string().required(),
-        razorpay_signature: Joi.string().required(),
-        userId: Joi.string().uuid().required()
+        receipt: Joi.string().optional(),
+        platform: Joi.string().valid('ios', 'android').optional(),
+        productId: Joi.string().optional(),
+        userId: Joi.string().uuid().optional()
     }),
 };

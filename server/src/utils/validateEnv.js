@@ -10,8 +10,6 @@ export const validateEnv = () => {
     const optional = [
         'CLERK_PUBLISHABLE_KEY',
         'CLERK_SECRET_KEY',
-        'RAZORPAY_KEY_ID',
-        'RAZORPAY_KEY_SECRET',
         'INTERNAL_API_KEY',
         'CLERK_WEBHOOK_SECRET',
     ];
