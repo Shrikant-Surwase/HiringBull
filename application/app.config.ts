@@ -56,7 +56,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     googleServicesFile:'./google-services.json'
   },
   web: {
-    favicon: './assets/favicon.png',
+    favicon: './assets/icon.png',
     bundler: 'metro',
   },
   plugins: [
@@ -65,7 +65,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         backgroundColor: '#2E3C4B',
         image: './assets/splash-icon.png',
-        imageWidth: 150,
+        imageWidth: 200,
       },
     ],
     [
