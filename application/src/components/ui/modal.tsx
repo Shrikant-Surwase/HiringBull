@@ -65,7 +65,7 @@ export const useModal = () => {
 export const Modal = React.forwardRef(
   (
     {
-      snapPoints: _snapPoints = ['60%'],
+      snapPoints: _snapPoints = ['100%'],
       title,
       detached = false,
       ...props
@@ -99,8 +99,9 @@ export const Modal = React.forwardRef(
         {...props}
         {...detachedProps}
         ref={modal.ref}
-        index={0}
+        index={0}   
         snapPoints={snapPoints}
+        topInset={0}
         backdropComponent={props.backdropComponent || renderBackdrop}
         enableDynamicSizing={false}
         handleComponent={renderHandleComponent}

@@ -176,7 +176,7 @@ export default function Login() {
         }
       }
     } catch (err: any) {
-      console.error('Verification error:', err);
+      // console.error('Verification error:', err);
       setError(err?.errors?.[0]?.message || 'Invalid verification code');
     } finally {
       setIsLoading(false);
@@ -258,7 +258,9 @@ export default function Login() {
             {error ? (
               <View className="mb-4 rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
                 <Text className="text-sm text-red-600 dark:text-red-400">
-                  {error}
+                  {error == "Sign-in incomplete. Please try again." ? (
+                    <>Something went wrong, please try again!</>
+                  ) : <>Your OTP is wrong or expired. Please try again.</>}
                 </Text>
               </View>
             ) : null}
@@ -285,7 +287,7 @@ export default function Login() {
 
                 <View className="gap-4">
                   <Input
-                    placeholder="name@work-email.com"
+                    placeholder="name@email.com"
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"

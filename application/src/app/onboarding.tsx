@@ -78,6 +78,7 @@ const FILTERS = [
   { label: 'All', value: 'all' },
   { label: 'Global MNC', value: 'mnc' },
   { label: 'Global Startups', value: 'global-startup' },
+  { label: 'YCombinator', value: 'ycombinator' },
   { label: 'Indian Startups', value: 'indian-startup' },
 ] as const;
 
@@ -238,7 +239,7 @@ function Step0({ data, onChange, onContinue, canContinue }: Step0Props) {
             </Text>
             <Input
               ref={cgpaOrYoeRef}
-              placeholder={data.isExperienced ? 'e.g. 3.5' : 'e.g. 9.0'}
+              placeholder={data.isExperienced ? 'e.g. 0.5' : 'e.g. 8.5'}
               value={data.cgpaOrYoe}
               onChangeText={(text) => {
                 if (data.isExperienced) {

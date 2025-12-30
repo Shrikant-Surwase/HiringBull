@@ -1,7 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, TextInput, Alert, View as RNView, Keyboard } from 'react-native';
+import {
+  Dimensions,
+  TextInput,
+  Alert,
+  View as RNView,
+  Keyboard,
+} from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -25,8 +31,6 @@ import { subscribe } from '@/lib';
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.8;
 const ITEM_SPACING = (width - CARD_WIDTH) / 2;
-
-
 
 const PlanCard = ({
   item,
@@ -77,18 +81,12 @@ const PlanCard = ({
 
   return (
     <Animated.View
-      style={[
-        { width: CARD_WIDTH },
-        animatedStyle,
-      ]}
+      style={[{ width: CARD_WIDTH }, animatedStyle]}
       className="py-4"
     >
       <View className="flex-1 overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
         {/* Header Color Strip */}
-        <View
-          className="h-2 w-full"
-          style={{ backgroundColor: item.color }}
-        />
+        <View className="h-2 w-full" style={{ backgroundColor: item.color }} />
 
         {item.popular && (
           <View className="absolute right-0 top-6 rounded-l-lg bg-black px-3 py-1 dark:bg-white">
@@ -103,14 +101,22 @@ const PlanCard = ({
             <Text className="text-sm font-bold uppercase tracking-widest text-neutral-500">
               {item.title}
             </Text>
-            <RNView className="mt-2 flex-row items-baseline">
+            <RNView className="mt-2 flex-row items-baseline gap-2">
+              {item.originalPrice && (
+                <Text className="text-xl font-semibold text-neutral-400 line-through">
+                  {item.originalPrice}
+                </Text>
+              )}
+
               <Text className="text-5xl font-black text-neutral-900 dark:text-white">
                 {item.price}
               </Text>
+
               <Text className="ml-1 text-lg font-medium text-neutral-400">
                 /mo
               </Text>
             </RNView>
+
             <View className="mt-2 flex-row items-center gap-2">
               <View className="rounded-md bg-neutral-100 px-2 py-1 dark:bg-neutral-800">
                 <Text className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
@@ -140,8 +146,14 @@ const PlanCard = ({
             ))}
           </View>
 
-          <Text className="mt-6 text-center text-sm font-medium text-neutral-400">
-             Total: ₹{item.totalPrice} billed upfront
+          {item.originalTotalPrice && (
+            <Text className="mt-4 text-center text-sm font-medium text-neutral-400 line-through">
+              Total: ₹{item.originalTotalPrice}
+            </Text>
+          )}
+
+          <Text className="mt-2 text-center text-sm font-medium text-neutral-400">
+            Total: ₹{item.totalPrice} billed upfront
           </Text>
         </View>
       </View>
@@ -171,7 +183,7 @@ export default function Payment() {
           'Early notifications to verified job openings',
           'Ideal for trying the platform',
         ],
-        color: '#000000', // black
+        color: '#000000',
       },
       {
         id: 'popular',
@@ -186,7 +198,7 @@ export default function Payment() {
           'Early notifications to verified job openings',
           'Get full refund if you get job in the time period',
         ],
-        color: '#8b5cf6', // violet-500
+        color: '#8b5cf6',
       },
       {
         id: 'best_value',
@@ -201,18 +213,29 @@ export default function Payment() {
           'Get full refund if you get job in the time period',
           'Free mock interview if user receives an interview call from a top MNC',
         ],
-        color: '#10b981', // emerald-500
+        color: '#10b981',
       },
     ];
 
-    if (isReferralApplied) {
-      return plans.map((plan) => ({
-        ...plan,
-        totalPrice: plan.totalPrice - 50,
-      }));
+    if (!isReferralApplied) {
+      return plans;
     }
 
-    return plans;
+    return plans.map((plan) => {
+      const months = Number(plan.duration.split(' ')[0]); // 1, 3, 6
+      const discount = months * 50;
+
+      const monthlyPrice = Number(plan.price.replace('₹', ''));
+
+      return {
+        ...plan,
+        originalTotalPrice: plan.totalPrice, // for total strikethrough
+        totalPrice: plan.totalPrice - discount,
+
+        originalPrice: plan.price, // 👈 for /mo strikethrough
+        price: `₹${monthlyPrice - 50}`, // 👈 new discounted monthly price
+      };
+    });
   }, [isReferralApplied]);
 
   const handleScroll = useAnimatedScrollHandler((event) => {
@@ -223,10 +246,15 @@ export default function Payment() {
 
   const handleApply = () => {
     Keyboard.dismiss();
-    // Validate email
+
+    const cleanedCode = code.replace(/\s+/g, ''); // 🔥 remove all spaces
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(code)) {
-      Alert.alert('Invalid Code', 'Please enter a valid referral code (email address)');
+    if (!emailRegex.test(cleanedCode)) {
+      Alert.alert(
+        'Invalid Code',
+        'Please enter a valid referral code (email address)'
+      );
       return;
     }
 
@@ -251,7 +279,8 @@ export default function Payment() {
             Choose Your Plan
           </Text>
           <Text className="mt-2 text-base font-medium leading-6 text-neutral-500 text-left">
-            Unlock premium features and accelerate your career growth with our tailored plans.
+            Unlock premium features and accelerate your career growth with our
+            tailored plans.
           </Text>
         </View>
 
@@ -280,17 +309,30 @@ export default function Payment() {
         />
 
         <View className="border-t border-neutral-100 bg-white px-6 pb-6 pt-4 dark:border-neutral-900 dark:bg-neutral-950">
-          <Pressable
-            onPress={present}
-            className="mb-6 flex-row items-center justify-center gap-1.5"
-          >
-            <Text className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-              Have a referral code? Get flat ₹50 off
-            </Text>
-            <Text className="text-sm font-bold text-neutral-900 underline dark:text-white">
-              Apply
-            </Text>
-          </Pressable>
+          {!isReferralApplied ? (
+            <Pressable
+              onPress={present}
+              className="mb-6 flex-row items-center justify-center gap-1.5"
+            >
+              <Text className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                Have a referral code? Get flat ₹50 off
+              </Text>
+              <Text className="text-sm font-bold text-neutral-900 underline dark:text-white">
+                Apply
+              </Text>
+            </Pressable>
+          ) : (
+            <View className="mb-6 items-center justify-center">
+              <Text className="text-sm font-medium text-green-600 dark:text-green-400">
+                🎉 Referral code applied
+              </Text>
+
+              <Text className="mt-1 text-sm font-bold lowercase text-green-700 dark:text-green-300">
+                {code.replace(/\s+/g, '')} saved you ₹
+                {activePlan.originalTotalPrice - activePlan.totalPrice}
+              </Text>
+            </View>
+          )}
 
           <Pressable
             onPress={handleSubscribe}
@@ -300,7 +342,12 @@ export default function Payment() {
             <Text className="text-lg font-bold text-white">
               Subscribe for ₹{activePlan.totalPrice}
             </Text>
-            <Ionicons name="arrow-forward" size={20} color="white" style={{ marginLeft: 8 }} />
+            <Ionicons
+              name="arrow-forward"
+              size={20}
+              color="white"
+              style={{ marginLeft: 8 }}
+            />
           </Pressable>
           <Text className="mt-4 text-center text-xs text-neutral-400">
             Recurs annually. Cancel anytime.
@@ -314,7 +361,7 @@ export default function Payment() {
           onDismiss={dismiss}
         >
           <View className="flex-1 px-6 pt-4">
-             <Text className="mb-4 text-center text-sm font-bold uppercase tracking-widest text-green-600 dark:text-green-400">
+            <Text className="mb-4 text-center text-sm font-bold uppercase tracking-widest text-green-600 dark:text-green-400">
               Flat ₹50 off with referral code
             </Text>
             <RNView className="mb-4 justify-center rounded-xl bg-neutral-100 px-4 py-3 dark:bg-neutral-900">
@@ -324,7 +371,6 @@ export default function Payment() {
                 placeholderTextColor="#737373"
                 value={code}
                 onChangeText={setCode}
-                autoCapitalize="characters"
                 autoFocus
               />
             </RNView>
@@ -332,7 +378,9 @@ export default function Payment() {
               onPress={handleApply}
               className="items-center justify-center rounded-xl bg-neutral-900 py-4 dark:bg-white"
             >
-              <Text className="text-base font-bold text-white dark:text-black">Apply Code</Text>
+              <Text className="text-base font-bold text-white dark:text-black">
+                Apply Code
+              </Text>
             </Pressable>
           </View>
         </Modal>
