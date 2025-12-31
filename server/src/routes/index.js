@@ -10,8 +10,9 @@ import testingRoutes from './testing.js';
 
 const router = express.Router();
 
-router.use('/users', userRoutes);
+// Register more specific routes first
 router.use('/users/devices', deviceRoutes);
+router.use('/users', userRoutes);
 router.use('/jobs', jobRoutes);
 router.use('/social-posts', socialPostRoutes);
 router.use('/payment', paymentRoutes);
