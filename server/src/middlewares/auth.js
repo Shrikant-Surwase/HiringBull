@@ -29,7 +29,7 @@ export const requireAuth = async (req, res, next) => {
             update: {},
             create: {
                 clerkId,
-                email: clerkUser.sessionClaims?.email || clerkUser.sessionClaims?.email_address || `${clerkId}@no-email.clerk`,
+                email: clerkUser.email ||  `${clerkId}@no-email.clerk`,
                 name: clerkUser.sessionClaims?.name || 'User',
                 active: true
             }
