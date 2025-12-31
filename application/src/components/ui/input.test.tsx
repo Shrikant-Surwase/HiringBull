@@ -105,6 +105,6 @@ describe('Input component ', () => {
     render(<Input testID="input" disabled={true} />);
 
     const input = screen.getByTestId('input');
-    expect(input.props.disabled).toBe(true);
+    expect(input.props.editable).toBe(false);
   });
 });

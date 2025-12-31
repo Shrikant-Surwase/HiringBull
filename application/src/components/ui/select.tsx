@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import {
   BottomSheetFlatList,
   type BottomSheetModal,
@@ -7,7 +8,14 @@ import { useColorScheme } from 'nativewind';
 import * as React from 'react';
 import type { FieldValues } from 'react-hook-form';
 import { useController } from 'react-hook-form';
-import { Platform, Pressable, type PressableProps, View } from 'react-native';
+import {
+  Dimensions,
+  Keyboard,
+  Platform,
+  Pressable,
+  type PressableProps,
+  View,
+} from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import Svg, { Path } from 'react-native-svg';
 import { tv } from 'tailwind-variants';
@@ -15,6 +23,7 @@ import { tv } from 'tailwind-variants';
 import colors from '@/components/ui/colors';
 import { CaretDown } from '@/components/ui/icons';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { InputControllerType } from './input';
 import { Modal, useModal } from './modal';
 import { Text } from './text';
@@ -55,7 +64,11 @@ const selectTv = tv({
 
 const List = Platform.OS === 'web' ? FlashList : BottomSheetFlatList;
 
-export type OptionType = { label: string; value: string | number };
+export type OptionType = {
+  label: string;
+  value: string | number;
+  icon?: string;
+};
 
 type OptionsProps = {
   options: OptionType[];
@@ -65,6 +78,7 @@ type OptionsProps = {
   modalExtraHeight?: number;
   optionClassName?: string;
   optionTextClassName?: string;
+  itemHeight?: number;
 };
 
 function keyExtractor(item: OptionType) {
@@ -81,11 +95,18 @@ export const Options = React.forwardRef<BottomSheetModal, OptionsProps>(
       modalExtraHeight: _modalExtraHeight = 100,
       optionClassName,
       optionTextClassName,
+      itemHeight = 52,
     },
     ref
   ) => {
     const { colorScheme } = useColorScheme();
     const isDark = colorScheme === 'dark';
+    const { bottom } = useSafeAreaInsets();
+
+    const screenHeight = Dimensions.get('window').height;
+    const totalHeight = options.length * itemHeight;
+    const snapHeight = Math.min(totalHeight, screenHeight * 0.9);
+    const snapPoints = [`${(snapHeight / screenHeight) * 90}%`];
 
     const renderSelectItem = React.useCallback(
       ({ item }: { item: OptionType }) => (
@@ -97,28 +118,40 @@ export const Options = React.forwardRef<BottomSheetModal, OptionsProps>(
           testID={testID ? `${testID}-item-${item.value}` : undefined}
           className={optionClassName}
           textClassName={optionTextClassName}
+          icon={item.icon}
+          height={itemHeight}
         />
       ),
-      [onSelect, value, testID, optionClassName, optionTextClassName]
+      [
+        onSelect,
+        value,
+        testID,
+        optionClassName,
+        optionTextClassName,
+        itemHeight,
+      ]
     );
 
     return (
       <Modal
         ref={ref}
         index={0}
-        // snapPoints={snapPoints}
+        snapPoints={snapPoints}
         backgroundStyle={{
           backgroundColor: isDark ? colors.neutral[800] : colors.white,
         }}
       >
-        <List
-          data={options}
-          keyExtractor={keyExtractor}
-          renderItem={renderSelectItem}
-          testID={testID ? `${testID}-modal` : undefined}
-          estimatedItemSize={52}
-          contentContainerStyle={{ paddingBottom: 24 }}
-        />
+        <View className={`flex-1`}>
+          <List
+            data={options}
+            keyExtractor={keyExtractor}
+            renderItem={renderSelectItem}
+            testID={testID ? `${testID}-modal` : undefined}
+            estimatedItemSize={itemHeight}
+            showsVerticalScrollIndicator={false}
+          />
+          <View style={{ height: bottom }} />
+        </View>
       </Modal>
     );
   }
@@ -130,21 +163,46 @@ const Option = React.memo(
     selected = false,
     className,
     textClassName,
+    icon,
+    height,
     ...props
   }: PressableProps & {
     selected?: boolean;
     label: string;
     className?: string;
     textClassName?: string;
+    icon?: string;
+    height?: number;
   }) => {
+    const { colorScheme } = useColorScheme();
+    const isDark = colorScheme === 'dark';
     const defaultClassName =
       'flex-row items-center border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800';
     const defaultTextClassName =
       'flex-1 text-neutral-900 dark:text-neutral-100';
 
+    const iconColor = isDark ? '#d1d5db' : '#6b7280';
+
     return (
-      <Pressable className={className || defaultClassName} {...props}>
-        <Text className={textClassName || defaultTextClassName}>{label}</Text>
+      <Pressable
+        className={className || defaultClassName}
+        style={height ? { height } : undefined}
+        {...props}
+      >
+        {icon && (
+          <Ionicons
+            name={icon as any}
+            size={20}
+            color={iconColor}
+            style={{ marginRight: 12 }}
+          />
+        )}
+        <Text
+          className={textClassName || defaultTextClassName}
+          numberOfLines={1}
+        >
+          {label}
+        </Text>
         {selected && <Check />}
       </Pressable>
     );
@@ -166,6 +224,7 @@ export interface SelectProps {
   modalExtraHeight?: number;
   optionClassName?: string;
   optionTextClassName?: string;
+  itemHeight?: number;
 }
 interface ControlledSelectProps<T extends FieldValues>
   extends SelectProps,
@@ -173,6 +232,8 @@ interface ControlledSelectProps<T extends FieldValues>
 
 export const Select = React.forwardRef<{ present: () => void }, SelectProps>(
   (props, ref) => {
+    const { colorScheme } = useColorScheme();
+    const isDark = colorScheme === 'dark';
     const {
       label,
       value,
@@ -187,6 +248,7 @@ export const Select = React.forwardRef<{ present: () => void }, SelectProps>(
       modalExtraHeight = 100,
       optionClassName,
       optionTextClassName,
+      itemHeight,
     } = props;
     const modal = useModal();
 
@@ -207,14 +269,25 @@ export const Select = React.forwardRef<{ present: () => void }, SelectProps>(
       [error, disabled]
     );
 
-    const textValue = React.useMemo(
+    const selectedOption = React.useMemo(
       () =>
         value !== undefined
-          ? (options?.filter((t) => t.value === value)?.[0]?.label ??
-            placeholder)
-          : placeholder,
-      [value, options, placeholder]
+          ? options?.filter((t) => t.value === value)?.[0]
+          : null,
+      [value, options]
     );
+
+    const textValue = React.useMemo(
+      () => selectedOption?.label ?? placeholder,
+      [selectedOption, placeholder]
+    );
+
+    const handlePress = () => {
+      if (!disabled) {
+        Keyboard.dismiss();
+        modal.present();
+      }
+    };
 
     React.useImperativeHandle(ref, () => ({ present: modal.present }), [modal]);
 
@@ -232,9 +305,17 @@ export const Select = React.forwardRef<{ present: () => void }, SelectProps>(
           <Pressable
             className={`${styles.input()} ${className || ''}`}
             disabled={disabled}
-            onPress={modal.present}
+            onPress={handlePress}
             testID={testID ? `${testID}-trigger` : undefined}
           >
+            {selectedOption?.icon && (
+              <Ionicons
+                name={selectedOption.icon as any}
+                size={20}
+                color={isDark ? '#d1d5db' : '#6b7280'}
+                style={{ marginRight: 8 }}
+              />
+            )}
             <View className="flex-1">
               <Text
                 className={
@@ -265,6 +346,7 @@ export const Select = React.forwardRef<{ present: () => void }, SelectProps>(
           modalExtraHeight={modalExtraHeight}
           optionClassName={optionClassName}
           optionTextClassName={optionTextClassName}
+          itemHeight={itemHeight}
         />
       </>
     );

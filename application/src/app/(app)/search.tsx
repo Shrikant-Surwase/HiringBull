@@ -14,6 +14,7 @@ import {
   View,
 } from '@/components/ui';
 import { useOutreachForm } from '@/lib/hooks/use-outreach-form';
+import { useSendLimitStore } from '@/lib/stores/send-limit-store';
 
 // Local component for this form with ref support
 const ControlledInputWithRef = React.forwardRef<
@@ -26,6 +27,9 @@ const ControlledInputWithRef = React.forwardRef<
     onSubmitEditing?: () => void;
     multiline?: boolean;
     numberOfLines?: number;
+    style?: any;
+    className?: string;
+    disabled?: boolean;
   }
 >(({ control, name, ...props }, ref) => {
   return <ControlledInput control={control} name={name} {...props} ref={ref} />;
@@ -44,53 +48,61 @@ const COMPANIES: Company[] = [
 ];
 
 const COMPANY_OPTIONS = [
-  { label: 'Adobe', value: 'adobe' },
-  { label: 'Amazon', value: 'amazon' },
-  { label: 'Apple', value: 'apple' },
-  { label: 'Atlassian', value: 'atlassian' },
-  { label: 'Google', value: 'google' },
-  { label: 'Meta', value: 'meta' },
-  { label: 'Microsoft', value: 'microsoft' },
-  { label: 'Oracle', value: 'oracle' },
-  { label: 'Salesforce', value: 'salesforce' },
-  { label: 'Samsung', value: 'samsung' },
-  { label: 'Uber', value: 'uber' },
-  { label: 'Walmart', value: 'walmart' },
+  { label: 'Adobe', value: 'adobe', icon: 'color-palette' },
+  { label: 'Amazon', value: 'amazon', icon: 'basket' },
+  { label: 'Apple', value: 'apple', icon: 'logo-apple' },
+  { label: 'Atlassian', value: 'atlassian', icon: 'code-slash' },
+  { label: 'Google', value: 'google', icon: 'logo-google' },
+  { label: 'Meta', value: 'meta', icon: 'logo-facebook' },
+  { label: 'Microsoft', value: 'microsoft', icon: 'logo-windows' },
+  { label: 'Oracle', value: 'oracle', icon: 'server' },
+  { label: 'Salesforce', value: 'salesforce', icon: 'cloud' },
+  { label: 'Samsung', value: 'samsung', icon: 'phone-portrait' },
+  { label: 'Uber', value: 'uber', icon: 'car' },
+  { label: 'Walmart', value: 'walmart', icon: 'storefront' },
 ];
 
 const REASON_OPTIONS = [
-  { label: 'Seeking a Referral', value: 'seeking_a_referral' },
+  { label: 'Seeking a Referral', value: 'seeking_a_referral', icon: 'people' },
   {
     label: 'Resume Review / Profile Feedback',
     value: 'resume_review_profile_feedback',
+    icon: 'document-text',
   },
   {
     label: 'Preparing for an Upcoming Interview',
     value: 'preparing_for_an_upcoming_interview',
+    icon: 'school',
   },
   {
     label: 'Online Assessment (OA) Preparation Guidance',
     value: 'online_assessment_oa_preparation_guidance',
+    icon: 'laptop',
   },
   {
     label: 'Understanding the Hiring Process at This Company',
     value: 'understanding_the_hiring_process_at_this_company',
+    icon: 'information-circle',
   },
   {
     label: 'Role Fit - Behavioral round prep',
     value: 'role_fit_behavioral_round_prep',
+    icon: 'chatbubbles',
   },
   {
     label: 'Clarifying Job Requirements or Tech Stack',
     value: 'clarifying_job_requirements_or_tech_stack',
+    icon: 'code-working',
   },
   {
     label: 'Interview Experience & Preparation Tips',
     value: 'interview_experience_preparation_tips',
+    icon: 'bulb',
   },
   {
     label: 'Following Up After Applying',
     value: 'following_up_after_applying',
+    icon: 'mail',
   },
 ];
 
@@ -122,6 +134,9 @@ export default function Search() {
   } = form;
   const { user } = useUser();
 
+  const { canSend, getRemaining, increment, resetIfNewMonth } =
+    useSendLimitStore();
+
   // Watch required fields for validation
   const email = watch('email');
   const company = watch('company');
@@ -140,11 +155,26 @@ export default function Search() {
   const companyRef = React.useRef<{ present: () => void }>(null);
   const reasonRef = React.useRef<{ present: () => void }>(null);
 
+  const remaining = getRemaining();
+  const canSendNow = canSend() && isFormValid;
+
+  React.useEffect(() => {
+    resetIfNewMonth();
+  }, [resetIfNewMonth]);
+
   React.useEffect(() => {
     if (user?.primaryEmailAddress?.emailAddress) {
       form.setValue('email', user.primaryEmailAddress.emailAddress);
     }
   }, [user, form]);
+
+  const handleSendMessage = () => {
+    if (canSendNow) {
+      increment();
+      onSubmit();
+      form.reset({ email });
+    }
+  };
 
   return (
     <SafeAreaView
@@ -280,6 +310,7 @@ export default function Search() {
               ref={emailRef}
               returnKeyType="next"
               onSubmitEditing={() => companyRef.current?.present()}
+              disabled={remaining === 0}
             />
 
             <ControlledSelect
@@ -288,12 +319,18 @@ export default function Search() {
               control={control}
               name="company"
               ref={companyRef}
-              onValueChange={() => reasonRef.current?.present()}
+              onValueChange={() => {
+                if (!reason) {
+                  reasonRef.current?.present();
+                }
+              }}
               className="border-neutral-300 bg-neutral-100 px-4 py-3 dark:border-neutral-700"
               inputValueClassName="text-neutral-400"
               modalExtraHeight={0}
-              optionClassName="flex-row items-center border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800"
+              optionClassName="flex-row items-center border-b border-neutral-200 bg-white px-5 py-3 dark:border-neutral-700 dark:bg-neutral-800"
               optionTextClassName="flex-1 text-neutral-900 dark:text-neutral-100"
+              itemHeight={52}
+              disabled={remaining === 0}
             />
 
             <ControlledSelect
@@ -306,8 +343,10 @@ export default function Search() {
               className="border-neutral-300 bg-neutral-100 px-4 py-3 dark:border-neutral-700"
               inputValueClassName="text-neutral-400"
               modalExtraHeight={0}
-              optionClassName="flex-row items-center border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800"
+              optionClassName="flex-row items-center border-b border-neutral-200 bg-white px-5 py-3 dark:border-neutral-700 dark:bg-neutral-800"
               optionTextClassName="flex-1 text-neutral-900 dark:text-neutral-100"
+              itemHeight={52}
+              disabled={remaining === 0}
             />
 
             <ControlledInputWithRef
@@ -317,6 +356,7 @@ export default function Search() {
               ref={jobIdRef}
               returnKeyType="next"
               onSubmitEditing={() => resumeLinkRef.current?.focus()}
+              disabled={remaining === 0}
             />
 
             <ControlledInputWithRef
@@ -326,6 +366,7 @@ export default function Search() {
               ref={resumeLinkRef}
               returnKeyType="next"
               onSubmitEditing={() => messageRef.current?.focus()}
+              disabled={remaining === 0}
             />
 
             <ControlledInputWithRef
@@ -336,13 +377,19 @@ export default function Search() {
               multiline
               numberOfLines={4}
               returnKeyType="done"
+              className="min-h-[120px]"
+              disabled={remaining === 0}
             />
 
             <Button
-              label="Send message"
-              onPress={onSubmit}
+              label={
+                remaining > 0
+                  ? `Send Message (${remaining} Left this month)`
+                  : 'Send Message (Limit Reached for this month)'
+              }
+              onPress={handleSendMessage}
               className="mt-4"
-              disabled={!isFormValid}
+              disabled={!canSendNow}
             />
           </View>
 

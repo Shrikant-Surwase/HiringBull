@@ -9,8 +9,8 @@ import { useController } from 'react-hook-form';
 import type { TextInputProps } from 'react-native';
 import {
   I18nManager,
-  StyleSheet,
   TextInput as NTextInput,
+  StyleSheet,
   View,
 } from 'react-native';
 import { tv } from 'tailwind-variants';
@@ -55,6 +55,7 @@ export interface NInputProps extends TextInputProps {
   label?: string;
   disabled?: boolean;
   error?: string;
+  className?: string;
 }
 
 type TRule<T extends FieldValues> =
@@ -76,7 +77,7 @@ interface ControlledInputProps<T extends FieldValues>
     InputControllerType<T> {}
 
 export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
-  const { label, error, testID, ...inputProps } = props;
+  const { label, error, testID, className, disabled, ...inputProps } = props;
   const [isFocussed, setIsFocussed] = React.useState(false);
   const onBlur = React.useCallback(() => setIsFocussed(false), []);
   const onFocus = React.useCallback(() => setIsFocussed(true), []);
@@ -86,9 +87,9 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
       inputTv({
         error: Boolean(error),
         focused: isFocussed,
-        disabled: Boolean(props.disabled),
+        disabled: Boolean(disabled),
       }),
-    [error, isFocussed, props.disabled]
+    [error, isFocussed, disabled]
   );
 
   return (
@@ -105,13 +106,15 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
         testID={testID}
         ref={ref}
         placeholderTextColor={colors.neutral[400]}
-        className={styles.input()}
+        className={`${styles.input()} ${className || ''}`}
         onBlur={onBlur}
         onFocus={onFocus}
+        editable={!disabled}
         {...inputProps}
         style={StyleSheet.flatten([
           { writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' },
           { textAlign: I18nManager.isRTL ? 'right' : 'left' },
+          inputProps.multiline ? { textAlignVertical: 'top' } : {},
           inputProps.style,
         ])}
       />
