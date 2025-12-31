@@ -38,6 +38,47 @@ export const getUserById = catchAsync(async (req, res) => {
 });
 
 export const updateUser = catchAsync(async (req, res) => {
+  const updateBody = req.body;
+
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user) {
+    const error = new Error('User not found');
+    error.statusCode = httpStatus.NOT_FOUND;
+    throw error;
+  }
+
+  if (updateBody.email && (await prisma.user.findUnique({ where: { email: updateBody.email } }))) {
+    if (updateBody.email !== user.email) {
+      const error = new Error('Email already taken');
+      error.statusCode = httpStatus.BAD_REQUEST;
+      throw error;
+    }
+  }
+
+  let data = { ...updateBody };
+  if (updateBody.companies) {
+    delete data.companies;
+    data.followedCompanies = {
+      set: updateBody.companies.map((companyId) => ({ id: companyId }))
+    };
+  }
+
+  if (updateBody.followedCompanies) {
+    delete data.followedCompanies;
+    data.followedCompanies = {
+      set: updateBody.followedCompanies.map((companyId) => ({ id: companyId }))
+    };
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: req.user.id },
+    data: data,
+    include: { followedCompanies: true }
+  });
+  res.status(httpStatus.OK).json(updatedUser);
+});
+
+export const updateUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const updateBody = req.body;
 
@@ -86,6 +127,20 @@ export const updateUser = catchAsync(async (req, res) => {
 });
 
 export const deleteUser = catchAsync(async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user) {
+    const error = new Error('User not found');
+    error.statusCode = httpStatus.NOT_FOUND;
+    throw error;
+  }
+
+  await prisma.user.delete({
+    where: { id: req.user.id },
+  });
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+export const deleteUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
 
   if (id !== req.user.id) {

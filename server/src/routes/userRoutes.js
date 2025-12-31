@@ -8,6 +8,8 @@ import {
     updateUser,
     deleteUser,
     getCurrentUser,
+    updateUserById,
+    deleteUserById,
 } from '../controllers/userController.js';
 
 const router = express.Router();
@@ -21,7 +23,7 @@ router.put('/me', requireAuth, validate(userValidation.updateProfile), updateUse
 // Admin/future routes (kept for future use)
 router.get('/', requireAuth, getAllUsers);
 router.get('/:id', requireAuth, validate(userValidation.getUser), getUserById);
-router.put('/:id', requireAuth, validate(userValidation.updateUser), updateUser);
-router.delete('/:id', requireAuth, validate(userValidation.deleteUser), deleteUser);
+router.put('/:id', requireAuth, validate(userValidation.updateUser), updateUserById);
+router.delete('/:id', requireAuth, validate(userValidation.deleteUser), deleteUserById);
 
 export default router;

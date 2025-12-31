@@ -48,7 +48,7 @@ export const updateUser = {
         segment: Joi.string().allow(null, ''),
         companies: Joi.array().items(Joi.string().uuid()),
         promo_code: Joi.string().allow(null, ''),
-    }).min(1),
+    })
 };
 
 export const updateProfile = {
