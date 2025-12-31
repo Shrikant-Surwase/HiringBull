@@ -17,37 +17,39 @@ enum ExperienceLevel {
 }
 
 model User {
-  id                 String    @id @default(uuid())
-  clerkId            String?   @unique // Clerk user ID for auth sync
-  name               String
-  img_url            String?
-  email              String    @unique
-  active             Boolean   @default(true)
-  is_experienced     Boolean   @default(false)
-  college_name       String?
-  cgpa               String?
-  company_name       String?
-  years_of_experience Float?
-  resume_link        String?
-  segment            String?
-  experience_level   ExperienceLevel?
-  promo_code         String?   @unique
-  promo_code_used    String?
-  tokens_left        Int?      @default(3)
-  tokens_last_update DateTime?
-  total_paid         Float?    @default(0)
-  last_paid          Float?
-  current_plan_start DateTime?
-  current_plan_end   DateTime?
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
-  expiry             DateTime?
-  isPaid             Boolean   @default(false)
-  planExpiry         DateTime?
-  payments           Payment[]
-  comments           Comment[]
-  followedCompanies  Company[]
-  devices            Device[]
+  id                     String    @id @default(uuid())
+  clerkId                String?   @unique // Clerk user ID for auth sync
+  name                   String
+  img_url                String?
+  email                  String    @unique
+  active                 Boolean   @default(true)
+  is_experienced         Boolean   @default(false)
+  college_name           String?
+  cgpa                   String?
+  company_name           String?
+  years_of_experience    Float?
+  resume_link            String?
+  segment                String?
+  experience_level       ExperienceLevel?
+  onboarding_completed   Boolean   @default(false)
+  onboarding_completed_at DateTime?
+  promo_code             String?   @unique
+  promo_code_used        String?
+  tokens_left            Int?      @default(3)
+  tokens_last_update     DateTime?
+  total_paid             Float?    @default(0)
+  last_paid              Float?
+  current_plan_start     DateTime?
+  current_plan_end      DateTime?
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
+  expiry                 DateTime?
+  isPaid                 Boolean   @default(false)
+  planExpiry             DateTime?
+  payments               Payment[]
+  comments               Comment[]
+  followedCompanies      Company[]
+  devices                Device[]
 
   @@index([email])
   @@index([clerkId])

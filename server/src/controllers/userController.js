@@ -70,6 +70,9 @@ export const updateUser = catchAsync(async (req, res) => {
     };
   }
 
+  data.onboarding_completed = true;
+  data.onboarding_completed_at = new Date();
+
   const updatedUser = await prisma.user.update({
     where: { id: req.user.id },
     data: data,
