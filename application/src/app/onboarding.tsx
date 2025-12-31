@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ImageSourcePropType, TextInput as RNTextInput } from 'react-native';
 import { Pressable, TextInput } from 'react-native';
 import {
@@ -572,6 +573,7 @@ function Step2({
 
 export default function Onboarding() {
   const router = useRouter();
+  const { getToken } = useAuth();
 
   const [step, setStep] = useState(1);
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -584,6 +586,14 @@ export default function Onboarding() {
   const [experienceLevel, setExperienceLevel] =
     useState<ExperienceLevel | null>(null);
   const [selectedCompanies, setSelectedCompanies] = useState<CompanyId[]>([]);
+
+  useEffect(() => {
+    const logToken = async () => {
+      const token = await getToken();
+      console.log('getToken:', token);
+    };
+    logToken();
+  }, [getToken]);
 
   const handleToggleCompany = useCallback((companyId: CompanyId) => {
     setSelectedCompanies((prev) =>
