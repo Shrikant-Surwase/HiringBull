@@ -41,6 +41,12 @@ export const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const updateBody = req.body;
 
+  if (id !== req.user.id) {
+    const error = new Error('Unauthorized to update another user');
+    error.statusCode = httpStatus.FORBIDDEN;
+    throw error;
+  }
+
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) {
     const error = new Error('User not found');
@@ -64,6 +70,13 @@ export const updateUser = catchAsync(async (req, res) => {
     };
   }
 
+  if (updateBody.followedCompanies) {
+    delete data.followedCompanies;
+    data.followedCompanies = {
+      set: updateBody.followedCompanies.map((companyId) => ({ id: companyId }))
+    };
+  }
+
   const updatedUser = await prisma.user.update({
     where: { id },
     data: data,
@@ -74,6 +87,12 @@ export const updateUser = catchAsync(async (req, res) => {
 
 export const deleteUser = catchAsync(async (req, res) => {
   const { id } = req.params;
+
+  if (id !== req.user.id) {
+    const error = new Error('Unauthorized to delete another user');
+    error.statusCode = httpStatus.FORBIDDEN;
+    throw error;
+  }
 
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) {

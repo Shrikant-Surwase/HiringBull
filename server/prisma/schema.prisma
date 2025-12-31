@@ -10,6 +10,12 @@ datasource db {
   url      = env("DIRECT_URL")
 }
 
+enum ExperienceLevel {
+  INTERNSHIP
+  FRESHER_OR_LESS_THAN_1_YEAR
+  ONE_TO_THREE_YEARS
+}
+
 model User {
   id                 String    @id @default(uuid())
   clerkId            String?   @unique // Clerk user ID for auth sync
@@ -18,12 +24,13 @@ model User {
   email              String    @unique
   active             Boolean   @default(true)
   is_experienced     Boolean   @default(false)
-  college_name       String? 
+  college_name       String?
   cgpa               String?
   company_name       String?
-  years_of_experience Int?
+  years_of_experience Float?
   resume_link        String?
   segment            String?
+  experience_level   ExperienceLevel?
   promo_code         String?   @unique
   promo_code_used    String?
   tokens_left        Int?      @default(3)

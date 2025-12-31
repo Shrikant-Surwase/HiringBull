@@ -12,8 +12,13 @@ import {
 
 const router = express.Router();
 
-// Protected routes (require authentication)
+// Get current user's profile
 router.get('/me', requireAuth, getCurrentUser);
+
+// Update current user's profile
+router.put('/me', requireAuth, validate(userValidation.updateProfile), updateUser);
+
+// Admin/future routes (kept for future use)
 router.get('/', requireAuth, getAllUsers);
 router.get('/:id', requireAuth, validate(userValidation.getUser), getUserById);
 router.put('/:id', requireAuth, validate(userValidation.updateUser), updateUser);
