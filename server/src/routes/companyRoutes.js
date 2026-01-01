@@ -15,10 +15,10 @@ import * as companyValidation from '../validations/companyValidation.js';
 const router = express.Router();
 
 // Admin routes (require API Key)
-router.post('/', requireApiKey, validate(companyValidation.createCompany), createCompany);
 router.post('/bulk', requireApiKey, validate(companyValidation.bulkCreateCompanies), bulkCreateCompanies);
-router.put('/:id', requireApiKey, validate(companyValidation.updateCompany), updateCompany);
+router.post('/', requireApiKey, validate(companyValidation.createCompany), createCompany);
 router.put('/bulk', requireApiKey, validate(companyValidation.bulkUpdateCompanies), bulkUpdateCompanies);
+router.put('/:id', requireApiKey, validate(companyValidation.updateCompany), updateCompany);
 
 // Protected routes (require valid subscription)
 router.get('/', requireAuth, validate(companyValidation.getCompanies), getAllCompanies);
