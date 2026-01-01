@@ -39,16 +39,6 @@ Backend APIs for HiringBull – a comprehensive platform for onboarding users, m
    npx prisma db push
    ```
 
-### Running the App
-- **Development mode**:
-  ```bash
-  npm run dev
-  ```
-- **Production mode**:
-  ```bash
-  npm start
-  ```
-
 ---
 
 ## 🔑 Environment Variables
@@ -66,160 +56,283 @@ Create a `.env` file in the root of the `server/` directory:
 
 ---
 
-## 📂 Project Structure
-
-```bash
-server/
-├── prisma/             # Prisma schema and migrations
-└── src/
-    ├── controllers/    # Business logic & request handlers
-    ├── middlewares/    # Auth, validation, & error handling
-    ├── routes/         # API route definitions
-    ├── validations/    # Joi request validation schemas
-    ├── utils/          # Helper functions (pagination, env validation)
-    ├── index.js        # Server entry point
-    └── prismaClient.js # Prisma client singleton
-```
-
----
-
-## 📡 API Endpoints
+## � API Reference
 
 ### Base URL
 `https://hiringbull-api.scale8ai.com/api/`
 
-### Authentication & Authorization
-| Type | Usage | Header |
-|------|-------|--------|
-| **Bearer** | Logged-in Users | `Authorization: Bearer <CLERK_JWT>` |
-| **API Key** | Admin / Bulk | `x-api-key: <INTERNAL_API_KEY>` |
-| **None** | Public Access | — |
-
-> [!IMPORTANT]
-> Some routes require an active subscription (`requirePayment`). If the user hasn't paid, these routes will return a `402 Payment Required` status.
-
 ---
 
 ### 1. User Management
+Manage user profiles and onboarding.
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/users` | Bearer | Create/Sync user after Clerk signup |
 | `GET` | `/users/me` | Bearer | Get current user profile |
-| `PUT` | `/users/me`| Bearer | Update current user profile |
+| `PUT` | `/users/me` | Bearer | Update current user profile |
 | `GET` | `/users` | Bearer | [Admin] List all users |
+| `GET` | `/users/:id`| Bearer | [Admin] Get user by ID |
+| `DELETE`| `/users/:id`| Bearer | Delete user profile |
 
-#### Sample Request (`PUT /api/users/me`)
+````carousel
 ```json
+// GET /users/me (Response)
 {
+  "id": "uuid-123",
   "name": "John Doe",
+  "email": "john@gmail.com",
+  "onboarding_completed": true,
+  "followedCompanies": []
+}
+```
+<!-- slide -->
+```json
+// PUT /users/me (Request)
+{
+  "name": "John Updated",
   "is_experienced": true,
   "company_name": "Google",
-  "years_of_experience": 5,
-  "experience_level": "ONE_TO_THREE_YEARS"
+  "experience_level": "ONE_TO_THREE_YEARS",
+  "resume_link": "https://drive.google.com/..."
 }
 ```
-
----
-
-### 2. Payment (In-App Purchases)
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/payment/order` | Bearer | Initialize a payment/order intent |
-| `POST` | `/payment/verify`| Bearer | Verify IAP receipt from Play/App Store |
-
-#### Sample Request (`POST /api/payment/verify`)
+<!-- slide -->
 ```json
+// DELETE /users/:id (Response)
 {
-  "receipt": "base64_encoded_receipt_data",
-  "platform": "android",
-  "productId": "premium_monthly"
+  "status": "success",
+  "message": "User deleted"
 }
 ```
+````
 
 ---
 
-### 3. Company Management
+### 2. Company Management
+Browse and manage recruiting companies.
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `GET` | `/companies` | Bearer + Paid | List all companies |
+| `GET` | `/companies` | Bearer + Paid | List companies (filterable by category) |
 | `POST` | `/companies` | API Key | Create a single company |
-| `POST` | `/companies/bulk`| API Key | Bulk create companies |
+| `POST` | `/companies/bulk`| API Key | Bulk creation of companies |
+
+````carousel
+```json
+// GET /companies?category=global_mnc (Response)
+[
+  {
+    "id": "uuid-cmp-1",
+    "name": "Google",
+    "category": "global_mnc",
+    "logo": "https://..."
+  }
+]
+```
+<!-- slide -->
+```json
+// POST /companies (Request)
+{
+  "name": "Stripe",
+  "description": "Payment processor",
+  "category": "global_startup",
+  "logo": "https://..."
+}
+```
+<!-- slide -->
+```json
+// POST /companies/bulk (Request)
+[
+  { "name": "Apple", "category": "global_mnc" },
+  { "name": "Netflix", "category": "global_mnc" }
+]
+```
+````
 
 ---
 
-### 4. Job Management
+### 3. Job Management
+Access job listings across segments.
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `GET` | `/jobs` | Bearer + Paid | List jobs (supports filtering/pagination)|
-| `GET` | `/jobs/:id` | Bearer + Paid | Get job details |
-| `POST` | `/jobs/bulk` | API Key | Bulk upload job listings |
+| `GET` | `/jobs` | Bearer + Paid | List jobs (filtering & pagination) |
+| `GET` | `/jobs/:id` | Bearer + Paid | Detailed job view |
+| `POST` | `/jobs/bulk` | API Key | Ingest jobs in bulk |
+
+````carousel
+```json
+// GET /jobs?segment=software_engineering&page=1 (Response)
+{
+  "data": [
+    {
+      "id": "uuid-job-1",
+      "title": "SDE-1",
+      "companyRel": { "name": "Uber" }
+    }
+  ],
+  "pagination": { "total": 100, "page": 1, "limit": 20 }
+}
+```
+<!-- slide -->
+```json
+// POST /jobs/bulk (Request)
+[
+  {
+    "title": "Backend Dev",
+    "company": "Swiggy",
+    "segment": "software_engineering",
+    "careerpage_link": "https://..."
+  }
+]
+```
+````
 
 ---
 
-### 5. Social & Referrals
+### 4. Social Posts
+Referral posts and social updates.
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `GET` | `/social-posts` | Bearer | Get all referral/social posts |
-| `GET` | `/social-posts/:id` | Bearer | Get single social post |
-| `POST` | `/social-posts/bulk`| API Key | Bulk create social posts |
+| `GET` | `/social-posts` | Bearer | List social posts |
+| `GET` | `/social-posts/:id`| Bearer | Get post details and comments |
+| `POST` | `/social-posts/bulk`| API Key | Bulk upload social posts |
+
+````carousel
+```json
+// GET /social-posts/:id (Response)
+{
+  "id": "uuid-post-1",
+  "name": "Google Referral",
+  "comments": [
+    { "text": "Interested!", "user": { "name": "Alice" } }
+  ]
+}
+```
+<!-- slide -->
+```json
+// POST /social-posts/bulk (Request)
+[
+  {
+    "name": "Meta SDE Referral",
+    "description": "Looking to refer...",
+    "source": "linkedin",
+    "source_link": "https://..."
+  }
+]
+```
+````
 
 ---
 
-### 6. Device & Notifications
+### 5. Payments (IAP)
+Subscription and verification logic.
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/users/devices` | Bearer | Register token for current user |
-| `GET` | `/users/devices` | Bearer | List current user devices |
-| `DELETE`| `/users/devices/:token`| Bearer | Unregister a device token |
-| `POST` | `/users/devices/public`| None | Register token (public/guest) |
+| `POST` | `/payment/order` | Bearer | Initialize IAP intent |
+| `POST` | `/payment/verify`| Bearer | Verify receipt data |
+
+````carousel
+```json
+// POST /payment/verify (Request)
+{
+  "receipt": "base64_data",
+  "platform": "ios",
+  "productId": "premium_tier_1"
+}
+```
+<!-- slide -->
+```json
+// POST /payment/order (Request)
+{
+  "userId": "your-uuid",
+  "amount": 999
+}
+```
+````
+
+---
+
+### 6. Notifications & Devices
+Push notification registration.
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/users/devices` | Bearer | Register current user device |
+| `POST` | `/users/devices/public`| None | Register guest device |
+| `GET` | `/users/devices`| Bearer | Get user devices |
+| `POST` | `/public/send-notification`| None | [Testing] Trigger push |
+
+````carousel
+```json
+// POST /users/devices (Request)
+{
+  "token": "ExponentPushToken[...]",
+  "type": "android"
+}
+```
+<!-- slide -->
+```json
+// POST /public/send-notification (Request)
+{
+  "title": "Hello",
+  "body": "This is a test notification",
+  "data": { "jobId": "123" }
+}
+```
+````
 
 ---
 
 ### 7. Webhooks
+External event sync.
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/webhooks/clerk` | Clerk/Svix | Sync user data from Clerk events |
+| `POST` | `/webhooks/clerk` | Svix Signature | Sync user data from Clerk |
 
----
-
-### 8. Testing & Public Hub (Development Only)
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `GET` | `/public/testing` | None | Health check endpoint |
-| `GET` | `/public/auth-test`| Bearer | Verify JWT authentication |
-| `GET` | `/public/all-devices`| None | Debug: List all registered devices |
-
----
-
-## ⚠️ Responses
-
-### Success Response
+````carousel
 ```json
+// POST /webhooks/clerk (Example Payload)
 {
-  "status": "success",
-  "data": { ... }
+  "type": "user.created",
+  "data": {
+    "id": "user_2Y...",
+    "email_addresses": [{ "email_address": "test@test.com" }],
+    "first_name": "Test",
+    "last_name": "User"
+  }
 }
 ```
+````
 
-### Error Response
+---
+
+## ⚠️ Common Responses
+
 | Status | Meaning |
 |--------|---------|
-| `400` | Validation Error |
-| `401` | Unauthorized (Invalid token/key) |
-| `402` | Payment Required (Subscription expired/missing) |
-| `404` | Resource Not Found |
+| `200` | OK - Request successful |
+| `201` | Created - Resource created |
+| `400` | Bad Request - Validation error |
+| `401` | Unauthorized - Authentication failed |
+| `402` | Payment Required - Active subscription missing |
+| `404` | Not Found - Resource does not exist |
 | `500` | Internal Server Error |
 
-```json
-{
-  "message": "Detailed error message here"
-}
+---
+
+## 📂 Project Structure
+
+```bash
+server/
+├── prisma/             # Database schema
+└── src/
+    ├── controllers/    # Business logic
+    ├── middlewares/    # Interceptors (Auth, Payment)
+    ├── routes/         # API Paths
+    ├── validations/    # Request schemas (Joi)
+    └── index.js        # Entry point
 ```
