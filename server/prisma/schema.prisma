@@ -61,7 +61,7 @@ model Company {
   name        String   @unique
   logo        String?
   description String?
-  category    String?  // "global_mnc", "global_startup", "indian_startup"
+  category    String?  // "tech-giant", "fintech-giant", "indian-startup", "global-startup", "ycombinator", "mass-hiring", "hft"
   users       User[]
   jobs        Job[]
   createdAt   DateTime @default(now())
