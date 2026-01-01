@@ -24,37 +24,31 @@ import {
 import { completeOnboarding } from '@/lib';
 
 import { Images } from '../../assets/images/index';
+import useRegisterUser from '@/features/users/hooks/useRegisterUser';
+import { UserRegistration } from '@/features/users';
 
-const EXPERIENCE_LEVELS = [
+const EXPERIENCE_LEVELS:{id: UserRegistration['experience_level'],
+  label: string,
+  description: string,
+  image: ImageSourcePropType,
+}[] = [
   {
-    id: 'internship',
+    id: 'INTERNSHIP',
     label: 'Internships',
     description: 'Looking for internship opportunities',
     image: Images.experience.internship,
   },
   {
-    id: 'less-than-one',
+    id: 'FRESHER_OR_LESS_THAN_1_YEAR',
     label: 'Fresher or experience < 1 Year',
     description: 'Just starting out',
     image: Images.experience.lessThanOne,
   },
   {
-    id: 'one-to-three',
+    id: 'ONE_TO_THREE_YEARS',
     label: '1 - 3 Years Experience',
     description: 'Building experience',
     image: Images.experience.oneToThree,
-  },
-  {
-    id: 'three-to-five',
-    label: '3 - 5 Years Experience',
-    description: 'Mid-level professional',
-    image: Images.experience.threeToFive,
-  },
-  {
-    id: 'five-plus',
-    label: '5+ Years Experience',
-    description: 'Senior professional',
-    image: Images.experience.fivePlus,
   },
 ] as const;
 
@@ -392,8 +386,6 @@ function Step1({ selectedLevel, onSelect, onBack }: Step1Props) {
         }}
       >
         {EXPERIENCE_LEVELS.map((level) => {
-          const isDisabled =
-            level.id === 'three-to-five' || level.id === 'five-plus';
           return (
             <ExperienceCard
               key={level.id}
@@ -401,7 +393,6 @@ function Step1({ selectedLevel, onSelect, onBack }: Step1Props) {
               onPress={() => onSelect(level.id)}
               label={level.label}
               image={level.image}
-              disabled={isDisabled}
             />
           );
         })}
@@ -587,6 +578,8 @@ export default function Onboarding() {
     useState<ExperienceLevel | null>(null);
   const [selectedCompanies, setSelectedCompanies] = useState<CompanyId[]>([]);
 
+  const {mutate: registerUser, isPending: isRegistering} = useRegisterUser();
+
   useEffect(() => {
     const logToken = async () => {
       const token = await getToken();
@@ -625,11 +618,49 @@ export default function Onboarding() {
     setStep((prev) => prev - 1);
   }, []);
 
-  const handleFinish = useCallback(() => {
-    // TODO: Save all data to storage/API
-    completeOnboarding();
-    router.replace('/');
-  }, [router]);
+  console.log({profileData , experienceLevel , selectedCompanies})
+  const handleFinish = () => {
+    if(profileData && experienceLevel && selectedCompanies){
+      let payload = {
+        name:profileData.name,
+        is_experienced: profileData.isExperienced,
+        resume_link: profileData.resumeLink,
+        experience_level: experienceLevel,
+        followedCompanies: [
+          "1fd207c4-59dc-479d-ae20-42c3daece209",
+          "3369f26a-13cc-41d4-8abc-f3de762edf2d"
+        ],
+      } as UserRegistration;
+
+      if(payload.is_experienced){
+        payload = {
+          ...payload,
+          is_experienced: true,
+          years_of_experience: Number(profileData.cgpaOrYoe),
+          company_name: profileData.collegeOrCompany
+        }
+      }else{
+        payload = {
+          ...payload,
+          cgpa: profileData.cgpaOrYoe, 
+          college_name:profileData.collegeOrCompany
+        }
+      }
+
+      console.log({payload})
+
+      registerUser(payload,{
+          onSuccess:()=>{
+            router.replace('/');
+          },
+          onError:(e)=>{
+            console.error(e)
+          }
+        })
+    }
+
+   
+  };
 
   const canContinue = useMemo(() => {
     if (step === 1) {
