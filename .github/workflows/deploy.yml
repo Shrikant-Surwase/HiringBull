@@ -26,6 +26,8 @@ jobs:
             cd ${{ secrets.APP_DIR }}
             git pull origin main
             npm install
+            npx prisma generate
+            npx prisma migrate deploy
             pm2 restart 0
             pm2 save
           EOF
