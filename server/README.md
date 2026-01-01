@@ -74,7 +74,7 @@ Manage user profiles and onboarding.
 | `GET` | `/users/:id`| Bearer | [Admin] Get user by ID |
 | `DELETE`| `/users/:id`| Bearer | Delete user profile |
 
-````carousel
+<!-- slide -->
 ```json
 // GET /users/me (Response)
 {
@@ -104,7 +104,6 @@ Manage user profiles and onboarding.
   "message": "User deleted"
 }
 ```
-````
 
 ---
 
@@ -117,7 +116,6 @@ Browse and manage recruiting companies.
 | `POST` | `/companies` | API Key | Create a single company |
 | `POST` | `/companies/bulk`| API Key | Bulk creation of companies |
 
-````carousel
 ```json
 // GET /companies?category=global_mnc (Response)
 [
@@ -147,7 +145,6 @@ Browse and manage recruiting companies.
   { "name": "Netflix", "category": "global_mnc" }
 ]
 ```
-````
 
 ---
 
@@ -160,7 +157,6 @@ Access job listings across segments.
 | `GET` | `/jobs/:id` | Bearer + Paid | Detailed job view |
 | `POST` | `/jobs/bulk` | API Key | Ingest jobs in bulk |
 
-````carousel
 ```json
 // GET /jobs?segment=software_engineering&page=1 (Response)
 {
@@ -186,7 +182,6 @@ Access job listings across segments.
   }
 ]
 ```
-````
 
 ---
 
@@ -199,7 +194,6 @@ Referral posts and social updates.
 | `GET` | `/social-posts/:id`| Bearer | Get post details and comments |
 | `POST` | `/social-posts/bulk`| API Key | Bulk upload social posts |
 
-````carousel
 ```json
 // GET /social-posts/:id (Response)
 {
@@ -222,7 +216,6 @@ Referral posts and social updates.
   }
 ]
 ```
-````
 
 ---
 
@@ -234,7 +227,6 @@ Subscription and verification logic.
 | `POST` | `/payment/order` | Bearer | Initialize IAP intent |
 | `POST` | `/payment/verify`| Bearer | Verify receipt data |
 
-````carousel
 ```json
 // POST /payment/verify (Request)
 {
@@ -251,7 +243,6 @@ Subscription and verification logic.
   "amount": 999
 }
 ```
-````
 
 ---
 
@@ -265,7 +256,6 @@ Push notification registration.
 | `GET` | `/users/devices`| Bearer | Get user devices |
 | `POST` | `/public/send-notification`| None | [Testing] Trigger push |
 
-````carousel
 ```json
 // POST /users/devices (Request)
 {
@@ -282,7 +272,6 @@ Push notification registration.
   "data": { "jobId": "123" }
 }
 ```
-````
 
 ---
 
@@ -293,7 +282,6 @@ External event sync.
 |--------|----------|------|-------------|
 | `POST` | `/webhooks/clerk` | Svix Signature | Sync user data from Clerk |
 
-````carousel
 ```json
 // POST /webhooks/clerk (Example Payload)
 {
@@ -306,7 +294,6 @@ External event sync.
   }
 }
 ```
-````
 
 ---
 
