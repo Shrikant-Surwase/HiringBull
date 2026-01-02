@@ -89,6 +89,24 @@ export const bulkCreateJobs = catchAsync(async (req, res) => {
         skipDuplicates: true,
     });
 
+    const uniqueCompanyIds = [...new Set(jobsData.filter(job => job.companyId).map(job => job.companyId))];
+
+    if (uniqueCompanyIds.length > 0) {
+        const { sendJobNotificationToFollowers } = await import('../utils/notificationService.js');
+
+        for (const companyId of uniqueCompanyIds) {
+            const jobsForCompany = jobsData.filter(job => job.companyId === companyId);
+
+            for (const job of jobsForCompany) {
+                try {
+                    await sendJobNotificationToFollowers(companyId, job);
+                } catch (error) {
+                    console.error(`Failed to send notifications for job ${job.title}:`, error.message);
+                }
+            }
+        }
+    }
+
     res.status(httpStatus.CREATED).json({
         message: 'Bulk job creation completed',
         count: count.count,
