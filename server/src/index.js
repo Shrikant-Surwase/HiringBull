@@ -16,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 // Health check root - moved to top to ensure availability even if config is incomplete
 app.get("/", (req, res) => {
-  res.send({ status: "ok", message: "Hi guys , HiringBull server is running" });
+  res.send({ status: "ok", message: "Testing backend auto deployment! - 2 Jan 2026 - 7:35AM" });
 });
 
 app.use(helmet());
