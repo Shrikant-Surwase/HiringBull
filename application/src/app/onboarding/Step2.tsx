@@ -56,7 +56,12 @@ function Step2({
   console.log({COMPANIES});
 
   const FILTERS = ['ALL',...new Set(COMPANIES.map(c=> c.category))];
-  console.log({FILTERS})
+
+  const filterNameFormat = (name: string)=>{
+    let output = name.replace('_'," ").toUpperCase();
+    output = output.charAt(0).toUpperCase()+output.slice(1).toLowerCase();
+    return output;
+  }
   return (
     <Animated.View
       entering={FadeInRight.duration(300)}
@@ -117,7 +122,7 @@ function Step2({
                     : 'text-neutral-600 dark:text-neutral-300'
                 }`}
               >
-                {filter.toUpperCase()}
+                {filterNameFormat(filter)}
               </Text>
             </Pressable>
           ))}
