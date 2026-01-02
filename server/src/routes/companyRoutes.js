@@ -20,7 +20,7 @@ router.post('/', requireApiKey, validate(companyValidation.createCompany), creat
 router.put('/bulk', requireApiKey, validate(companyValidation.bulkUpdateCompanies), bulkUpdateCompanies);
 router.put('/:id', requireApiKey, validate(companyValidation.updateCompany), updateCompany);
 
-// Protected routes (require valid subscription)
-router.get('/', requireAuth, validate(companyValidation.getCompanies), getAllCompanies);
+// router.get('/', requireAuth, validate(companyValidation.getCompanies), getAllCompanies);
+router.get('/', validate(companyValidation.getCompanies), getAllCompanies);
 
 export default router;

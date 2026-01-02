@@ -14,6 +14,7 @@ const router = express.Router();
 router.use('/users/devices', deviceRoutes);
 router.use('/users', userRoutes);
 router.use('/jobs', jobRoutes);
+router.use('/outreach', userRoutes);
 router.use('/social-posts', socialPostRoutes);
 router.use('/payment', paymentRoutes);
 router.use('/companies', companyRoutes);

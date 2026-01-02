@@ -26,6 +26,18 @@ enum CompanyCategory {
   HFT
 }
 
+enum PlanType {
+  ONE_MONTH
+  THREE_MONTH
+  SIX_MONTH
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
 model User {
   id                     String    @id @default(uuid())
   clerkId                String?   @unique // Clerk user ID for auth sync
@@ -115,21 +127,6 @@ model SocialPost {
   @@index([created_at])
 }
 
-model Payment {
-  id        String   @id @default(uuid())
-  orderId   String
-  paymentId String?
-  signature String?
-  amount    Float
-  status    String   @default("PENDING") // PENDING, SUCCESS, FAILED
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([orderId])
-}
-
 model Comment {
   id        String     @id @default(uuid())
   content   String
@@ -153,4 +150,58 @@ model Device {
 
   @@index([userId])
   @@index([token])
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String
+  paymentId       String?
+  signature       String?
+  amount          Float
+  status          PaymentStatus @default(PENDING)
+
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+
+  planType        PlanType
+
+  // 🔑 Referral fields
+  referralCode    String?
+  referredByEmail String?
+  referralDiscount Float?       // e.g. 50
+  referralApplied Boolean       @default(false)
+
+  createdAt       DateTime      @default(now())
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([referralCode])
+  @@index([planType])
+}
+
+model OutreachRequest {
+  id           String   @id @default(uuid())
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+
+  email        String
+  companyName  String
+
+  reason       String          // ✅ REQUIRED (compulsory)
+
+  jobId        String?
+  resumeLink   String?
+  message      String?
+
+  status       String   @default("PENDING")
+
+  createdAt    DateTime @default(now())
+  reviewedAt   DateTime?
+  sentAt       DateTime?
+
+  @@index([userId])
+  @@index([companyName])
+  @@index([status])
+  @@index([createdAt])
 }
