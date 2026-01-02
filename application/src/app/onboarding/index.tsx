@@ -21,11 +21,12 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { completeOnboarding } from '@/lib';
 
 import { Images } from '../../../assets/images';
 import useRegisterUser from '@/features/users/hooks/useRegisterUser';
 import { UserRegistration } from '@/features/users';
+import Step2 from '@/app/onboarding/Step2';
+import { CompanyId } from '@/app/onboarding/types';
 
 const EXPERIENCE_LEVELS:{id: UserRegistration['experience_level'],
   label: string,
@@ -52,33 +53,7 @@ const EXPERIENCE_LEVELS:{id: UserRegistration['experience_level'],
   },
 ] as const;
 
-const COMPANIES = [
-  { id: 'google', name: 'Google', emoji: '🔍', type: 'mnc' },
-  { id: 'apple', name: 'Apple', emoji: '🍎', type: 'mnc' },
-  { id: 'meta', name: 'Meta', emoji: '👤', type: 'mnc' },
-  { id: 'amazon', name: 'Amazon', emoji: '📦', type: 'mnc' },
-  { id: 'microsoft', name: 'Microsoft', emoji: '💻', type: 'mnc' },
-  { id: 'netflix', name: 'Netflix', emoji: '🎬', type: 'mnc' },
-  { id: 'spotify', name: 'Spotify', emoji: '🎵', type: 'global-startup' },
-  { id: 'stripe', name: 'Stripe', emoji: '💳', type: 'global-startup' },
-  { id: 'airbnb', name: 'Airbnb', emoji: '🏠', type: 'global-startup' },
-  { id: 'uber', name: 'Uber', emoji: '🚗', type: 'global-startup' },
-  { id: 'zomato', name: 'Zomato', emoji: '🍕', type: 'indian-startup' },
-  { id: 'swiggy', name: 'Swiggy', emoji: '🍱', type: 'indian-startup' },
-  { id: 'flipkart', name: 'Flipkart', emoji: '🛍️', type: 'indian-startup' },
-  { id: 'razorpay', name: 'Razorpay', emoji: '💸', type: 'indian-startup' },
-] as const;
-
-const FILTERS = [
-  { label: 'All', value: 'all' },
-  { label: 'Global MNC', value: 'mnc' },
-  { label: 'Global Startups', value: 'global-startup' },
-  { label: 'YCombinator', value: 'ycombinator' },
-  { label: 'Indian Startups', value: 'indian-startup' },
-] as const;
-
 type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number]['id'];
-type CompanyId = (typeof COMPANIES)[number]['id'];
 
 type StepIndicatorProps = {
   currentStep: number;
@@ -272,33 +247,6 @@ function Step0({ data, onChange, onContinue, canContinue }: Step0Props) {
   );
 }
 
-
-type OptionCardProps = {
-  selected: boolean;
-  onPress: () => void;
-  children: React.ReactNode;
-};
-
-function OptionCard({ selected, onPress, children }: OptionCardProps) {
-  return (
-    <Pressable
-      onPress={onPress}
-      className={`mb-3 flex-row items-center rounded-xl border bg-white p-5 ${
-        selected
-          ? 'border-2 border-black android:shadow-lg ios:shadow-sm'
-          : 'border-neutral-200 android:shadow-md ios:shadow-sm dark:border-neutral-700'
-      }`}
-    >
-      <View className="flex-1">{children}</View>
-      <Ionicons
-        name={selected ? 'checkmark-circle' : 'checkmark-circle-outline'}
-        size={24}
-        color={selected ? '#000000' : '#d1d5db'}
-      />
-    </Pressable>
-  );
-}
-
 type Step1Props = {
   selectedLevel: ExperienceLevel | null;
   onSelect: (level: ExperienceLevel) => void;
@@ -401,166 +349,6 @@ function Step1({ selectedLevel, onSelect, onBack }: Step1Props) {
   );
 }
 
-type Step2Props = {
-  selectedCompanies: CompanyId[];
-  onToggle: (companyId: CompanyId) => void;
-  onBack: () => void;
-  onSelectAll: (companyIds: CompanyId[], select: boolean) => void;
-};
-
-function Step2({
-  selectedCompanies,
-  onToggle,
-  onBack,
-  onSelectAll,
-}: Step2Props) {
-  const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] =
-    useState<(typeof FILTERS)[number]['value']>('all');
-  const { colorScheme } = useColorScheme();
-
-  const filteredCompanies = useMemo(() => {
-    let result = COMPANIES as unknown as typeof COMPANIES;
-    if (activeFilter !== 'all') {
-      result = result.filter((c) => c.type === activeFilter) as any;
-    }
-    if (!search.trim()) return result;
-    return result.filter((company) =>
-      company.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [search, activeFilter]);
-
-  const allFilteredSelected = useMemo(() => {
-    if (filteredCompanies.length === 0) return false;
-    return filteredCompanies.every((c) => selectedCompanies.includes(c.id));
-  }, [filteredCompanies, selectedCompanies]);
-
-  return (
-    <Animated.View
-      entering={FadeInRight.duration(300)}
-      exiting={FadeOutLeft.duration(300)}
-      className="flex-1"
-    >
-      <View className="px-6">
-        <Pressable
-          onPress={onBack}
-          className="mb-4 flex-row items-center self-start"
-        >
-          <Ionicons
-            name="arrow-back"
-            size={16}
-            color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'}
-          />
-          <Text className="ml-1 text-sm font-medium text-neutral-500 underline dark:text-neutral-400">
-            Back
-          </Text>
-        </Pressable>
-        <Text className="mb-2 text-3xl font-bold">
-          Companies you&apos;d love
-        </Text>
-        <Text className="mb-4 text-base text-neutral-500">
-          Select companies you&apos;re interested in working for
-        </Text>
-
-        <View className="mb-4 flex-row items-center rounded-xl border border-neutral-200 bg-neutral-100 px-4 dark:border-neutral-700 dark:bg-neutral-800">
-          <Text className="mr-2">🔍</Text>
-          <TextInput
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Search companies..."
-            placeholderTextColor="#9ca3af"
-            className="flex-1 py-3 text-base text-black dark:text-white"
-          />
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="mb-4 flex-row"
-        >
-          {FILTERS.map((filter) => (
-            <Pressable
-              key={filter.value}
-              onPress={() => setActiveFilter(filter.value)}
-              className={`mr-2 rounded-full border px-4 py-2  ${
-                activeFilter === filter.value
-                  ? 'border-black bg-black dark:border-white dark:bg-white'
-                  : 'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800'
-              }`}
-            >
-              <Text
-                className={`text-sm font-medium ${
-                  activeFilter === filter.value
-                    ? 'text-white dark:text-black'
-                    : 'text-neutral-600 dark:text-neutral-300'
-                }`}
-              >
-                {filter.label}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        <View className="mb-4 flex-row items-center justify-between">
-          <Text className="text-sm font-medium text-neutral-500">
-            {filteredCompanies.length} companies found
-          </Text>
-          <Pressable
-            onPress={() => {
-              const ids = filteredCompanies.map((c) => c.id);
-              onSelectAll(ids, !allFilteredSelected);
-            }}
-            className="flex-row items-center"
-          >
-            <Text className="mr-2 text-sm font-medium dark:text-neutral-300">
-              Select All
-            </Text>
-            <Checkbox
-              checked={allFilteredSelected}
-              onChange={() => {
-                const ids = filteredCompanies.map((c) => c.id);
-                onSelectAll(ids, !allFilteredSelected);
-              }}
-              accessibilityLabel="Select all visible companies"
-            />
-          </Pressable>
-        </View>
-      </View>
-
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 24,
-          paddingBottom: 24,
-        }}
-      >
-        {filteredCompanies.map((company) => {
-          const isSelected = selectedCompanies.includes(company.id);
-          return (
-            <OptionCard
-              key={company.id}
-              selected={isSelected}
-              onPress={() => onToggle(company.id)}
-            >
-              <View className="flex-row items-center">
-                <View className="mr-3 size-10 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
-                  <Ionicons name="business" size={20} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
-                </View>
-                <Text className="text-lg font-semibold">{company.name}</Text>
-              </View>
-            </OptionCard>
-          );
-        })}
-        {filteredCompanies.length === 0 && (
-          <Text className="py-8 text-center text-neutral-500">
-            No companies found
-          </Text>
-        )}
-      </ScrollView>
-    </Animated.View>
-  );
-}
 
 export default function Onboarding() {
   const router = useRouter();
