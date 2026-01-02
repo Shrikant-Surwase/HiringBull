@@ -429,14 +429,14 @@ export default function Onboarding() {
 
       console.log({payload})
 
-      // registerUser(payload,{
-      //     onSuccess:()=>{
-      //       router.replace('/');
-      //     },
-      //     onError:(e)=>{
-      //       console.error(e)
-      //     }
-      //   })
+      registerUser(payload,{
+          onSuccess:()=>{
+            router.replace('/');
+          },
+          onError:(e)=>{
+            console.error(e)
+          }
+        })
     }
 
    

@@ -40,7 +40,7 @@ function Step2({
     return result.filter((company) =>
       company.name.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search, activeFilter]);
+  }, [search, activeFilter,COMPANIES]);
 
   const allFilteredSelected = useMemo(() => {
     if (filteredCompanies.length === 0) return false;
