@@ -53,34 +53,18 @@ export const updateUser = {
 
 export const updateProfile = {
     body: Joi.object().keys({
-        name: Joi.string().required(),
-        is_experienced: Joi.boolean().required(),
-        college_name: Joi.string().when('is_experienced', {
-            is: false,
-            then: Joi.required(),
-            otherwise: Joi.optional().allow(null, '')
-        }),
-        cgpa: Joi.string().when('is_experienced', {
-            is: false,
-            then: Joi.required(),
-            otherwise: Joi.optional().allow(null, '')
-        }),
-        company_name: Joi.string().when('is_experienced', {
-            is: true,
-            then: Joi.required(),
-            otherwise: Joi.optional().allow(null, '')
-        }),
-        years_of_experience: Joi.number().when('is_experienced', {
-            is: true,
-            then: Joi.required(),
-            otherwise: Joi.optional().allow(null, '')
-        }),
+        name: Joi.string().optional(),
+        is_experienced: Joi.boolean().optional(),
+        college_name: Joi.string().allow(null, '').optional(),
+        cgpa: Joi.string().allow(null, '').optional(),
+        company_name: Joi.string().allow(null, '').optional(),
+        years_of_experience: Joi.number().allow(null).optional(),
         experience_level: Joi.string().valid(
             'INTERNSHIP',
             'FRESHER_OR_LESS_THAN_1_YEAR',
             'ONE_TO_THREE_YEARS'
-        ).required(),
-        resume_link: Joi.string().uri().optional().allow(null, ''),
+        ).allow(null, '').optional(),
+        resume_link: Joi.string().uri().allow(null, '').optional(),
         followedCompanies: Joi.array().items(Joi.string().uuid()).optional()
     })
 };
