@@ -17,6 +17,7 @@ import { APIProvider } from '@/api';
 import { getUserInfo, useRegisterDevice } from '@/features/users';
 import { authService } from '@/service/auth-service';
 import {
+  completeOnboarding,
   hydrateOnboarding,
   loadSelectedTheme,
   useIsFirstTime,
@@ -77,7 +78,6 @@ function RootNavigator() {
     const hasCompletedOnboarding = useOnboarding.use.hasCompletedOnboarding();
     const isSubscribed = useOnboarding.use.isSubscribed();
 
-    const [isUserOnbaorded, setIsUserOnboarded] = useState(false)
 
     // Sync auth service with Clerk
     useEffect(() => {
@@ -112,7 +112,9 @@ function RootNavigator() {
     try{
     const data = await getUserInfo();
     console.log(data)
-    setIsUserOnboarded(Boolean(data.onboarding_completed))
+    if(Boolean(data.onboarding_completed)){
+      completeOnboarding()
+    }
     }catch(e){
       console.error("Failed to get user info")
     }
@@ -136,18 +138,18 @@ function RootNavigator() {
         <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack.Protected>
 
-      <Stack.Protected guard={isUserOnbaorded}>
+      <Stack.Protected guard={hasCompletedOnboarding}>
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack.Protected>
 
       <Stack.Protected
-        guard={isUserOnbaorded}
+        guard={hasCompletedOnboarding}
       >
         <Stack.Screen name="payment" options={{ headerShown: false }} />
       </Stack.Protected>
 
       <Stack.Protected
-        guard={true}
+        guard={hasCompletedOnboarding}
       >
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
       </Stack.Protected>
