@@ -1,15 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
-import logoBig from '../utils/logo-big.png';
 import logo from '../utils/logo.png';
+import logoBig from '../utils/logo-big.png';
+import social1 from '../utils/social1.png';
+import social2 from '../utils/social2.png';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 const Landing = () => {
   const rows = [
     {
       aspect: "Competition Level",
-      hiringbull: "Limited to 1,000 members → less competition",
+      hiringbull: "Limited to 1,000 members → early apply, significantly less competition",
       others: "Extremely high competition",
       groups: "Extremely high competition",
       hbType: "good",
@@ -18,7 +21,7 @@ const Landing = () => {
     },
     {
       aspect: "Access Control",
-      hiringbull: "Capped membership",
+      hiringbull: "Capped membership (only 1,000 users at a time)",
       others: "Open to everyone",
       groups: "Open to everyone",
       hbType: "good",
@@ -27,7 +30,7 @@ const Landing = () => {
     },
     {
       aspect: "Job Discovery Speed",
-      hiringbull: "Early alerts from career pages",
+      hiringbull: "Early alerts from company career pages",
       others: "Often delayed",
       groups: "Early alerts",
       hbType: "good",
@@ -36,7 +39,7 @@ const Landing = () => {
     },
     {
       aspect: "Job Quality",
-      hiringbull: "Verified career-page links only",
+      hiringbull: "Verified company career-page links only",
       others: "Mixed quality",
       groups: "Unverified, noisy",
       hbType: "good",
@@ -44,13 +47,67 @@ const Landing = () => {
       gType: "bad"
     },
     {
-      aspect: "DM Visibility",
-      hiringbull: "Up to 3 controlled requests/month",
+      aspect: "Personalization",
+      hiringbull: "Based on your segment & company choice",
+      others: "Broad, generic",
+      groups: "None",
+      hbType: "good",
+      oType: "warn",
+      gType: "bad"
+    },
+    {
+      aspect: "Notifications",
+      hiringbull: "Only for relevant jobs you opt into",
+      others: "High-noise alerts",
+      groups: "High-noise alerts",
+      hbType: "good",
+      oType: "warn",
+      gType: "warn"
+    },
+    {
+      aspect: "DM Visibility (to company employees or HRs)",
+      hiringbull: "100% visibility with up to 3 controlled requests/month",
       others: "No visibility guarantee",
-      groups: "No access to HRs",
+      groups: "No access to employees / HRs",
       hbType: "good",
       oType: "bad",
       gType: "bad"
+    },
+    {
+      aspect: "Fake / Expired Jobs",
+      hiringbull: "Actively filtered",
+      others: "Common",
+      groups: "Common",
+      hbType: "good",
+      oType: "bad",
+      gType: "bad"
+    },
+    {
+      aspect: "Social Media Important Posts",
+      hiringbull: "Curated hiring posts from LinkedIn, Reddit, Twitter",
+      others: "Not centralized",
+      groups: "None",
+      hbType: "good",
+      oType: "bad",
+      gType: "bad"
+    },
+    {
+      aspect: "Promotional / Spam Entries",
+      hiringbull: "No promotions, ads, or paid postings",
+      others: "Sponsored & promoted listings",
+      groups: "Heavy promotions & spam",
+      hbType: "good",
+      oType: "warn",
+      gType: "bad"
+    },
+    {
+      aspect: "Target Audience",
+      hiringbull: "Built specifically for India",
+      others: "Global, not India-focused",
+      groups: "Indian groups exist but unstructured",
+      hbType: "good",
+      oType: "bad",
+      gType: "warn"
     }
   ];
 
@@ -351,9 +408,9 @@ const Landing = () => {
               <thead>
                 <tr>
                   <th>Aspect</th>
-                  <th>HiringBull</th>
-                  <th>LinkedIn / Naukri</th>
-                  <th>Telegram / WhatsApp</th>
+                  <th><img src={logoBig} alt="" /> </th>
+                  <th><img src={social1} alt="" /></th>
+                  <th><img src={social2} alt="" /></th>
                 </tr>
               </thead>
 
@@ -363,17 +420,23 @@ const Landing = () => {
                     <td className="aspect">{row.aspect}</td>
 
                     <td className={`cell ${row.hbType}`}>
-                      <span className="icon">✓</span>
+                      <span className="icon">
+                        {row.hbType == "good" ? "✅" : "✖️"}
+                      </span>
                       {row.hiringbull}
                     </td>
 
                     <td className={`cell ${row.oType}`}>
-                      <span className="icon">✕</span>
+                      <span className="icon">
+                        {row.oType == "good" ? "✅" : "✖️"}
+                      </span>
                       {row.others}
                     </td>
 
                     <td className={`cell ${row.gType}`}>
-                      <span className="icon">✕</span>
+                      <span className="icon">
+                        {row.gType == "good" ? "✅" : "✖️"}
+                      </span>
                       {row.groups}
                     </td>
                   </tr>
@@ -395,6 +458,81 @@ const Landing = () => {
           </div>
         </div> */}
 
+      </Page>
+      <PageBetween>
+        <div className="line"></div>
+        <img src={logo} alt="" />
+        <div className="line"></div>
+      </PageBetween>
+      <Page>
+        <h1>
+          Pricing & Membership Plans
+          <img src={logo} alt="" />
+        </h1>
+        <h2>
+          A small membership fee for a much larger advantage.
+        </h2>
+
+        <div className="container1000">
+          <div className="square-pricing">
+            <div className="title">Starter Plan - <i>1 Month</i></div>
+            <div className="desc">Best for trying HiringBull</div>
+            <div className="line"></div>
+            <div className="price">
+              <div className="current-amount">
+                <span>₹199</span> / month
+              </div>
+              <div className="total-amount">
+                ( 1 Month Access )
+              </div>
+            </div>
+            <div className="advantage-points">
+              <div className="point"><CheckCircleIcon /> Early alerts from verified career pages you select</div>
+              <div className="point"><CheckCircleIcon /> Curated hiring signals from social posts</div>
+              <div className="point"><CheckCircleIcon /> Up to 3 outreach requests per month</div>
+            </div>
+            <a href="#apply" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
+          </div>
+          <div className="square-pricing recommended">
+            <div className="tag">Most Popular</div>
+            <div className="title">Growth Plan - <i>3 Months</i></div>
+            <div className="desc">Best for active job seekers</div>
+            <div className="line"></div>
+            <div className="price">
+              <div className="current-amount">
+                <span>₹149</span> / month
+              </div>
+              <div className="total-amount">
+                ( 3 Month Access - <span>₹447</span> Total )
+              </div>
+            </div>
+            <div className="advantage-points">
+              <div className="point"><CheckCircleIcon /> All Starter features included</div>
+              <div className="point"><CheckCircleIcon /> 100% money-back guarantee if placed*</div>
+              <div className="point"><CheckCircleIcon /> Priority support</div>
+            </div>
+            <a href="#apply" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
+          </div>
+          <div className="square-pricing">
+            <div className="title">Pro Plan - <i>6 Months</i></div>
+            <div className="desc">Maximum Advantage 🔥</div>
+            <div className="line"></div>
+            <div className="price">
+              <div className="current-amount">
+                <span>₹119</span> / month
+              </div>
+              <div className="total-amount">
+                ( 6 Month Access - <span>₹714</span> Total )
+              </div>
+            </div>
+            <div className="advantage-points">
+              <div className="point"><CheckCircleIcon /> All Growth features included</div>
+              <div className="point"><CheckCircleIcon /> Free mock interviews with FAANG employees</div>
+              <div className="point"><CheckCircleIcon /> Outreach feature priority</div>
+            </div>
+            <a href="#apply" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
+          </div>
+        </div>
       </Page>
     </Container >
   )
@@ -760,6 +898,157 @@ const Page = styled.div`
       grid-column: span 2;
     }
 
+    .square-pricing{
+      position: relative;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #f4eeee;
+
+      padding: 25px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+
+      .title{
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: left;
+        /* padding: 10px 20px; */
+        /* background-color: #a6f0b9; */
+        /* border-radius: 100px; */
+
+        i{
+          font-weight: 300;
+        }
+      }
+
+      .desc{
+        margin-top: 5px;
+        font-size: 0.9rem;
+        font-weight: 300;
+        color: #555;
+        text-align: left;
+      }
+
+      .line{
+        height: 1px;
+        width: 100%;
+
+        background-color: #cccccc;
+
+        margin: 15px 0;
+      }
+
+      .price{
+        .current-amount{
+          font-size: 0.85rem;
+          font-weight: 300;
+          letter-spacing: 0rem;
+
+          span{
+            font-size: 1.5rem;
+          }
+        }
+
+        .total-amount{
+          font-size: 0.85rem;
+          font-weight: 300;
+          margin-top: 5px;
+        }
+
+
+        span{
+          font-weight: 600;
+          letter-spacing: 0.1rem;
+
+          font-family: 'Inter', system-ui, sans-serif;
+          font-feature-settings: "tnum";
+          font-variant-numeric: tabular-nums;
+        }
+      }
+
+      .advantage-points{
+        .point{
+          display: flex;
+          align-items: center;
+
+          font-size: 0.85rem;
+          font-weight: 300;
+          margin-top: 10px;
+
+          svg{
+            margin-right: 10px;
+            font-size: 1rem;
+          }
+        }
+      }
+
+      .apply-btn{
+        position: absolute;
+        width: calc(100% - 50px);
+        bottom: 25px;
+        padding: 12px 25px;
+        background-color: black;    
+        color: #ffff00c4;
+        border-radius: 100px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+
+        opacity: 0.75;
+
+        text-decoration: none;
+
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        svg{
+          font-size: 1.5rem;  
+          fill: #ffff00c4;
+        }
+
+        &:hover{
+          opacity: 1;
+          transition-duration: 250ms;
+          color: yellow;
+
+          svg{
+            fill: yellow;
+          }
+        }
+      }
+
+    }
+
+    .recommended{
+      border: 2px solid #ffb300;
+      scale: 1.05;
+      background-color: #ffb30003;
+
+      .tag{
+        background-color: #ffb300;
+        color: #fff; 
+
+        left: calc(50% - 50px);
+
+        position: absolute;
+        top: -12.5px;
+        padding: 5px 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+
+        border-radius: 100px;
+      }
+
+      .apply-btn{
+        opacity: 0.85;
+      }
+    }
+
     /* ---------------- SHRINK ---------------- */
     @media (max-width: 1120px) {
       width: calc(100vw - 40px);
@@ -908,7 +1197,7 @@ const PageBetween = styled.div`
 
 const Table = styled.div`
   width: 100%;
-  margin: 2rem 0;
+  margin-top: 40px;
 
   /* Wrapper for mobile responsiveness */
   .comparison-wrapper {
@@ -916,7 +1205,7 @@ const Table = styled.div`
     overflow-x: auto;
     border-radius: 12px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #f4eeee;
+    border: 1px solid black;
   }
 
   .comparison-table {
@@ -942,6 +1231,20 @@ const Table = styled.div`
     border-bottom: 1px solid #000;
     border-left: 1px solid #000;
     color: #4b5563;
+
+    img{
+      height: 40px;
+      margin-bottom: -10px;
+    }
+  }
+  
+  .compare-company{
+    display: flex;
+    align-items: center;
+    
+    img{
+      height: 40px;
+    }
   }
 
   th:first-child {
@@ -987,13 +1290,13 @@ const Table = styled.div`
   
   /* Bad State */
   .bad {
-    background-color: #fef2f2; /* Very light red bg */
+    background-color: #e28282; /* Very light red bg */
     color: #b91c1c;
   }
 
   /* Warn State */
   .warn {
-    background-color: #fffbeb; /* Very light yellow bg */
+    background-color: #f9d0d0; /* Very light yellow bg */
     color: #b45309;
   }
 
