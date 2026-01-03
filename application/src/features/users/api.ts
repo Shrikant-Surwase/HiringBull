@@ -1,13 +1,20 @@
 import { client } from '@/api/common/client';
-import type { DeviceRegistration, DeviceResponse, UserRegistration } from './types';
+import { UserInfo, type DeviceRegistration, type DeviceResponse, type UserRegistration } from './types';
 
-export const userApi = {
-  registerDevice: async (data: DeviceRegistration) => {
+const BASE_USER_URL = '/api/users/me';
+
+
+export const registerDevice = async (data: DeviceRegistration) => {
     const res = await client.post<DeviceResponse>('/api/users/devices', data);
     return res.data;
-  },
-  registerUser: async (payload: UserRegistration) => {
-    const {data} = await client.put<DeviceResponse>('/api/users/me', payload);
+}
+  
+export const registerUser =  async (payload: UserRegistration) => {
+    const {data} = await client.put(BASE_USER_URL, payload);
     return data;
-  },
-};
+}
+
+export const getUserInfo = async ()=>{
+    const {data} = await client.get<UserInfo>(BASE_USER_URL);
+    return data;
+}
