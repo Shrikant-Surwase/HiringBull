@@ -49,6 +49,9 @@ router.post("/send-notification", async (req, res) => {
       return res.status(400).json({ message: "Title and body are required" });
     }
 
+    // Ensure data is a plain object (not string, array, or null)
+    const notificationData = (data && typeof data === 'object' && !Array.isArray(data)) ? data : {};
+
     const devices = await prisma.device.findMany({
       select: { token: true }
     });
@@ -69,7 +72,7 @@ router.post("/send-notification", async (req, res) => {
         sound: 'default',
         title,
         body,
-        data: data || {},
+        data: notificationData,
       });
     }
 

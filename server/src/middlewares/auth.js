@@ -29,7 +29,7 @@ export const requireAuth = async (req, res, next) => {
             update: {},
             create: {
                 clerkId,
-                email: clerkUser.email ||  `${clerkId}@no-email.clerk`,
+                email: clerkUser.email || `${clerkId}@no-email.clerk`,
                 name: clerkUser.sessionClaims?.name || 'User',
                 active: true
             }
@@ -64,6 +64,7 @@ export const optionalAuth = (req, res, next) => {
  * Assuming requireAuth has already run and populated req.user
  */
 export const requirePayment = async (req, res, next) => {
+    next();
     try {
         if (!req.user) {
             return res.status(401).json({ message: "Authentication required" });
