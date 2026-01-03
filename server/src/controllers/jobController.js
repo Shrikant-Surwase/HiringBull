@@ -99,7 +99,18 @@ export const bulkCreateJobs = catchAsync(async (req, res) => {
 
             for (const job of jobsForCompany) {
                 try {
-                    await sendJobNotificationToFollowers(companyId, job);
+                    const createdJob = await prisma.job.findFirst({
+                        where: {
+                            title: job.title,
+                            company: job.company,
+                            companyId: job.companyId
+                        },
+                        orderBy: { created_at: 'desc' }
+                    });
+
+                    if (createdJob) {
+                        await sendJobNotificationToFollowers(companyId, createdJob);
+                    }
                 } catch (error) {
                     console.error(`Failed to send notifications for job ${job.title}:`, error.message);
                 }
