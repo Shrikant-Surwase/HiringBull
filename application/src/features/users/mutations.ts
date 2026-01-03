@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { userApi } from './api';
+import { registerDevice } from './api';
 // import { userKeys } from './keys'; // Uncomment when using invalidateQueries
 
 export const useRegisterDevice = () => {
   // const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: userApi.registerDevice,
+    mutationFn: registerDevice,
     meta: {
       // successMessage: 'Device registered successfully', // Uncomment if you want a toast
       // toastError: true

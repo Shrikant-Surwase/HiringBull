@@ -20,3 +20,18 @@ export type UserRegistration = {
 } | {is_experienced: false, 
   college_name: string;cgpa: string
 })
+
+
+export type UserInfo = {
+    "id": string,
+    "clerkId": string,
+    "name": string,
+    "email": string,
+    "active": boolean,
+    "is_experienced": boolean,
+    "company_name": string,
+    "resume_link": string,
+    "onboarding_completed": boolean|null,
+    "onboarding_completed_at":string|null,
+    "followedCompanies": []
+}

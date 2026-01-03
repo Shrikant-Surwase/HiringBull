@@ -5,7 +5,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -14,9 +14,10 @@ import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-expo'
 import { tokenCache } from '@clerk/clerk-expo/token-cache'
 
 import { APIProvider } from '@/api';
-import { useRegisterDevice } from '@/features/users';
+import { getUserInfo, useRegisterDevice } from '@/features/users';
 import { authService } from '@/service/auth-service';
 import {
+  completeOnboarding,
   hydrateOnboarding,
   loadSelectedTheme,
   useIsFirstTime,
@@ -77,6 +78,7 @@ function RootNavigator() {
     const hasCompletedOnboarding = useOnboarding.use.hasCompletedOnboarding();
     const isSubscribed = useOnboarding.use.isSubscribed();
 
+
     // Sync auth service with Clerk
     useEffect(() => {
       if (isSignedIn) {
@@ -90,7 +92,7 @@ function RootNavigator() {
     const isAuthenticated = isLoaded ? (isSignedIn ?? false) : false;
 
     // Notifications should only be initialized for paying users
-    const shouldInitNotifications = isAuthenticated && isSubscribed;
+    const shouldInitNotifications = true;
 
   //   temporary flags for testing
 //   const isFirstTime = false;
@@ -106,6 +108,24 @@ function RootNavigator() {
     }
   }, [isLoaded]);
 
+  const checkUserInfo = async ()=>{
+    try{
+    const data = await getUserInfo();
+    console.log(data)
+    if(Boolean(data.onboarding_completed)){
+      completeOnboarding()
+    }
+    }catch(e){
+      console.error("Failed to get user info")
+    }
+  }
+
+  useEffect(()=>{
+    if(isSignedIn){
+      checkUserInfo();
+    }
+  },[isSignedIn]);
+
   return (
     <>
       {shouldInitNotifications && <NotificationInitializer />}
@@ -118,18 +138,18 @@ function RootNavigator() {
         <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack.Protected>
 
-      <Stack.Protected guard={isAuthenticated && !hasCompletedOnboarding}>
+      <Stack.Protected guard={hasCompletedOnboarding}>
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack.Protected>
 
       <Stack.Protected
-        guard={isAuthenticated && hasCompletedOnboarding && !isSubscribed}
+        guard={hasCompletedOnboarding}
       >
         <Stack.Screen name="payment" options={{ headerShown: false }} />
       </Stack.Protected>
 
       <Stack.Protected
-        guard={isAuthenticated && hasCompletedOnboarding && isSubscribed}
+        guard={hasCompletedOnboarding}
       >
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
       </Stack.Protected>

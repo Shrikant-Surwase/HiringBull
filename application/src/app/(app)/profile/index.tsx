@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, Image } from 'react-native';
+import { Alert, Pressable, Image, Linking } from 'react-native';
 
 import {
   FocusAwareStatusBar,
