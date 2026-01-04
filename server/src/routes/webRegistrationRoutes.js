@@ -1,5 +1,6 @@
 import express from 'express';
 import validate from '../middlewares/validate.js';
+import { requireApiKey } from '../middlewares/auth.js';
 import * as webRegistrationValidation from '../validations/webRegistrationValidation.js';
 import {
     createWebRegistration,
@@ -11,10 +12,13 @@ import {
 
 const router = express.Router();
 
-router.post('/', validate(webRegistrationValidation.createWebRegistration), createWebRegistration);
+// Public route - frontend checks email before Clerk login
 router.get('/check', validate(webRegistrationValidation.checkWebRegistration), checkWebRegistration);
-router.put('/:email', validate(webRegistrationValidation.updateWebRegistration), updateWebRegistration);
-router.delete('/:email', validate(webRegistrationValidation.deleteWebRegistration), deleteWebRegistration);
-router.get('/', getWebRegistrations);
+
+// Admin routes - require API key
+router.post('/', requireApiKey, validate(webRegistrationValidation.createWebRegistration), createWebRegistration);
+router.put('/:email', requireApiKey, validate(webRegistrationValidation.updateWebRegistration), updateWebRegistration);
+router.delete('/:email', requireApiKey, validate(webRegistrationValidation.deleteWebRegistration), deleteWebRegistration);
+router.get('/', requireApiKey, getWebRegistrations);
 
 export default router;
