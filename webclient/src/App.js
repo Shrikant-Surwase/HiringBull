@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import styled from "styled-components";
 import Landing from "./Screens/Landing";
+import JoinMembershipForm from "./Screens/JoinMembershipForm";
+
 
 
 const App = () => {
@@ -9,6 +11,7 @@ const App = () => {
     <Container>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="join-membership" element={<JoinMembershipForm />} />
       </Routes>
     </Container>
   )

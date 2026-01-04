@@ -197,7 +197,7 @@ const Landing = () => {
             <a href="#compare">Compare</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
-            <a href="#apply" className='type2'>Apply for Membership <OfflineBoltIcon /></a>
+            <a href="/join-membership" className='type2'>Apply for Membership <OfflineBoltIcon /></a>
           </div>
         </div>
       </Navbar>
@@ -212,7 +212,7 @@ const Landing = () => {
           Compete with <u>50 applicants</u>, not 50,000.
         </p>
 
-        <a href='/' className="apply-btn">
+        <a href='/join-membership' className="apply-btn">
           Apply for Membership <OfflineBoltIcon />
         </a>
 
@@ -561,7 +561,7 @@ const Landing = () => {
               <div className="point"><CheckCircleIcon /> Curated hiring signals from social posts</div>
               <div className="point"><CheckCircleIcon /> Up to 3 outreach requests per month</div>
             </div>
-            <a href="#apply" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
+            <a href="/join-membership" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
           </div>
           <div className="square-pricing recommended">
             <div className="tag">Most Popular</div>
@@ -581,7 +581,7 @@ const Landing = () => {
               <div className="point"><CheckCircleIcon /> <p>100% money-back guarantee if placed <u>Terms apply</u></p></div>
               <div className="point"><CheckCircleIcon /> Priority support</div>
             </div>
-            <a href="#apply" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
+            <a href="/join-membership" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
           </div>
           <div className="square-pricing">
             <div className="title">Pro Plan - <i>6 Months</i></div>
@@ -600,7 +600,7 @@ const Landing = () => {
               <div className="point"><CheckCircleIcon /> Free mock interviews with FAANG employees</div>
               <div className="point"><CheckCircleIcon /> Outreach feature priority</div>
             </div>
-            <a href="#apply" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
+            <a href="/join-membership" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
           </div>
         </div>
 
@@ -663,7 +663,7 @@ const Landing = () => {
 
           <div className="col">
             <div className="heading">Support</div>
-            <a href="#apply">Apply for Membership</a>
+            <a href="/join-membership">Apply for Membership</a>
             <a href="#contact">Contact</a>
             <a href="#referral">Referral Program</a>
           </div>
@@ -1149,7 +1149,10 @@ const Page = styled.div`
 
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
+
+        text-align: center;
         
         svg{
           font-size: 1.5rem;  
@@ -1191,6 +1194,7 @@ const Page = styled.div`
       }
 
       .apply-btn{
+        text-align: center;
         opacity: 0.85;
       }
     }
