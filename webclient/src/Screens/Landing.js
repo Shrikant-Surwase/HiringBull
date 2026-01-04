@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from "react";
 import styled from 'styled-components';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 import logo from '../utils/logo.png';
@@ -110,6 +111,75 @@ const Landing = () => {
       gType: "warn"
     }
   ];
+
+  const faqData = [
+    {
+      question: "What is HiringBull?",
+      answer: "HiringBull is a job-search and mentorship platform that delivers early job alerts from verified company career pages and provides curated hiring signals, outreach tools, and mock interviews to help you land your next role."
+    },
+    {
+      question: "How quickly do I receive job alerts?",
+      answer: "Job alerts are delivered within approximately 10 minutes of being posted on verified company career pages, giving you a significant head start over other applicants."
+    },
+    {
+      question: "Why is membership capped?",
+      answer: "Membership is limited to around 1,000 users per experience level to reduce competition and ensure you're competing with fewer candidates for each opportunity."
+    },
+    {
+      question: "What does the outreach feature include?",
+      answer: "The outreach feature allows you to send up to 3 structured requests per month—such as referral requests, resume reviews, or mock interview requests—via curated communities of professionals."
+    },
+    {
+      question: "What are the differences between pricing plans?",
+      answer: "Core features are available across all plans, but 3-month and 6-month plans include priority support and are eligible for our 100% money-back guarantee if you get placed during your active membership. Terms applied."
+    },
+    {
+      question: "What is the refund policy?",
+      answer: "If you secure a job placement during an active 3-month or 6-month membership, you're eligible for a 100% refund upon submitting official proof such as a selection or offer email."
+    },
+    {
+      question: "Is HiringBull available on iOS?",
+      answer: "HiringBull is currently available on Android via the Play Store, and iOS support is coming soon."
+    },
+    {
+      question: "Are the job postings verified?",
+      answer: "Yes, all job alerts come from verified company career pages with no paid promotions or ads—only curated and authentic opportunities."
+    },
+    {
+      question: "What are hiring signals?",
+      answer: "Hiring signals are curated social media posts from employees and recruiters indicating active hiring, such as 'DM for referral' or 'actively hiring,' helping you discover hidden opportunities."
+    },
+    {
+      question: "What does the Pro plan include?",
+      answer: "The Pro plan includes regular mock interviews conducted by employees from FAANG and top MNCs, along with peer comparison features to benchmark your progress."
+    },
+    {
+      question: "How are users grouped on the platform?",
+      answer: "Users are grouped by experience level to ensure discussions, opportunities, and networking remain relevant and valuable to your career stage."
+    },
+    {
+      question: "Is HiringBull affiliated with companies like Google or Amazon?",
+      answer: "No, HiringBull is an independent platform and is not affiliated with any specific companies."
+    },
+    {
+      question: "How is my data protected?",
+      answer: "HiringBull prioritizes data privacy and trust, implementing robust security measures to protect your personal and professional information."
+    },
+    {
+      question: "What kind of support can I expect?",
+      answer: "All users receive standard support, while 3-month and 6-month plan members receive priority support for faster assistance with any questions or issues."
+    },
+    {
+      question: "Can I cancel my membership anytime?",
+      answer: "Yes, you can cancel your membership at any time, though refunds are only applicable under the terms of our money-back guarantee for active 3-month or 6-month members who secure placement."
+    }
+  ];
+
+  const [openIndex, setOpenIndex] = useState(null);
+
+  const toggleFAQ = (index) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
 
   return (
     <Container>
@@ -320,7 +390,7 @@ const Landing = () => {
             <div className="desc">
               Early alerts only work when access is limited. The cap ensures members act before applications flood in.
             </div>
-            <u>Make it easier — use a <b>referral code</b> to get a discount and priority access.</u>
+            <u>Make it easier — use a <b>registerd email as referral code</b> to get a discount and priority access.</u>
             <div className="tags">
               <div className="tag">Exclusive Club</div>
             </div>
@@ -508,7 +578,7 @@ const Landing = () => {
             </div>
             <div className="advantage-points">
               <div className="point"><CheckCircleIcon /> All Starter features included</div>
-              <div className="point"><CheckCircleIcon /> 100% money-back guarantee if placed*</div>
+              <div className="point"><CheckCircleIcon /> <p>100% money-back guarantee if placed <u>Terms apply</u></p></div>
               <div className="point"><CheckCircleIcon /> Priority support</div>
             </div>
             <a href="#apply" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
@@ -533,7 +603,83 @@ const Landing = () => {
             <a href="#apply" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
           </div>
         </div>
+
+        <div className="referral">
+          <div className="box"></div>
+          <div className="text">
+            <div className="title">Click to check new prices - Unlock an instant 25% discount</div>
+            <div className="desc">
+              Have a friend already with HiringBull Membership? Share their registered membership email to unlock a flat 25% off your plan - and your friend earns 25% of your plan value as a referral reward.
+            </div>
+          </div>
+        </div>
       </Page>
+      <PageBetween>
+        <div className="line"></div>
+        <img src={logo} alt="" />
+        <div className="line"></div>
+      </PageBetween>
+      <Page>
+        <h1>
+          Frequently Asked Questions
+          <img src={logo} alt="" />
+        </h1>
+        <h2>
+          Get all your questions answered
+        </h2>
+        <div className="faq">
+          {faqData.map((item, index) => (
+            <div
+              key={index}
+              className={`qna ${openIndex === index ? "open" : ""}`}
+            >
+              <div className="question" onClick={() => toggleFAQ(index)}>
+                <div className="text">{item.question}</div>
+                <div className="symbol">+</div>
+              </div>
+
+              <div className="answer">{item.answer}</div>
+            </div>
+          ))}
+        </div>
+      </Page>
+      <Footer>
+        <div className="footer-grid">
+          <div className="col brand">
+            <img src={logoBig} className='logo' alt="" />
+            <div className="tagline">Compete with 50 applicants, not 50,000. <br /> Apply early.  </div>
+            <div className="trust">
+              Early job alerts · Curated access · Limited members
+            </div>
+          </div>
+
+          <div className="col">
+            <div className="heading">Product</div>
+            <a href="#how">How it works</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+          </div>
+
+          <div className="col">
+            <div className="heading">Support</div>
+            <a href="#apply">Apply for Membership</a>
+            <a href="#contact">Contact</a>
+            <a href="#referral">Referral Program</a>
+          </div>
+
+          <div className="col">
+            <div className="heading">Legal</div>
+            <a href="#terms">Terms</a>
+            <a href="#privacy">Privacy</a>
+            <a href="#refund">Refund Policy</a>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          © 2026 HiringBull · Opensource platform
+        </div>
+      </Footer>
     </Container >
   )
 }
@@ -542,7 +688,7 @@ export default Landing
 
 const Container = styled.div`
   width: 100vw; 
-`
+`;
 
 const Navbar = styled.div`
   width: 100vw; 
@@ -647,7 +793,7 @@ const Navbar = styled.div`
       }
     }
   }
-`
+`;
 
 const Page1 = styled.div`
   position: relative;
@@ -752,7 +898,7 @@ const Page1 = styled.div`
     font-size: 4rem;
     fill: #888;
   }
-`
+`;
 
 const Page = styled.div`
   min-height: 100vh;
@@ -800,7 +946,6 @@ const Page = styled.div`
     grid-auto-rows: 460px;
     gap: 24px;
 
-    padding: 24px;
     box-sizing: border-box;
 
     /* Common square styles */
@@ -1015,6 +1160,7 @@ const Page = styled.div`
           opacity: 1;
           transition-duration: 250ms;
           color: yellow;
+          scale: 1.05;
 
           svg{
             fill: yellow;
@@ -1126,7 +1272,89 @@ const Page = styled.div`
       }
     }
   }
-`
+
+  .referral{
+    display: flex;
+    align-items: center;
+    max-width: 1000px;
+    margin-top: 20px;
+    padding: 0 40px;
+
+    .box{
+      height: 30px;
+      aspect-ratio: 1/1;
+      border-radius: 4px;
+      border: 1px solid black;
+      margin-right: 20px;
+    }
+
+    .text{
+      .title{
+        font-size: 1.25rem;
+        font-weight: 500;
+      }
+
+      .desc{
+        font-size: 0.9rem;
+        font-weight: 300;
+      }
+    }
+  }
+
+  .faq{
+    margin-top: 80px;
+    margin-bottom: 40px;
+  }
+
+  .qna {
+    border-bottom: 1px solid #eee;
+    padding: 20px 0;
+    max-width: 1000px;
+    
+    .question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      
+      .text {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: #111;
+      }
+      
+      .symbol {
+        font-size: 2rem;
+        font-weight: 400;
+        transition: transform 0.25s ease;
+        color: #555;
+      }
+    }
+  
+    .answer {
+      max-height: 0;
+      overflow: hidden;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #555;
+      transition-duration: 250ms;
+      /* transition: max-height 0.3s ease, opacity 0.2s ease; */
+      opacity: 0;
+    }
+  
+  }
+  
+  /* OPEN STATE */
+  .qna.open .answer {
+    max-height: 300px;
+    margin-top: 12px;
+    opacity: 1;
+  }
+
+  .qna.open .symbol {
+    transform: rotate(45deg); /* + becomes × */
+  }
+`;
 
 const PageGap = styled.div`
   height: 40px;
@@ -1320,5 +1548,86 @@ const Table = styled.div`
     th, td {
       padding: 1rem;
     }
+  }
+`;
+
+const Footer = styled.footer`
+  background: #0f0f0f;
+  color: #ddd;
+  padding: 64px 80px 24px;
+
+  @media (max-width: 768px) {
+    padding: 48px 24px 20px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 40px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .brand {
+    max-width: 360px;
+  }
+
+  .logo {
+    width: 300px;
+  }
+
+  .tagline {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #aaa;
+  }
+
+  .trust {
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .heading {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 8px;
+  }
+
+  a {
+    font-size: 0.9rem;
+    color: #ddd;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  a:hover {
+    color: #fff;
+  }
+
+  .footer-bottom {
+    border-top: 1px solid #222;
+    padding-top: 16px;
+    font-size: 0.8rem;
+    color: #777;
+    text-align: center;
   }
 `;
