@@ -3,7 +3,7 @@ import QueryKeys from '@/service/queryKeys';
 import { useAuth } from '@clerk/clerk-expo';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-const useFetchFollowedJobs = () => {
+export const useFetchFollowedJobs = () => {
   const { isSignedIn } = useAuth();
   return useInfiniteQuery<JobsResponse, Error>({
     queryKey: [QueryKeys.followedJobs],
@@ -21,5 +21,3 @@ const useFetchFollowedJobs = () => {
     },
   });
 };
-
-export default useFetchFollowedJobs;

@@ -3,7 +3,7 @@ import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { Pressable, Image, Linking, FlatList, ActivityIndicator } from 'react-native';
 
 import { type Job, JobCard } from '@/components/job-card';
-import useFetchFollowedJobs from './hooks/useFetchFollowedJobs';
+import { useFetchFollowedJobs } from '@/features/jobs';
 import { type Job as ApiJob } from '@/api/jobs'; // Import API Job type
 import {
   FocusAwareStatusBar,
