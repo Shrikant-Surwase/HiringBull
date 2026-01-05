@@ -1,6 +1,10 @@
 import { clerkMiddleware, requireAuth as clerkRequireAuth, getAuth } from '@clerk/express';
+import { createClerkClient } from '@clerk/backend';
 import prisma from '../prismaClient.js';
 import { log } from '../utils/logger.js';
+
+// Initialize Clerk Backend client for fetching full user data
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 /**
  * Initialize Clerk middleware for the Express app
@@ -12,25 +16,46 @@ export const initClerk = clerkMiddleware();
  * Middleware to require authentication
  * Returns 401 if user is not authenticated
  * Auto-creates user if they don't exist in DB
+ * Fetches full user data from Clerk API to get email
  */
 export const requireAuth = async (req, res, next) => {
     clerkRequireAuth()(req, res, async (err) => {
         if (err) return next(err);
 
-        const clerkUser = getAuth(req);
+        const clerkAuth = getAuth(req);
 
-        if (!clerkUser?.userId) {
+        if (!clerkAuth?.userId) {
             return res.status(401).json({ message: "Authentication required" });
         }
 
-        const clerkId = clerkUser.userId;
+        const clerkId = clerkAuth.userId;
+
+        // Fetch full user data from Clerk API to get email
+        let email = `${clerkId}@no-email.clerk`;
+        let name = 'User';
+
+        try {
+            const fullClerkUser = await clerkClient.users.getUser(clerkId);
+            email = fullClerkUser.emailAddresses[0]?.emailAddress || email;
+            name = fullClerkUser.firstName
+                ? `${fullClerkUser.firstName}${fullClerkUser.lastName ? ' ' + fullClerkUser.lastName : ''}`
+                : name;
+        } catch (clerkError) {
+            log("Error fetching user from Clerk API:", clerkError);
+            // Continue with fallback values
+        }
+
         const user = await prisma.user.upsert({
             where: { clerkId },
-            update: {},
+            update: {
+                // Update email and name if user exists but has placeholder values
+                ...(email !== `${clerkId}@no-email.clerk` && { email }),
+                ...(name !== 'User' && { name })
+            },
             create: {
                 clerkId,
-                email: clerkUser.email || `${clerkId}@no-email.clerk`,
-                name: clerkUser.sessionClaims?.name || 'User',
+                email,
+                name,
                 active: true
             }
         });
