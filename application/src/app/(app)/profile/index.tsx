@@ -142,13 +142,13 @@ export default function Profile() {
       label: 'Change segment',
       icon: 'layers-outline',
       iconColor: '#3b82f6', // blue-500
-      onPress:()=> navigate('/profile/editExperience'),
+      onPress:()=> navigate('/edit-experience'),
     },
     {
       label: 'Update Companies',
       icon: 'business-outline',
       iconColor: '#8b5cf6', // violet-500
-      onPress:()=> navigate('/profile/editFollowedCompanies'),
+      onPress:()=> navigate('/edit-companies'),
     },
     {
       label: 'Logout',

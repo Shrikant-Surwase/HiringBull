@@ -206,7 +206,7 @@ export default function Jobs() {
             ListHeaderComponent={
               <View className="mb-3 flex-row gap-2">
                 <Pressable
-                  onPress={() => router.push('/(app)/profile/editFollowedCompanies')}
+                  onPress={() => router.push('/edit-companies')}
                   className="self-start items-center justify-center rounded-xl border border-neutral-200 bg-white android:shadow-md ios:shadow-sm"
                   style={{
                     paddingVertical: 5,
@@ -225,7 +225,7 @@ export default function Jobs() {
                 </Pressable>
 
                 <Pressable
-                  onPress={() => router.push('/(app)/profile/editExperience')}
+                  onPress={() => router.push('/edit-experience')}
                   className="self-start items-center justify-center rounded-xl border border-neutral-200 bg-white android:shadow-md ios:shadow-sm"
                   style={{
                     paddingVertical: 5,
