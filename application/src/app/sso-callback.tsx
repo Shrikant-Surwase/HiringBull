@@ -20,7 +20,6 @@ export default function SSOCallback() {
   // Helper to determine target route based on state
   const getTargetRoute = () => {
     if (!hasCompletedOnboarding) return '/onboarding';
-    if (!isSubscribed) return '/payment';
     return '/';
   };
 
