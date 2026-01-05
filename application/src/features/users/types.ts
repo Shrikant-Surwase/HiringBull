@@ -1,3 +1,5 @@
+import { ExperienceLevel, OnboardedCompanies } from "@/app/onboarding/types";
+
 export interface DeviceRegistration {
   token: string;
   type: 'ios' | 'android';
@@ -33,5 +35,10 @@ export type UserInfo = {
     "resume_link": string,
     "onboarding_completed": boolean|null,
     "onboarding_completed_at":string|null,
-    "followedCompanies": []
+    "followedCompanies": string[] | OnboardedCompanies,
+    experience_level: ExperienceLevel,
+}
+
+export function isFollowedCompanyObject(followedCompanies:  string[] | OnboardedCompanies): followedCompanies is OnboardedCompanies {
+  return followedCompanies[0] !== 'string';
 }

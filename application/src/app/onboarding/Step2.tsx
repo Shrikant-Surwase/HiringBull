@@ -17,12 +17,14 @@ type Step2Props = {
   onToggle: (companyId: string) => void;
   onBack: () => void;
   onSelectAll: (companyIds: string[], select: boolean) => void;
+  label?: string,
 };
 function Step2({
   selectedCompanies,
   onToggle,
   onBack,
   onSelectAll,
+  label = 'Companies you&apos;d love'
 }: Step2Props) {
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] =
@@ -53,8 +55,6 @@ function Step2({
           </Text>
   }
 
-  console.log({COMPANIES});
-
   const FILTERS = ['ALL',...new Set(COMPANIES.map(c=> c.category))];
 
   const filterNameFormat = (name: string)=>{
@@ -83,7 +83,7 @@ function Step2({
           </Text>
         </Pressable>
         <Text className="mb-2 text-3xl font-bold">
-          Companies you&apos;d love
+          {label}
         </Text>
         <Text className="mb-4 text-base text-neutral-500">
           Select companies you&apos;re interested in working for

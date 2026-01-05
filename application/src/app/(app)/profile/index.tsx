@@ -11,6 +11,7 @@ import {
   View,
 } from '@/components/ui';
 import { resetOnboarding } from '@/lib';
+import { useRouter } from 'expo-router';
 
 type SettingsItem = {
   label: string;
@@ -63,6 +64,7 @@ function SettingsItemRow({ item }: { item: SettingsItem }) {
 export default function Profile() {
   const { signOut, getToken } = useAuth();
   const { user } = useUser();
+  const {navigate} = useRouter();
   const [apiResponse, setApiResponse] = useState<any>(null);
   const [isLoadingApi, setIsLoadingApi] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -140,11 +142,13 @@ export default function Profile() {
       label: 'Change segment',
       icon: 'layers-outline',
       iconColor: '#3b82f6', // blue-500
+      onPress:()=> navigate('/profile/editExperience'),
     },
     {
       label: 'Update Companies',
       icon: 'business-outline',
       iconColor: '#8b5cf6', // violet-500
+      onPress:()=> navigate('/profile/editFollowedCompanies'),
     },
     {
       label: 'Logout',
