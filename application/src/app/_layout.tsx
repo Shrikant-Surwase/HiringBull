@@ -172,7 +172,7 @@ function Providers({ children }: { children: React.ReactNode }) {
     >
       <KeyboardProvider>
         <ThemeProvider value={theme}>
-          <ClerkProvider tokenCache={tokenCache}>
+          <ClerkProvider tokenCache={tokenCache} publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}>
           <APIProvider>
             <BottomSheetModalProvider>
               {children}
