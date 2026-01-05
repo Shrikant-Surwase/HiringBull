@@ -85,6 +85,8 @@ export default function Login() {
       console.error('Google OAuth error:', JSON.stringify(err, null, 2));
       setError(err?.errors?.[0]?.message || 'Google sign-in failed');
       setIsLoading(false);
+    }finally{
+      setIsLoading(false);
     }
     // Note: We don't set isLoading to false here because the layout guards will unmount this component
   }, [startSSOFlow, router]);
