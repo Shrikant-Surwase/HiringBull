@@ -14,7 +14,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import InfoIcon from '@material-ui/icons/Info';
 
 const JoinMembershipForm = () => {
-  const [currentStep, setCurrentStep] = useState(4);
+  const [currentStep, setCurrentStep] = useState(1);
   const [isExperienced, setIsExperienced] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
@@ -25,7 +25,7 @@ const JoinMembershipForm = () => {
     { id: 1, label: "Overview" },
     { id: 2, label: "Application" },
     { id: 3, label: "Payment" },
-    { id: 4, label: "Approval" },
+    // { id: 4, label: "Approval" },
   ];
 
   const [formData, setFormData] = useState({
@@ -164,7 +164,34 @@ const JoinMembershipForm = () => {
                 );
               })}
             </Pagination>
-          ) : null
+          ) : (
+            <OneContentAfterPayment>
+              <div className="images">
+                {/* <img src="https://png.pngtree.com/png-vector/20230105/ourmid/pngtree-d-green-check-mark-icon-in-round-isolated-transparent-background-tick-png-image_6552327.png" alt="" /> */}
+                {/* <img className='logobig' src={logoBig} alt="" /> */}
+                <img src={membershipGoldCoin} alt="" />
+              </div>
+              <h1>
+                Yay! We’ve received your application 🎉
+                {/* <img src={logo} alt="" /> */}
+              </h1>
+
+              <h2>
+                Our team will review your membership request within <b>24–48 hours</b>
+              </h2>
+
+              <h2>
+                <b>You’ll receive an email</b> once your application is approved.
+                If it isn’t approved, your payment will be automatically refunded within 7 working days — no questions asked.
+              </h2>
+
+
+              {/* <img src={logoBig} alt="" /> */}
+              <div className="contact">
+                For any issues - <span>team@hirinbull.in</span>
+              </div>
+            </OneContentAfterPayment>
+          )
         }
 
         {
@@ -174,6 +201,8 @@ const JoinMembershipForm = () => {
                 Apply Early. Compete Less. Get Real Visibility.
                 <img src={logo} alt="" />
               </h1>
+              
+              {/* <img className='membership-img' src={membershipGoldCoin} alt="" /> */}
 
               <h2>HiringBull is a curated membership for serious job seekers who want early access to verified openings on official company career pages and real visibility with company employees. Instead of competing with thousands on public job portals, members apply when openings are still fresh and lightly contested.</h2>
 
@@ -478,32 +507,6 @@ const JoinMembershipForm = () => {
             )
           )
         }
-        <OneContentAfterPayment>
-          <div className="images">
-            {/* <img src="https://png.pngtree.com/png-vector/20230105/ourmid/pngtree-d-green-check-mark-icon-in-round-isolated-transparent-background-tick-png-image_6552327.png" alt="" /> */}
-            {/* <img className='logobig' src={logoBig} alt="" /> */}
-            <img src={membershipGoldCoin} alt="" />
-          </div>
-          <h1>
-            Yay! We’ve received your application 🎉
-            {/* <img src={logo} alt="" /> */}
-          </h1>
-
-          <h2>
-            Our team will review your membership request within <b>24–48 hours</b>
-          </h2>
-
-          <h2>
-            <b>You’ll receive an email</b> once your application is approved.
-            If it isn’t approved, your payment will be automatically refunded within 7 working days — no questions asked.
-          </h2>
-
-
-          {/* <img src={logoBig} alt="" /> */}
-          <div className="contact">
-            For any issues - <span>team@hirinbull.in</span>
-          </div>
-        </OneContentAfterPayment>
       </Content>
     </Container>
   )
@@ -739,6 +742,12 @@ const OneContent = styled.div`
       background-color: #ffc60042;
       padding: 0 10px;
     }
+  }
+
+  .membership-img{
+    float: left;
+    height: 100px;
+    margin: 20px 0; 
   }
 
   .logobig{
