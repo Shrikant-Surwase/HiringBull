@@ -169,14 +169,8 @@ export default function Jobs() {
                 onChangeText={setSearchQuery}
               />
             </View>
-            {/* <Pressable
-              onPress={handleFilterPress}
-              className="mb-2 size-12 items-center justify-center rounded-xl border border-neutral-300 bg-neutral-100"
-            >
-              <Ionicons name="options-outline" size={24} color="black" />
-            </Pressable> */}
 
-            <Pressable className="mb-2 size-12 items-center justify-center rounded-xl border border-neutral-300 bg-neutral-100">
+            <Pressable className="size-11 items-center justify-center rounded-xl border border-neutral-300 bg-neutral-100">
               <Ionicons name="search-outline" size={24} color="black" />
             </Pressable>
           </View>

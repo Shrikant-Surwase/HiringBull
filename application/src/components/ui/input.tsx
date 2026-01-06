@@ -93,7 +93,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
   );
 
   return (
-    <View className={styles.container()}>
+    <View>
       {label && (
         <Text
           testID={testID ? `${testID}-label` : undefined}
