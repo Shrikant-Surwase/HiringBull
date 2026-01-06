@@ -98,14 +98,6 @@ export default function Onboarding() {
 
   const {mutate: registerUser, isPending: isRegistering} = useRegisterOrEditUser();
 
-  useEffect(() => {
-    const logToken = async () => {
-      const token = await getToken();
-      console.log('getToken:', token);
-    };
-    logToken();
-  }, [getToken]);
-
   const handleToggleCompany = (companyId: string) => {
     setSelectedCompanies((prev) =>
       prev.includes(companyId)
@@ -156,8 +148,6 @@ export default function Onboarding() {
           college_name:profileData.collegeOrCompany
         }
       }
-
-      console.log({payload})
 
       registerUser(payload,{
           onSuccess:()=>{
