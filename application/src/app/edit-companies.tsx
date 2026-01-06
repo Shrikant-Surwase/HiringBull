@@ -85,7 +85,7 @@ const EditFollowedCompanies = () => {
             label="Edit Companies"
             />
         </View>
-        <Pressable
+        {fetchingOnboardingCompanies <1 && <Pressable
         onPress={updateFollowedCompanies}
         disabled={btnDisabled }
         className={`h-14 items-center justify-center rounded-xl ${
@@ -99,7 +99,7 @@ const EditFollowedCompanies = () => {
         >
           {fetchingOnboardingCompanies ? 'Fetching companies...' : isUpdating ? 'Updating...' : 'Update'}
         </Text>
-      </Pressable>
+      </Pressable>}
       </View>
 
 

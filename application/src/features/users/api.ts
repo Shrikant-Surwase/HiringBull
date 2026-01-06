@@ -2,6 +2,8 @@ import { client } from '@/api/common/client';
 import { UserInfo, type DeviceRegistration, type DeviceResponse, type UserRegistration } from './types';
 
 const BASE_USER_URL = '/api/users/me';
+const BASE_WEB_REGISTRATION_URL = '/api/web-registration';
+
 
 
 export const registerDevice = async (data: DeviceRegistration) => {
@@ -16,5 +18,10 @@ export const registerUser =  async (payload: Partial<UserRegistration>) => {
 
 export const getUserInfo = async ()=>{
     const {data} = await client.get<UserInfo>(BASE_USER_URL);
+    return data;
+}
+
+export const checkUserVerification = async (email: string)=>{
+    const {data} = await client.get<{registered: boolean}>(`${BASE_WEB_REGISTRATION_URL}/check?email=${email}`);
     return data;
 }

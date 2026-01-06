@@ -8,9 +8,11 @@ import{
   Text,
   View,
   ScrollView,
+  Input,
 } from '@/components/ui';
 import {TextInput} from 'react-native';
 import useFetchOnboardedCompanies from "@/app/onboarding/hooks/useFetchOnboardedCompanies";
+import LogoLoader from "@/components/logo-loader";
 
 type Step2Props = {
   selectedCompanies: string[];
@@ -49,9 +51,7 @@ function Step2({
   }, [filteredCompanies, selectedCompanies]);
 
   if(!COMPANIES || isFetchingCompanies){
-    return <Text className="ml-1 text-xl font-medium text-neutral-500  dark:text-neutral-400">
-            Loading list of companies ...
-          </Text>
+    return <LogoLoader />
   }
 
   const FILTERS = ['ALL',...new Set(COMPANIES.map(c=> c.category))];
@@ -88,17 +88,15 @@ function Step2({
           Select companies you&apos;re interested in working for
         </Text>
 
-        <View className="mb-4 flex-row items-center rounded-xl border border-neutral-200 bg-neutral-100 px-4 dark:border-neutral-700 dark:bg-neutral-800">
-          <Text className="mr-2">🔍</Text>
-          <TextInput
+        <View className="mb-4">
+           <Input
+            isSearch
+            placeholder="Search companies..."
             value={search}
             onChangeText={setSearch}
-            placeholder="Search companies..."
-            placeholderTextColor="#9ca3af"
-            className="flex-1 py-3 text-base text-black dark:text-white"
-          />
+            />
         </View>
-
+        
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
