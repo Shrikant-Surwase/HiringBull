@@ -20,6 +20,14 @@ export const getAllJobs = catchAsync(async (req, res) => {
         select: { experience_level: true }
     });
 
+    // Require onboarding completion
+    if (!user || !user.experience_level) {
+        return res.status(403).json({
+            code: 'ONBOARDING_REQUIRED',
+            message: 'Please complete your profile to access jobs'
+        });
+    }
+
     // Build filter - auto-filter by user's experience level
     const where = {
         segment: segment || user.experience_level  // Use query param if provided, else user's level
@@ -180,6 +188,14 @@ export const getJobsFromFollowedCompanies = catchAsync(async (req, res) => {
 
     if (!user) {
         return res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
+    }
+
+    // Require onboarding completion
+    if (!user.experience_level) {
+        return res.status(403).json({
+            code: 'ONBOARDING_REQUIRED',
+            message: 'Please complete your profile to access jobs'
+        });
     }
 
     const followedCompanyIds = user.followedCompanies.map(c => c.id);
