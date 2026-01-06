@@ -18,8 +18,8 @@ const EditFollowedCompanies = () => {
   const userInfo = useOnboarding.use.userInfo();
 
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
-  
-    
+
+
   const {mutate: editUser, isPending: isUpdating} = useRegisterOrEditUser();
 
   const fetchingOnboardingCompanies = useIsFetching({ queryKey: [QueryKeys.onboardedCompanies] })
@@ -65,12 +65,12 @@ const EditFollowedCompanies = () => {
         updateUserInfo(data);
       }
     })
-  } 
+  }
   const btnDisabled = (fetchingOnboardingCompanies > 0) || isUpdating;
   return (
     <SafeAreaView
         className="flex-1 dark:bg-neutral-950"
-        edges={['top']}
+        edges={['top', 'bottom']}
     >
       <View className='flex-1 p-2'>
         <View className='flex-1'>
@@ -98,8 +98,8 @@ const EditFollowedCompanies = () => {
         </Text>
       </Pressable>
       </View>
-       
-        
+
+
     </SafeAreaView>
   )
 }

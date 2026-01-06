@@ -18,7 +18,7 @@ const EditExperience = () => {
 
   const [experienceLevel, setExperienceLevel] =
       useState<ExperienceLevel | null>(null);
-    
+
   const {mutate: editUser, isPending: isUpdating} = useRegisterOrEditUser();
 
   const handleBack = useCallback(() => {
@@ -45,7 +45,7 @@ const EditExperience = () => {
       }
     })
     }
-    
+
   }
 
   const btnDisabled = userInfo.experience_level === experienceLevel;
@@ -53,11 +53,11 @@ const EditExperience = () => {
   return (
     <SafeAreaView
         className="flex-1 dark:bg-neutral-950"
-        edges={['top']}
+        edges={['top', 'bottom']}
     >
       <View className='flex-1 p-2'>
         <View className='flex-1'>
-          <Step1 
+          <Step1
             selectedLevel={experienceLevel}
             onSelect={setExperienceLevel}
             onBack={handleBack}
@@ -79,8 +79,8 @@ const EditExperience = () => {
         </Text>
       </Pressable>
       </View>
-       
-        
+
+
     </SafeAreaView>
   )
 }
