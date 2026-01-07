@@ -49,8 +49,7 @@ export const getAllCompanies = catchAsync(async (req, res) => {
  * @swagger
  * /api/companies:
  *   post:
- *     summary: Create a company
- *     description: Create a new company (admin only, requires API key)
+ *     summary: Create a company (admin)
  *     tags: [Companies]
  *     security:
  *       - apiKeyAuth: []
@@ -60,39 +59,12 @@ export const getAllCompanies = catchAsync(async (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *             properties:
- *               name:
- *                 type: string
- *                 example: "Google"
- *               description:
- *                 type: string
- *                 example: "Technology company"
- *               logo:
- *                 type: string
- *                 format: uri
- *                 example: "https://example.com/logo.png"
- *               category:
- *                 type: string
- *                 enum: ['TECH_GIANT', 'FINTECH_GIANT', 'INDIAN_STARTUP', 'GLOBAL_STARTUP', 'YCOMBINATOR', 'MASS_HIRING', 'HFT']
- *                 example: "TECH_GIANT"
- *             example:
- *               name: "Google"
- *               description: "Technology company"
- *               logo: "https://example.com/logo.png"
- *               category: "TECH_GIANT"
+ *             required: [name]
  *     responses:
  *       201:
- *         description: Company created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Company'
+ *         description: Created
  *       400:
- *         description: Bad request - Company already exists
- *       401:
- *         description: Unauthorized - Missing or invalid API key
+ *         description: Company exists
  */
 export const createCompany = catchAsync(async (req, res) => {
     const { name, description, logo, category } = req.body;
@@ -110,8 +82,7 @@ export const createCompany = catchAsync(async (req, res) => {
  * @swagger
  * /api/companies/bulk:
  *   post:
- *     summary: Bulk create companies
- *     description: Create multiple companies at once (admin only, requires API key)
+ *     summary: Bulk create companies (admin)
  *     tags: [Companies]
  *     security:
  *       - apiKeyAuth: []
@@ -121,55 +92,10 @@ export const createCompany = catchAsync(async (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - companies
- *             properties:
- *               companies:
- *                 type: array
- *                 items:
- *                   type: object
- *                   required:
- *                     - name
- *                   properties:
- *                     name:
- *                       type: string
- *                       example: "Google"
- *                     description:
- *                       type: string
- *                       example: "Technology company"
- *                     logo:
- *                       type: string
- *                       format: uri
- *                       example: "https://example.com/logo.png"
- *                     category:
- *                       type: string
- *                       enum: ['TECH_GIANT', 'FINTECH_GIANT', 'INDIAN_STARTUP', 'GLOBAL_STARTUP', 'YCOMBINATOR', 'MASS_HIRING', 'HFT']
- *                       example: "TECH_GIANT"
- *             example:
- *               companies:
- *                 - name: "Google"
- *                   description: "Technology company"
- *                   logo: "https://example.com/logo.png"
- *                   category: "TECH_GIANT"
- *                 - name: "Stripe"
- *                   description: "Payment processing"
- *                   logo: "https://example.com/stripe.png"
- *                   category: "FINTECH_GIANT"
+ *             required: [companies]
  *     responses:
  *       201:
- *         description: Companies created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 count:
- *                   type: integer
- *                   description: Number of created companies
- *       401:
- *         description: Unauthorized - Missing or invalid API key
+ *         description: Created
  */
 export const bulkCreateCompanies = catchAsync(async (req, res) => {
     const { companies } = req.body;
@@ -189,8 +115,7 @@ export const bulkCreateCompanies = catchAsync(async (req, res) => {
  * @swagger
  * /api/companies/{id}:
  *   put:
- *     summary: Update a company
- *     description: Update an existing company (admin only, requires API key)
+ *     summary: Update a company (admin)
  *     tags: [Companies]
  *     security:
  *       - apiKeyAuth: []
@@ -198,47 +123,12 @@ export const bulkCreateCompanies = catchAsync(async (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Company UUID
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: "Google LLC"
- *               description:
- *                 type: string
- *                 example: "Updated description"
- *               logo:
- *                 type: string
- *                 format: uri
- *                 example: "https://example.com/new-logo.png"
- *               category:
- *                 type: string
- *                 enum: ['TECH_GIANT', 'FINTECH_GIANT', 'INDIAN_STARTUP', 'GLOBAL_STARTUP', 'YCOMBINATOR', 'MASS_HIRING', 'HFT']
- *                 example: "TECH_GIANT"
- *             example:
- *               name: "Google LLC"
- *               description: "Updated description"
+ *         schema: { type: string }
  *     responses:
  *       200:
- *         description: Company updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Company'
- *       400:
- *         description: Bad request - Company name already exists
- *       401:
- *         description: Unauthorized - Missing or invalid API key
+ *         description: Success
  *       404:
- *         description: Company not found
+ *         description: Not found
  */
 export const updateCompany = catchAsync(async (req, res) => {
     const { id } = req.params;
@@ -273,8 +163,7 @@ export const updateCompany = catchAsync(async (req, res) => {
  * @swagger
  * /api/companies/bulk:
  *   put:
- *     summary: Bulk update companies
- *     description: Update multiple companies by name (admin only, requires API key)
+ *     summary: Bulk update companies (admin)
  *     tags: [Companies]
  *     security:
  *       - apiKeyAuth: []
@@ -284,70 +173,10 @@ export const updateCompany = catchAsync(async (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - companies
- *             properties:
- *               companies:
- *                 type: array
- *                 items:
- *                   type: object
- *                   required:
- *                     - name
- *                   properties:
- *                     name:
- *                       type: string
- *                       description: Company name to identify the record
- *                       example: "Google"
- *                     description:
- *                       type: string
- *                       example: "Updated description"
- *                     logo:
- *                       type: string
- *                       format: uri
- *                       example: "https://example.com/new-logo.png"
- *                     category:
- *                       type: string
- *                       enum: ['TECH_GIANT', 'FINTECH_GIANT', 'INDIAN_STARTUP', 'GLOBAL_STARTUP', 'YCOMBINATOR', 'MASS_HIRING', 'HFT']
- *                       example: "TECH_GIANT"
- *             example:
- *               companies:
- *                 - name: "Google"
- *                   description: "Updated Google description"
- *                 - name: "Stripe"
- *                   logo: "https://example.com/new-stripe.png"
+ *             required: [companies]
  *     responses:
  *       200:
- *         description: Bulk update completed
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 total:
- *                   type: integer
- *                 success:
- *                   type: integer
- *                   description: Number of successfully updated companies
- *                 failures:
- *                   type: integer
- *                   description: Number of failed updates
- *                 results:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       name:
- *                         type: string
- *                       success:
- *                         type: boolean
- *                       error:
- *                         type: string
- *                       data:
- *                         $ref: '#/components/schemas/Company'
- *       401:
- *         description: Unauthorized - Missing or invalid API key
+ *         description: Success
  */
 export const bulkUpdateCompanies = catchAsync(async (req, res) => {
     const { companies } = req.body;
