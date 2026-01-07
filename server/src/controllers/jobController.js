@@ -10,78 +10,22 @@ const catchAsync = (fn) => (req, res, next) => {
  * @swagger
  * /api/jobs:
  *   get:
- *     summary: Get all jobs
- *     description: Retrieve jobs with filtering and pagination. Auto-filters by user's experience level if segment not provided.
+ *     summary: Get all jobs with filtering and pagination
  *     tags: [Jobs]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: segment
- *         schema:
- *           type: string
- *           enum: ['INTERNSHIP', 'FRESHER_OR_LESS_THAN_1_YEAR', 'ONE_TO_THREE_YEARS']
- *         description: Filter by experience segment (if not provided, uses user's level)
+ *         schema: { type: string, enum: [INTERNSHIP, FRESHER_OR_LESS_THAN_1_YEAR, ONE_TO_THREE_YEARS] }
  *       - in: query
  *         name: companyId
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Filter by company ID
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *           default: 20
- *         description: Items per page
+ *         schema: { type: string }
  *     responses:
  *       200:
- *         description: Jobs retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     allOf:
- *                       - $ref: '#/components/schemas/Job'
- *                       - type: object
- *                         properties:
- *                           companyRel:
- *                             type: object
- *                             properties:
- *                               id:
- *                                 type: string
- *                               name:
- *                                 type: string
- *                               logo:
- *                                 type: string
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     page:
- *                       type: integer
- *                     limit:
- *                       type: integer
- *                     total:
- *                       type: integer
- *                     totalPages:
- *                       type: integer
- *       401:
- *         description: Unauthorized
+ *         description: Success
  *       403:
- *         description: Forbidden - Onboarding required
+ *         description: Onboarding required
  */
 export const getAllJobs = catchAsync(async (req, res) => {
     const { segment, companyId } = req.query;
@@ -143,7 +87,6 @@ export const getAllJobs = catchAsync(async (req, res) => {
  * /api/jobs/{id}:
  *   get:
  *     summary: Get job by ID
- *     description: Retrieve a specific job by its UUID
  *     tags: [Jobs]
  *     security:
  *       - bearerAuth: []
@@ -151,35 +94,12 @@ export const getAllJobs = catchAsync(async (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Job UUID
+ *         schema: { type: string }
  *     responses:
  *       200:
- *         description: Job found
- *         content:
- *           application/json:
- *             schema:
- *               allOf:
- *                 - $ref: '#/components/schemas/Job'
- *                 - type: object
- *                   properties:
- *                     companyRel:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                         name:
- *                           type: string
- *                         logo:
- *                           type: string
- *                         description:
- *                           type: string
- *       401:
- *         description: Unauthorized
+ *         description: Success
  *       404:
- *         description: Job not found
+ *         description: Not found
  */
 export const getJobById = catchAsync(async (req, res) => {
     const { id } = req.params;
@@ -208,8 +128,7 @@ export const getJobById = catchAsync(async (req, res) => {
  * @swagger
  * /api/jobs/bulk:
  *   post:
- *     summary: Bulk create jobs
- *     description: Create multiple jobs at once (admin only, requires API key). Sends notifications to company followers.
+ *     summary: Bulk create jobs (admin only)
  *     tags: [Jobs]
  *     security:
  *       - apiKeyAuth: []
@@ -221,67 +140,12 @@ export const getJobById = catchAsync(async (req, res) => {
  *             type: array
  *             items:
  *               type: object
- *               required:
- *                 - title
- *                 - companyId
- *                 - segment
- *               properties:
- *                 title:
- *                   type: string
- *                   example: "Software Engineer Intern"
- *                 companyId:
- *                   type: string
- *                   format: uuid
- *                   example: "550e8400-e29b-41d4-a716-446655440000"
- *                 segment:
- *                   type: string
- *                   enum: ['INTERNSHIP', 'FRESHER_OR_LESS_THAN_1_YEAR', 'ONE_TO_THREE_YEARS']
- *                   example: "INTERNSHIP"
- *                 careerpage_link:
- *                   type: string
- *                   format: uri
- *                   example: "https://company.com/careers/job-123"
- *                 created_by:
- *                   type: string
- *                   example: "admin"
- *             example:
- *               - title: "Software Engineer Intern"
- *                 companyId: "550e8400-e29b-41d4-a716-446655440000"
- *                 segment: "INTERNSHIP"
- *                 careerpage_link: "https://company.com/careers/job-123"
- *               - title: "Frontend Developer"
- *                 companyId: "550e8400-e29b-41d4-a716-446655440001"
- *                 segment: "ONE_TO_THREE_YEARS"
+ *               required: [title, companyId, segment]
  *     responses:
  *       201:
- *         description: Jobs created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 success:
- *                   type: integer
- *                   description: Number of successfully created jobs
- *                 failed:
- *                   type: integer
- *                   description: Number of failed job creations
- *                 errors:
- *                   type: array
- *                   description: Array of errors (if any)
- *                   items:
- *                     type: object
- *                     properties:
- *                       job:
- *                         type: object
- *                       reason:
- *                         type: string
+ *         description: Created
  *       401:
- *         description: Unauthorized - Missing or invalid API key
- *       400:
- *         description: Bad request
+ *         description: Unauthorized
  */
 export const bulkCreateJobs = catchAsync(async (req, res) => {
     const jobsData = req.body;
@@ -371,67 +235,14 @@ export const bulkCreateJobs = catchAsync(async (req, res) => {
  * /api/jobs/followed:
  *   get:
  *     summary: Get jobs from followed companies
- *     description: Retrieve jobs from companies the user follows, filtered by user's experience level
  *     tags: [Jobs]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *           default: 20
- *         description: Items per page
  *     responses:
  *       200:
- *         description: Jobs retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     allOf:
- *                       - $ref: '#/components/schemas/Job'
- *                       - type: object
- *                         properties:
- *                           companyRel:
- *                             type: object
- *                             properties:
- *                               id:
- *                                 type: string
- *                               name:
- *                                 type: string
- *                               logo:
- *                                 type: string
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     page:
- *                       type: integer
- *                     limit:
- *                       type: integer
- *                     total:
- *                       type: integer
- *                     totalPages:
- *                       type: integer
- *       401:
- *         description: Unauthorized
+ *         description: Success
  *       403:
- *         description: Forbidden - Onboarding required
- *       404:
- *         description: User not found
+ *         description: Onboarding required
  */
 export const getJobsFromFollowedCompanies = catchAsync(async (req, res) => {
     const { skip, take, page, limit } = getPagination(req.query);

@@ -9,8 +9,7 @@ const catchAsync = (fn) => (req, res, next) => {
  * @swagger
  * /api/users/devices:
  *   post:
- *     summary: Add device for authenticated user
- *     description: Register a device token for push notifications
+ *     summary: Add device for push notifications
  *     tags: [Devices]
  *     security:
  *       - bearerAuth: []
@@ -20,29 +19,10 @@ const catchAsync = (fn) => (req, res, next) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - token
- *             properties:
- *               token:
- *                 type: string
- *                 description: Device push notification token
- *                 example: "ExponentPushToken[xxx]"
- *               type:
- *                 type: string
- *                 description: Device platform/type
- *                 example: "ios"
- *             example:
- *               token: "ExponentPushToken[xxx]"
- *               type: "ios"
+ *             required: [token]
  *     responses:
  *       200:
- *         description: Device registered/updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Device'
- *       401:
- *         description: Unauthorized
+ *         description: Success
  */
 export const addDevice = catchAsync(async (req, res) => {
     const { token, type } = req.body;
@@ -70,7 +50,6 @@ export const addDevice = catchAsync(async (req, res) => {
  * /api/users/devices/{token}:
  *   delete:
  *     summary: Remove device
- *     description: Remove a device token for the authenticated user
  *     tags: [Devices]
  *     security:
  *       - bearerAuth: []
@@ -78,18 +57,12 @@ export const addDevice = catchAsync(async (req, res) => {
  *       - in: path
  *         name: token
  *         required: true
- *         schema:
- *           type: string
- *         description: Device token
+ *         schema: { type: string }
  *     responses:
  *       204:
- *         description: Device removed successfully
- *       401:
- *         description: Unauthorized
+ *         description: Success
  *       403:
- *         description: Forbidden - Cannot remove another user's device
- *       404:
- *         description: Device not found
+ *         description: Forbidden
  */
 export const removeDevice = catchAsync(async (req, res) => {
     const { token } = req.params;
@@ -123,21 +96,12 @@ export const removeDevice = catchAsync(async (req, res) => {
  * /api/users/devices:
  *   get:
  *     summary: Get user devices
- *     description: Get all registered devices for the authenticated user
  *     tags: [Devices]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Devices retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Device'
- *       401:
- *         description: Unauthorized
+ *         description: Success
  */
 export const getDevices = catchAsync(async (req, res) => {
     const devices = await prisma.device.findMany({
@@ -151,8 +115,7 @@ export const getDevices = catchAsync(async (req, res) => {
  * @swagger
  * /api/users/devices/public:
  *   post:
- *     summary: Add device publicly
- *     description: Register a device token without authentication (for testing/initial registration)
+ *     summary: Add device publicly (testing)
  *     tags: [Devices]
  *     requestBody:
  *       required: true
@@ -160,36 +123,11 @@ export const getDevices = catchAsync(async (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
- *             properties:
- *               token:
- *                 type: string
- *                 description: Device push notification token
- *                 example: "ExponentPushToken[xxx]"
- *               type:
- *                 type: string
- *                 description: Device platform/type
- *                 example: "android"
- *               clerkId:
- *                 type: string
- *                 description: Clerk user ID (optional, to link device to user)
- *                 example: "user_abc123"
- *             example:
- *               token: "ExponentPushToken[xxx]"
- *               type: "android"
- *               clerkId: "user_abc123"
  *     responses:
  *       200:
- *         description: Device updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Device'
+ *         description: Success
  *       201:
- *         description: Device created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Device'
+ *         description: Created
  */
 export const addDevicePublic = catchAsync(async (req, res) => {
     const { token, type, clerkId } = req.body;

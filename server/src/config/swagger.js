@@ -1,4 +1,9 @@
 import swaggerJsdoc from 'swagger-jsdoc';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const options = {
   definition: {
@@ -103,28 +108,21 @@ const options = {
             careerpage_link: { type: 'string', format: 'uri' },
             created_by: { type: 'string' },
             created_at: { type: 'string', format: 'date-time' },
-            updated_at: { type: 'string', format: 'date-time' },
           },
         },
         SocialPost: {
           type: 'object',
           properties: {
             id: { type: 'string', format: 'uuid' },
-            title: { type: 'string' },
-            content: { type: 'string' },
-            imageUrl: { type: 'string', format: 'uri' },
-            videoUrl: { type: 'string', format: 'uri' },
-            companyId: { type: 'string', format: 'uuid' },
-            segment: {
-              type: 'string',
-              enum: ['INTERNSHIP', 'FRESHER_OR_LESS_THAN_1_YEAR', 'ONE_TO_THREE_YEARS'],
-            },
-            platform: { type: 'string' },
-            link: { type: 'string', format: 'uri' },
-            likesCount: { type: 'integer' },
-            commentsCount: { type: 'integer' },
+            name: { type: 'string' },
+            description: { type: 'string' },
+            segment: { type: 'string' },
+            company: { type: 'string' },
+            source: { type: 'string' },
+            source_link: { type: 'string', format: 'uri' },
+            image_link: { type: 'string', format: 'uri' },
             created_at: { type: 'string', format: 'date-time' },
-            updated_at: { type: 'string', format: 'date-time' },
+            created_by: { type: 'string' },
           },
         },
         Device: {
@@ -132,7 +130,7 @@ const options = {
           properties: {
             id: { type: 'string', format: 'uuid' },
             token: { type: 'string' },
-            platform: { type: 'string' },
+            type: { type: 'string' },
             userId: { type: 'string', format: 'uuid' },
             createdAt: { type: 'string', format: 'date-time' },
           },
@@ -151,9 +149,9 @@ const options = {
               type: 'string',
               enum: ['PENDING', 'SUCCESS', 'FAILED'],
             },
-            razorpayOrderId: { type: 'string' },
-            razorpayPaymentId: { type: 'string' },
-            razorpaySignature: { type: 'string' },
+            orderId: { type: 'string' },
+            paymentId: { type: 'string' },
+            signature: { type: 'string' },
             created_at: { type: 'string', format: 'date-time' },
           },
         },
@@ -234,8 +232,12 @@ const options = {
         bearerAuth: [],
       },
     ],
-    },
-    apis: ['./src/controllers/*.js', './src/routes/*.js', './src/index.js'],
+  },
+  apis: [
+    path.join(__dirname, '../controllers/*.js'),
+    path.join(__dirname, '../routes/*.js'),
+    path.join(__dirname, '../index.js')
+  ],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

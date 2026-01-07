@@ -11,54 +11,18 @@ const catchAsync = (fn) => (req, res, next) => {
  * /api/webhooks/clerk:
  *   post:
  *     summary: Handle Clerk webhooks
- *     description: Process webhook events from Clerk for user synchronization
  *     tags: [Webhooks]
- *     parameters:
- *       - in: header
- *         name: svix-id
- *         required: true
- *         schema:
- *           type: string
- *         description: Svix webhook ID
- *       - in: header
- *         name: svix-timestamp
- *         required: true
- *         schema:
- *           type: string
- *         description: Svix webhook timestamp
- *       - in: header
- *         name: svix-signature
- *         required: true
- *         schema:
- *           type: string
- *         description: Svix webhook signature
  *     requestBody:
  *       required: true
- *       description: Clerk webhook payload
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             properties:
- *               data:
- *                 type: object
- *               type:
- *                 type: string
- *                 enum: ['user.created', 'user.updated', 'user.deleted']
  *     responses:
  *       200:
- *         description: Webhook processed successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
+ *         description: Success
  *       400:
- *         description: Bad request - Invalid webhook signature
- *       500:
- *         description: Internal server error - Missing webhook secret
+ *         description: Invalid signature
  */
 export const handleClerkWebhook = catchAsync(async (req, res) => {
     const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
