@@ -77,17 +77,51 @@ export const sendJobNotificationToFollowers = async (companyId, jobData) => {
     where: whereClause,
     select: {
       id: true,
+      email: true,
+      name: true,
+      experience_level: true,
       devices: {
         select: {
-          token: true
+          token: true,
+          type: true
         }
       }
     }
   });
 
   if (users.length === 0) {
+    console.log('\n===========================================');
+    console.log('📢 JOB NOTIFICATION - No matching users');
+    console.log('===========================================');
+    console.log(`Company: ${jobData.company} (ID: ${companyId})`);
+    console.log(`Job: ${jobData.title}`);
+    console.log(`Segment: ${jobData.segment || 'N/A'}`);
+    console.log(`Reason: No active users found who follow this company with matching experience level`);
+    console.log('===========================================\n');
     return { totalUsers: 0, sent: 0, errors: 0 };
   }
+
+  console.log('\n===========================================');
+  console.log('📢 JOB NOTIFICATION - Sending to followers');
+  console.log('===========================================');
+  console.log(`Company: ${jobData.company} (ID: ${companyId})`);
+  console.log(`Job: ${jobData.title}`);
+  console.log(`Segment: ${jobData.segment || 'N/A'}`);
+  console.log(`Total users to notify: ${users.length}`);
+  console.log('-------------------------------------------');
+  console.log('USERS TO NOTIFY:');
+  users.forEach((user, index) => {
+    console.log(`${index + 1}. User ID: ${user.id}`);
+    console.log(`   Email: ${user.email}`);
+    console.log(`   Name: ${user.name || 'N/A'}`);
+    console.log(`   Experience Level: ${user.experience_level || 'N/A'}`);
+    console.log(`   Devices: ${user.devices.length} (${user.devices.map(d => d.type || 'unknown').join(', ') || 'none'})`);
+    if (user.devices.length > 0) {
+      console.log(`   Device Tokens: ${user.devices.map(d => d.token.substring(0, 20) + '...').join(', ')}`);
+    }
+    console.log('');
+  });
+  console.log('===========================================\n');
 
   const allDevices = users.flatMap(user => user.devices);
 
@@ -104,6 +138,13 @@ export const sendJobNotificationToFollowers = async (companyId, jobData) => {
     jobData.title,
     notificationData
   );
+
+  console.log('\n===========================================');
+  console.log('📢 NOTIFICATION RESULT');
+  console.log('===========================================');
+  console.log(`Notifications sent: ${result.sent}`);
+  console.log(`Notifications failed: ${result.errors}`);
+  console.log('===========================================\n');
 
   return {
     totalUsers: users.length,
