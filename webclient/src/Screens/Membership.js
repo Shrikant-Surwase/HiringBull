@@ -42,9 +42,9 @@ const Membership = () => {
     }, [userEmail]);
 
     if (isLoading) {
-        return(
+        return (
             <Container>
-                <div className="info"><CircularProgress/> Checking <b>{userEmail}</b> Membership <img src={logo} alt="" /></div>
+                <div className="info"><CircularProgress /> Checking <b>{userEmail}</b> Membership <img src={logo} alt="" /></div>
             </Container>
         )
     }
@@ -53,7 +53,15 @@ const Membership = () => {
         return (
             <Container>
                 <div className="left">
-                    <h1 className='title'>Help your friends!</h1>
+                    <h1 className='title'>Help your friends get hired faster</h1>
+                    <p className="desc">
+                        Invite people you know to HiringBull. <br />
+                        <b>When they subscribe, you earn 25% of the plan value as credits — automatically.</b>
+                    </p>
+                    <div className="referral-card">
+
+                    </div>
+
                 </div>
                 <div className="right">
                     <img className="gold-coin" src={membershipGoldCoin} alt="" />
@@ -66,17 +74,17 @@ const Membership = () => {
                             <span>60 Days Plan • Expires on 16 March 2026 </span>
                         </div>
                         <div className="membership-type">
-                            <img src={logo} alt="" />                            
+                            <img src={logo} alt="" />
                         </div>
                     </div>
                     <div className="options">
                         <a href='/' className="option">
                             <p>Extend Membership - <span>50% Off</span></p>
-                            <ChevronRightIcon/>
+                            <ChevronRightIcon />
                         </a>
                         <a href='/' className="option">
                             <p>Refer your Friend - <span>nayak.primary@gmail.com</span></p>
-                            <ChevronRightIcon/>
+                            <ChevronRightIcon />
                         </a>
                     </div>
                 </div>
@@ -169,6 +177,36 @@ const Container = styled.div`
         height: 100vh;
         width: 400px;
         background-color: black;
+        
+        padding: 20px;
+
+        .title{
+            margin: 0;
+            font-size: 1.5rem;
+            text-align: left;
+            color: #7bf7aa;
+        }
+
+        .desc{
+            font-size: 0.85rem;
+            font-weight: 300;
+
+            color: #e2dcdc;
+
+            b{
+                color: white;
+                font-weight: 500;
+            }
+        }
+
+        .referral-card{
+            height: 400px;
+            width: 100%;
+            background-color: #f0fef3;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 2px solid white;
+        }
     }
 
     .right{
