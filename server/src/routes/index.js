@@ -9,9 +9,18 @@ import webhookRoutes from './webhookRoutes.js';
 import testingRoutes from './testing.js';
 import webRegistrationRoutes from './webRegistrationRoutes.js';
 import outreachRoutes from './outreachRoutes.js';
+import authTestRoutes from './authTest.js'; // ✅ ADD
 
 const router = express.Router();
 
+// 🔓 Public routes
+router.use('/public', testingRoutes);
+router.use('/webhooks', webhookRoutes);
+
+// 🔐 Auth test route (Clerk only)
+router.use('/auth', authTestRoutes); // ✅ NEW
+
+// 🔒 Normal API routes (unchanged)
 router.use('/users/devices', deviceRoutes);
 router.use('/users', userRoutes);
 router.use('/jobs', jobRoutes);
@@ -19,8 +28,6 @@ router.use('/outreach', outreachRoutes);
 router.use('/social-posts', socialPostRoutes);
 router.use('/payment', paymentRoutes);
 router.use('/companies', companyRoutes);
-router.use('/webhooks', webhookRoutes);
 router.use('/web-registration', webRegistrationRoutes);
-router.use('/public', testingRoutes);
 
 export default router;

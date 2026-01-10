@@ -55,12 +55,13 @@ router.get("/testing", (req, res) => {
  *       401:
  *         description: Unauthorized
  */
-router.get("/auth-test", requireAuth, (req, res) => {
-  res.status(200).json({
-    message: "Kabeer Auth testing working",
-    userId: req.auth().userId,
-  });
-});
+
+// router.get("/auth-test", requireAuth, (req, res) => {
+//   res.status(200).json({
+//     message: "Kabeer Auth testing working",
+//     userId: req.auth().userId,
+//   });
+// });
 
 /**
  * @swagger

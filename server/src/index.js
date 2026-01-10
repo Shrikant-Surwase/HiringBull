@@ -17,33 +17,8 @@ validateEnv();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-/**
- * @swagger
- * /:
- *   get:
- *     summary: Health check
- *     description: Root endpoint to verify API is running
- *     tags: [Health]
- *     responses:
- *       200:
- *         description: API is healthy
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "ok"
- *                 message:
- *                   type: string
- *                   example: "Testing backend auto deployment! - 2 Jan 2026 - 7:35AM"
- *     x-code-samples:
- *       - lang: curl
- *         source: curl -X GET http://localhost:4000/
- */
 app.get("/", (req, res) => {
-  res.send({ status: "ok", message: "Testing backend auto deployment! - 2 Jan 2026 - 7:35AM" });
+  res.send({ status: "ok", message: "Testing backend auto deployment! 9 JAN 2026" });
 });
 
 app.use(helmet());
@@ -61,9 +36,6 @@ app.use(morgan("dev"));
 // app.use(defaultLimiter);
 app.set("trust proxy", 1);
 
-// Clerk authentication (populates req.auth)
-app.use(initClerk);
-
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'HiringBull API Documentation',
@@ -76,6 +48,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     tryItOutEnabled: true
   }
 }));
+
+// Clerk authentication (populates req.auth)
+app.use(initClerk);
 
 // Swagger JSON spec
 app.get('/api-docs.json', (req, res) => {

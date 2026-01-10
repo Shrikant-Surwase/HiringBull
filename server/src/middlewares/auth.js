@@ -1,127 +1,106 @@
-import { clerkMiddleware, requireAuth as clerkRequireAuth, getAuth } from '@clerk/express';
-import { createClerkClient } from '@clerk/backend';
-import prisma from '../prismaClient.js';
-import { log } from '../utils/logger.js';
-
-// Initialize Clerk Backend client for fetching full user data
-const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+import { clerkMiddleware, getAuth } from "@clerk/express";
+import { createClerkClient } from "@clerk/backend";
+import prisma from "../prismaClient.js";
+import { log } from "../utils/logger.js";
 
 /**
- * Initialize Clerk middleware for the Express app
- * This should be applied globally before any routes
+ * Clerk backend client (lazy init)
+ */
+let clerkClient = null;
+const getClerk = () => {
+  if (!clerkClient) {
+    clerkClient = createClerkClient({
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
+  }
+  return clerkClient;
+};
+
+/**
+ * 🔐 Initialize Clerk middleware
+ * Must be mounted BEFORE protected routes
  */
 export const initClerk = clerkMiddleware();
 
 /**
- * Middleware to require authentication
- * Returns 401 if user is not authenticated
- * Auto-creates user if they don't exist in DB
- * Fetches full user data from Clerk API to get email
+ * 🔐 Require authenticated user
+ * - Validates Clerk JWT / session
+ * - Auto-creates user in DB
+ * - Attaches `req.user`
  */
 export const requireAuth = async (req, res, next) => {
-    clerkRequireAuth()(req, res, async (err) => {
-        if (err) return next(err);
-
-        const clerkAuth = getAuth(req);
-
-        if (!clerkAuth?.userId) {
-            return res.status(401).json({ message: "Authentication required" });
-        }
-
-        const clerkId = clerkAuth.userId;
-
-        // Fetch full user data from Clerk API to get email
-        let email = `${clerkId}@no-email.clerk`;
-        let name = 'User';
-
-        try {
-            const fullClerkUser = await clerkClient.users.getUser(clerkId);
-            email = fullClerkUser.emailAddresses[0]?.emailAddress || email;
-            name = fullClerkUser.firstName
-                ? `${fullClerkUser.firstName}${fullClerkUser.lastName ? ' ' + fullClerkUser.lastName : ''}`
-                : name;
-        } catch (clerkError) {
-            log("Error fetching user from Clerk API:", clerkError);
-            // Continue with fallback values
-        }
-
-        const user = await prisma.user.upsert({
-            where: { clerkId },
-            update: {
-                // Update email and name if user exists but has placeholder values
-                ...(email !== `${clerkId}@no-email.clerk` && { email }),
-                ...(name !== 'User' && { name })
-            },
-            create: {
-                clerkId,
-                email,
-                name,
-                active: true
-            }
-        });
-
-        if (!user.active) {
-            return res.status(403).json({ message: "Account disabled or deleted" });
-        }
-
-        req.user = user;
-        next();
-    });
-};
-
-/**
- * Middleware to optionally attach user info if authenticated
- * Does not block unauthenticated requests
- * Note: initClerk must be mounted globally before this middleware
- */
-export const optionalAuth = (req, res, next) => {
+  try {
     const auth = getAuth(req);
-    if (auth && auth.userId) {
-        req.clerkUserId = auth.userId;
+
+    if (!auth || !auth.userId) {
+      return res.status(401).json({ message: "Authentication required" });
     }
-    next();
-};
 
+    const clerkId = auth.userId;
 
-/**
- * Middleware to require active payment/subscription
- * Must be used AFTER requireAuth or requireApiKey (if mixed)
- * Assuming requireAuth has already run and populated req.user
- */
-export const requirePayment = async (req, res, next) => {
-    next();
+    // Defaults
+    let email = `${clerkId}@no-email.clerk`;
+    let name = "User";
+
+    // Fetch full user info from Clerk
     try {
-        if (!req.user) {
-            return res.status(401).json({ message: "Authentication required" });
-        }
-
-        const now = new Date();
-        const isActive = req.user.isPaid && (!req.user.planExpiry || req.user.planExpiry > now);
-
-        if (!isActive) {
-            return res.status(403).json({
-                message: "Active subscription required",
-                code: "PAYMENT_REQUIRED"
-            });
-        }
-
-        next();
-    } catch (error) {
-        log("Payment check error:", error);
-        res.status(500).json({ message: "Internal server error during payment check" });
+      const clerkUser = await getClerk().users.getUser(clerkId);
+      email =
+        clerkUser.emailAddresses?.[0]?.emailAddress ?? email;
+      name = clerkUser.firstName
+        ? `${clerkUser.firstName}${clerkUser.lastName ? " " + clerkUser.lastName : ""}`
+        : name;
+    } catch (err) {
+      log("Clerk user fetch failed:", err);
     }
+
+    // Upsert user in DB
+    const user = await prisma.user.upsert({
+      where: { clerkId },
+      update: {
+        ...(email && { email }),
+        ...(name && { name }),
+      },
+      create: {
+        clerkId,
+        email,
+        name,
+        active: true,
+      },
+    });
+
+    if (!user.active) {
+      return res.status(403).json({ message: "Account disabled" });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    log("Auth middleware error:", error);
+    return res.status(500).json({ message: "Authentication error" });
+  }
 };
 
 /**
- * Middleware to require internal API key
- * Used for bulk data creation/admin tasks
+ * 🔓 Optional auth (does NOT block)
+ */
+export const optionalAuth = (req, _res, next) => {
+  const auth = getAuth(req);
+  if (auth?.userId) {
+    req.clerkUserId = auth.userId;
+  }
+  next();
+};
+
+/**
+ * 🔑 Internal API key auth (cron/admin)
  */
 export const requireApiKey = (req, res, next) => {
-    const apiKey = req.headers['x-api-key'];
+  const apiKey = req.headers["x-api-key"];
 
-    if (!apiKey || apiKey !== process.env.INTERNAL_API_KEY) {
-        return res.status(401).json({ message: "Invalid or missing API key" });
-    }
+  if (!apiKey || apiKey !== process.env.INTERNAL_API_KEY) {
+    return res.status(401).json({ message: "Invalid API key" });
+  }
 
-    next();
+  next();
 };
