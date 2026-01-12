@@ -1,17 +1,12 @@
-import { ProfileData } from '@/app/onboarding/types';
-import React, {  useRef } from 'react';
-import {  TextInput, Pressable } from 'react-native';
-import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
-import {
-  KeyboardAwareScrollView,
-} from 'react-native-keyboard-controller';
+import React, { useRef } from 'react';
+import { Pressable, type TextInput } from 'react-native';
+// import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
-import {
-  Text,
-  Input,
-  View,
-  Checkbox,
-} from '@/components/ui';
+import { ProfileData } from '@/app/onboarding/types';
+import { Checkbox, Input, Text, View } from '@/components/ui';
+
+import { StepperControls } from './StepperInput';
 
 type Props = {
   data: ProfileData;
@@ -37,9 +32,9 @@ function Step0({ data, onChange, onContinue, canContinue }: Props) {
   };
 
   return (
-    <Animated.View
-      entering={FadeInRight.duration(300)}
-      exiting={FadeOutLeft.duration(300)}
+    <View
+      // entering={FadeInRight.duration(300)}
+      // exiting={FadeOutLeft.duration(300)}
       className="flex-1"
     >
       <View className="px-6">
@@ -75,22 +70,6 @@ function Step0({ data, onChange, onContinue, canContinue }: Props) {
             />
           </View>
 
-          <Pressable
-            onPress={() => updateField('isExperienced', !data.isExperienced)}
-            className="flex-row items-center gap-3 py-2"
-          >
-            <Checkbox
-              checked={data.isExperienced}
-              onChange={() =>
-                updateField('isExperienced', !data.isExperienced)
-              }
-              accessibilityLabel="I am an experienced professional"
-            />
-            <Text className="text-base text-neutral-900 dark:text-white">
-              I am an experienced professional
-            </Text>
-          </Pressable>
-
           <View>
             <Text className="mb-2 font-medium text-neutral-900 dark:text-white">
               {data.isExperienced ? 'Current Company' : 'College Name'}
@@ -110,28 +89,32 @@ function Step0({ data, onChange, onContinue, canContinue }: Props) {
 
           <View>
             <Text className="mb-2 font-medium text-neutral-900 dark:text-white">
-              {data.isExperienced
-                ? 'Years of Experience'
-                : 'CGPA / Percentage'}
+              {data.isExperienced ? 'Years of Experience' : 'CGPA / Percentage'}
             </Text>
-            <Input
-              ref={cgpaOrYoeRef}
-              placeholder={data.isExperienced ? 'e.g. 0.5' : 'e.g. 8.5'}
-              value={data.cgpaOrYoe}
-              onChangeText={(text) => {
-                if (data.isExperienced) {
-                  // Only allow numbers and decimal point
-                  const numericText = text.replace(/[^0-9.]/g, '');
-                  updateField('cgpaOrYoe', numericText);
-                } else {
-                  updateField('cgpaOrYoe', text);
-                }
-              }}
-              keyboardType={data.isExperienced ? 'numeric' : 'default'}
-              returnKeyType="next"
-              onSubmitEditing={() => resumeLinkRef.current?.focus()}
-              blurOnSubmit={false}
-            />
+            <View className="relative">
+              <Input
+                ref={cgpaOrYoeRef}
+                placeholder={data.isExperienced ? 'e.g. 0.5' : 'e.g. 8.5'}
+                value={data.cgpaOrYoe}
+                onChangeText={(text) => {
+                  if (data.isExperienced) {
+                    const numericText = text.replace(/[^0-9.]/g, '');
+                    updateField('cgpaOrYoe', numericText);
+                  }
+                }}
+              />
+
+              <StepperControls
+                onInc={() => {
+                  const val = Number(data.cgpaOrYoe) || 0;
+                  updateField('cgpaOrYoe', (val + 0.5).toString());
+                }}
+                onDec={() => {
+                  const val = Number(data.cgpaOrYoe) || 0;
+                  updateField('cgpaOrYoe', Math.max(0, val - 0.5).toString());
+                }}
+              />
+            </View>
           </View>
 
           <View>
@@ -148,9 +131,22 @@ function Step0({ data, onChange, onContinue, canContinue }: Props) {
               onSubmitEditing={handleSubmit}
             />
           </View>
+          <Pressable
+            onPress={() => updateField('isExperienced', !data.isExperienced)}
+            className="flex-row items-center gap-3 py-2"
+          >
+            <Checkbox
+              checked={data.isExperienced}
+              onChange={() => updateField('isExperienced', !data.isExperienced)}
+              accessibilityLabel="I am an experienced professional"
+            />
+            <Text className="text-base text-neutral-900 dark:text-white">
+              I am an experienced professional
+            </Text>
+          </Pressable>
         </View>
       </KeyboardAwareScrollView>
-    </Animated.View>
+    </View>
   );
 }
 

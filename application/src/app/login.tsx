@@ -1,11 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useSignIn, useSignUp, useSSO } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
+import * as AuthSession from 'expo-auth-session';
 import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable } from 'react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
-import * as WebBrowser from 'expo-web-browser';
-import * as AuthSession from 'expo-auth-session';
 
 import {
   FocusAwareStatusBar,
@@ -36,8 +36,16 @@ export default function Login() {
   useWarmUpBrowser();
 
   const router = useRouter();
-  const { signIn, setActive: setActiveSignIn, isLoaded: isSignInLoaded } = useSignIn();
-  const { signUp, setActive: setActiveSignUp, isLoaded: isSignUpLoaded } = useSignUp();
+  const {
+    signIn,
+    setActive: setActiveSignIn,
+    isLoaded: isSignInLoaded,
+  } = useSignIn();
+  const {
+    signUp,
+    setActive: setActiveSignUp,
+    isLoaded: isSignUpLoaded,
+  } = useSignUp();
   const { startSSOFlow } = useSSO();
 
   const [step, setStep] = useState<Step>('email');
@@ -58,10 +66,11 @@ export default function Login() {
       });
       console.log('Starting SSO flow with redirect URL:', redirectUrl);
 
-      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
-        strategy: 'oauth_google',
-        redirectUrl,
-      });
+      const { createdSessionId, setActive, signIn, signUp } =
+        await startSSOFlow({
+          strategy: 'oauth_google',
+          redirectUrl,
+        });
 
       // Session was created successfully - set it active and navigate
       if (createdSessionId) {
@@ -73,26 +82,40 @@ export default function Login() {
       // On Android, the session might be established asynchronously via maybeCompleteAuthSession()
       // The _layout.tsx guards will automatically navigate when auth state changes
       // So we don't show an error here - just log for debugging
-      console.log('OAuth returned without session - waiting for async auth state update...', {
-        signIn: signIn ? { status: signIn.status, firstFactor: signIn.firstFactorVerification?.status } : null,
-        signUp: signUp ? { status: signUp.status } : null
-      });
+      console.log(
+        'OAuth returned without session - waiting for async auth state update...',
+        {
+          signIn: signIn
+            ? {
+                status: signIn.status,
+                firstFactor: signIn.firstFactorVerification?.status,
+              }
+            : null,
+          signUp: signUp ? { status: signUp.status } : null,
+        }
+      );
 
       // Keep loading state briefly to allow for async session establishment
       // The layout guards will navigate automatically when isSignedIn becomes true
-
     } catch (err: any) {
       console.error('Google OAuth error:', JSON.stringify(err, null, 2));
       setError(err?.errors?.[0]?.message || 'Google sign-in failed');
       setIsLoading(false);
-    }finally{
+    } finally {
       setIsLoading(false);
     }
     // Note: We don't set isLoading to false here because the layout guards will unmount this component
   }, [startSSOFlow, router]);
 
   const handleInitialContinue = async () => {
-    if (!isSignInLoaded || !isSignUpLoaded || !signIn || !signUp || email.length === 0) return;
+    if (
+      !isSignInLoaded ||
+      !isSignUpLoaded ||
+      !signIn ||
+      !signUp ||
+      email.length === 0
+    )
+      return;
 
     setIsLoading(true);
     setError('');
@@ -144,7 +167,14 @@ export default function Login() {
   };
 
   const handleVerify = async () => {
-    if (!isSignInLoaded || !isSignUpLoaded || !signIn || !signUp || otp.length !== 6) return;
+    if (
+      !isSignInLoaded ||
+      !isSignUpLoaded ||
+      !signIn ||
+      !signUp ||
+      otp.length !== 6
+    )
+      return;
 
     setIsLoading(true);
     setError('');
@@ -274,9 +304,11 @@ export default function Login() {
             {error ? (
               <View className="mb-4 rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
                 <Text className="text-sm text-red-600 dark:text-red-400">
-                  {error == "Sign-in incomplete. Please try again." ? (
+                  {error == 'Sign-in incomplete. Please try again.' ? (
                     <>Something went wrong, please try again!</>
-                  ) : <>Your OTP is wrong or expired. Please try again.</>}
+                  ) : (
+                    <>Your OTP is wrong or expired. Please try again.</>
+                  )}
                 </Text>
               </View>
             ) : null}
@@ -287,7 +319,7 @@ export default function Login() {
                   onPress={handleGoogleLogin}
                   className="mb-8 flex-row items-center justify-center rounded-xl border border-neutral-200 bg-white py-4 active:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:active:bg-neutral-700"
                 >
-                  <Ionicons name="logo-google" size={20} color={""} />
+                  <Ionicons name="logo-google" size={20} color={''} />
                   <Text className="ml-3 text-base font-semibold dark:text-white">
                     Continue with Google
                   </Text>

@@ -79,7 +79,8 @@ interface ControlledInputProps<T extends FieldValues>
     InputControllerType<T> {}
 
 export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
-  const { label, error, testID, className, disabled,isSearch, ...inputProps } = props;
+  const { label, error, testID, className, disabled, isSearch, ...inputProps } =
+    props;
   const [isFocussed, setIsFocussed] = React.useState(false);
   const onBlur = React.useCallback(() => setIsFocussed(false), []);
   const onFocus = React.useCallback(() => setIsFocussed(true), []);
@@ -104,24 +105,26 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
           {label}
         </Text>
       )}
-      <View className={`flex-row items-center border-[0.5px]  bg-neutral-100 p-1 rounded-xl px-2`}>
-      {isSearch && <Ionicons name="search-outline" size={20} color="black" />}
-      <NTextInput
-        testID={testID}
-        ref={ref}
-        placeholderTextColor={colors.neutral[400]}
-        className={`${styles.input()}  ${className || ''} flex-1`}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        editable={!disabled}
-        {...inputProps}
-        style={StyleSheet.flatten([
-          { writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' },
-          { textAlign: I18nManager.isRTL ? 'right' : 'left' },
-          inputProps.multiline ? { textAlignVertical: 'top' } : {},
-          inputProps.style,
-        ])}
-      />
+      <View
+        className={`flex-row items-center rounded-xl  border-[0.5px] p-2 px-4`}
+      >
+        <NTextInput
+          testID={testID}
+          ref={ref}
+          placeholderTextColor={colors.neutral[400]}
+          className={`${styles.input()}  ${className || ''} flex-1`}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          editable={!disabled}
+          {...inputProps}
+          style={StyleSheet.flatten([
+            { writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' },
+            { textAlign: I18nManager.isRTL ? 'right' : 'left' },
+            inputProps.multiline ? { textAlignVertical: 'top' } : {},
+            inputProps.style,
+          ])}
+        />
+        {isSearch && <Ionicons name="search-outline" size={20} color="black" />}
       </View>
       {error && (
         <Text

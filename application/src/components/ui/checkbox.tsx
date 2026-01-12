@@ -72,7 +72,7 @@ const Label = ({ text, testID, className = '' }: LabelProps) => {
 };
 
 export const CheckboxIcon = ({ checked = false }: IconProps) => {
-  const color = checked ? colors.primary[300] : colors.charcoal[400];
+  const color = checked ? colors.primary[500] : colors.black;
   return (
     <MotiView
       style={{
@@ -80,7 +80,7 @@ export const CheckboxIcon = ({ checked = false }: IconProps) => {
         width: SIZE,
         borderColor: color,
       }}
-      className="items-center justify-center rounded-[5px] border-2"
+      className="items-center justify-center  border-2"
       from={{ backgroundColor: 'transparent', borderColor: '#CCCFD6' }}
       animate={{
         backgroundColor: checked ? color : 'transparent',
