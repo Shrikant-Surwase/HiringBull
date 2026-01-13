@@ -1,102 +1,96 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState } from 'react';
 import { useColorScheme } from 'nativewind';
-import {  Pressable} from 'react-native';
+import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
-import{
-  Checkbox,
-  Text,
-  View,
-  ScrollView,
-  Input,
-} from '@/components/ui';
-import {TextInput} from 'react-native';
-import useFetchOnboardedCompanies from "@/app/onboarding/hooks/useFetchOnboardedCompanies";
-import LogoLoader from "@/components/logo-loader";
+// import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
+import { Checkbox, Text, View, ScrollView, Input } from '@/components/ui';
+import { TextInput } from 'react-native';
+import useFetchOnboardedCompanies from '@/app/onboarding/hooks/useFetchOnboardedCompanies';
+import LogoLoader from '@/components/logo-loader';
 
 type Step2Props = {
   selectedCompanies: string[];
   onToggle: (companyId: string) => void;
   onBack: () => void;
   onSelectAll: (companyIds: string[], select: boolean) => void;
-  label?: string,
+  label?: string;
 };
 function Step2({
   selectedCompanies,
   onToggle,
   onBack,
   onSelectAll,
-  label = 'Companies you&apos;d love'
+  label = 'Companies you love',
 }: Step2Props) {
   const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] =
-    useState<string>('ALL');
+  const [activeFilter, setActiveFilter] = useState<string>('ALL');
   const { colorScheme } = useColorScheme();
 
-  const {data:COMPANIES, isFetching: isFetchingCompanies} = useFetchOnboardedCompanies();
-
+  const { data: COMPANIES, isFetching: isFetchingCompanies } =
+    useFetchOnboardedCompanies();
 
   const filteredCompanies = useMemo(() => {
-    let result = COMPANIES ? activeFilter === 'ALL' ?
-    COMPANIES : COMPANIES.filter((c) => c.category === activeFilter) : [];
+    let result = COMPANIES
+      ? activeFilter === 'ALL'
+        ? COMPANIES
+        : COMPANIES.filter((c) => c.category === activeFilter)
+      : [];
     if (!search.trim()) return result;
     return result.filter((company) =>
       company.name.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search, activeFilter,COMPANIES]);
+  }, [search, activeFilter, COMPANIES]);
 
   const allFilteredSelected = useMemo(() => {
     if (filteredCompanies.length === 0) return false;
     return filteredCompanies.every((c) => selectedCompanies.includes(c.id));
   }, [filteredCompanies, selectedCompanies]);
 
-  if(!COMPANIES || isFetchingCompanies){
-    return <LogoLoader />
+  if (!COMPANIES || isFetchingCompanies) {
+    return <LogoLoader />;
   }
 
-  const FILTERS = ['ALL',...new Set(COMPANIES.map(c=> c.category))];
+  const FILTERS = ['ALL', ...new Set(COMPANIES.map((c) => c.category))];
 
-  const filterNameFormat = (name: string)=>{
-    let output = name.replace('_'," ").toUpperCase();
-    output = output.charAt(0).toUpperCase()+output.slice(1).toLowerCase();
+  const filterNameFormat = (name: string) => {
+    let output = name.replace('_', ' ').toUpperCase();
+    output = output.charAt(0).toUpperCase() + output.slice(1).toLowerCase();
     return output;
-  }
+  };
   return (
-    <Animated.View
-      entering={FadeInRight.duration(300)}
-      exiting={FadeOutLeft.duration(300)}
+    <View
+      // entering={FadeInRight.duration(300)}
+      // exiting={FadeOutLeft.duration(300)}
       className="flex-1"
     >
       <View className="px-6">
-        <Pressable
-          onPress={onBack}
-          className="mb-4 flex-row items-center self-start"
-        >
-          <Ionicons
-            name="arrow-back"
-            size={16}
-            color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'}
-          />
-          <Text className="ml-1 text-sm font-medium text-neutral-500 underline dark:text-neutral-400">
-            Back
+        <View className="flex-row items-center">
+          <Pressable onPress={onBack}>
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={colorScheme === 'dark' ? '#a3a3a3' : '#737373'}
+              className="mb-2 mr-4 bg-neutral-200 rounded-md p-1"
+            />
+          </Pressable>
+
+          <Text className="mb-2 text-3xl font-bold dark:text-white">
+            {label}
           </Text>
-        </Pressable>
-        <Text className="mb-2 text-3xl font-bold">
-          {label}
-        </Text>
+        </View>
         <Text className="mb-4 text-base text-neutral-500">
           Select companies you&apos;re interested in working for
         </Text>
 
         <View className="mb-4">
-           <Input
+          <Input
             isSearch
-            placeholder="Search companies..."
+            placeholder="Search Jobs"
             value={search}
             onChangeText={setSearch}
-            />
+          />
         </View>
-        
+
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -109,7 +103,7 @@ function Step2({
               className={`mr-2 rounded-full border px-4 py-2  ${
                 activeFilter === filter
                   ? 'border-black bg-black dark:border-white dark:bg-white'
-                  : 'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800'
+                  : 'border-black bg-white dark:border-neutral-700 dark:bg-neutral-800 border-1'
               }`}
             >
               <Text
@@ -126,7 +120,7 @@ function Step2({
         </ScrollView>
 
         <View className="mb-4 flex-row items-center justify-between">
-          <Text className="text-sm font-medium text-neutral-500">
+          <Text className="text-md font-medium text-neutral-500">
             {filteredCompanies.length} companies found
           </Text>
           <Pressable
@@ -136,7 +130,7 @@ function Step2({
             }}
             className="flex-row items-center"
           >
-            <Text className="mr-2 text-sm font-medium dark:text-neutral-300">
+            <Text className="text-md mr-2 font-medium dark:text-neutral-300">
               Select All
             </Text>
             <Checkbox
@@ -169,7 +163,11 @@ function Step2({
             >
               <View className="flex-row items-center">
                 <View className="mr-3 size-10 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
-                  <Ionicons name="business" size={20} color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
+                  <Ionicons
+                    name="business"
+                    size={20}
+                    color={colorScheme === 'dark' ? '#ffffff' : '#000000'}
+                  />
                 </View>
                 <Text className="text-lg font-semibold">{company.name}</Text>
               </View>
@@ -182,7 +180,7 @@ function Step2({
           </Text>
         )}
       </ScrollView>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -196,17 +194,13 @@ function OptionCard({ selected, onPress, children }: OptionCardProps) {
   return (
     <Pressable
       onPress={onPress}
-      className={`mb-3 flex-row items-center rounded-xl border bg-white p-5 ${
-        selected
-          ? 'border-2 border-black android:shadow-lg ios:shadow-sm'
-          : 'border-neutral-200 android:shadow-md ios:shadow-sm dark:border-neutral-700'
-      }`}
+      className={`mb-3 flex-row items-center rounded-xl border bg-neutral-200 p-4 ${'android:shadow-lg ios:shadow-sm border-1 border-black'}`}
     >
       <View className="flex-1">{children}</View>
       <Ionicons
         name={selected ? 'checkmark-circle' : 'checkmark-circle-outline'}
         size={24}
-        color={selected ? '#000000' : '#d1d5db'}
+        color={selected ? '#000000' : '#A3A3A3'}
       />
     </Pressable>
   );

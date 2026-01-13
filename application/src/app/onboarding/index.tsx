@@ -1,37 +1,17 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
-import { useColorScheme } from 'nativewind';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ImageSourcePropType, TextInput as RNTextInput } from 'react-native';
-import { Pressable, TextInput } from 'react-native';
-import {
-  KeyboardAwareScrollView,
-  KeyboardStickyView,
-} from 'react-native-keyboard-controller';
-import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import * as WebBrowser from 'expo-web-browser';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable } from 'react-native';
 
-import {
-  Checkbox,
-  FocusAwareStatusBar,
-  Image,
-  Input,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  View,
-} from '@/components/ui';
-
-import { Images } from '../../../assets/images';
-import useRegisterOrEditUser from '@/features/users/hooks/useRegisterOrEditUser';
-import { checkUserVerification, UserRegistration } from '@/features/users';
-import Step2 from '@/app/onboarding/Step2';
 import Step0 from '@/app/onboarding/ExperienceLevel';
-import { ExperienceLevel, ProfileData } from '@/app/onboarding/types';
 import Step1 from '@/app/onboarding/Step1';
+import Step2 from '@/app/onboarding/Step2';
+import { type ExperienceLevel, type ProfileData } from '@/app/onboarding/types';
+import { FocusAwareStatusBar, SafeAreaView, Text, View } from '@/components/ui';
+import { checkUserVerification, UserRegistration } from '@/features/users';
+import useRegisterOrEditUser from '@/features/users/hooks/useRegisterOrEditUser';
 import { useOnboarding } from '@/lib';
-
 
 
 type StepIndicatorProps = {
@@ -40,51 +20,38 @@ type StepIndicatorProps = {
 };
 
 function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
+  console.log(currentStep);
   return (
-    <View className="mb-8 w-full flex-row items-center px-2">
-      {[1, 2, 3].map((step) => (
-        <React.Fragment key={step}>
-          <View
-            className={`size-8 items-center justify-center rounded-full ${
-              currentStep >= step
-                ? 'bg-black dark:bg-white'
-                : 'bg-neutral-200 dark:bg-neutral-700'
-            }`}
-          >
-            <Text
-              className={`text-sm font-semibold ${
-                currentStep >= step
-                  ? 'text-white dark:text-black'
-                  : 'text-neutral-500'
-              }`}
+    <View className="mb-4 w-full flex-row items-center">
+      {[1, 2, 3].map((step, index) => {
+         const isActive = currentStep >= step;
+        return (
+          <React.Fragment key={step}>
+            <View
+              className={`h-2 flex-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700 ${step === 2 && `mx-4`} `}
             >
-              {step}
-            </Text>
-          </View>
-          {step < 3 && (
-            <View className="mx-2 h-1 flex-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
               <View
-                className="h-full rounded-full bg-black dark:bg-white"
-                style={{
-                  width: `${currentStep > step ? 100 : 0}%`,
-                }}
+                className={`h-full rounded-full ${
+                  isActive ? 'bg-orange-400' : 'bg-transparent'
+                }`}
+                style={{ width: isActive ? '100%' : '0%' }}
               />
             </View>
-          )}
-        </React.Fragment>
-      ))}
+            {/* )} */}
+          </React.Fragment>
+        );
+      })}
     </View>
   );
 }
 
 
 
-
 export default function Onboarding() {
   const router = useRouter();
   const { getToken } = useAuth();
-  const completeOnboarding = useOnboarding.use.completeOnboarding()
-  const {user} = useUser();
+  const completeOnboarding = useOnboarding.use.completeOnboarding();
+  const { user } = useUser();
   const [isVerifiedUser, setIsVerifiedUser] = useState(false);
 
   const [step, setStep] = useState(1);
@@ -99,7 +66,8 @@ export default function Onboarding() {
     useState<ExperienceLevel | null>(null);
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
 
-  const {mutate: registerUser, isPending: isRegistering} = useRegisterOrEditUser();
+  const { mutate: registerUser, isPending: isRegistering } =
+    useRegisterOrEditUser();
 
   useEffect(() => {
     const logToken = async () => {
@@ -108,20 +76,21 @@ export default function Onboarding() {
     };
     logToken();
 
-
-    const checkIfVerified = async ()=>{
-      if(!user?.primaryEmailAddress?.emailAddress){
+    const checkIfVerified = async () => {
+      if (!user?.primaryEmailAddress?.emailAddress) {
         return;
       }
-      
-      const verificationData = await checkUserVerification(user.primaryEmailAddress.emailAddress);
-      
-      if(!verificationData.registered){
+
+      const verificationData = await checkUserVerification(
+        user.primaryEmailAddress.emailAddress
+      );
+
+      if (!verificationData.registered) {
         setIsVerifiedUser(false);
         return;
       }
       setIsVerifiedUser(true);
-    }
+    };
 
     checkIfVerified();
   }, [getToken]);
@@ -142,7 +111,7 @@ export default function Onboarding() {
         return prev.filter((id) => !companyIds.includes(id));
       }
     });
-  }
+  };
 
   const handleContinue = useCallback(() => {
     setStep((prev) => prev + 1);
@@ -153,42 +122,40 @@ export default function Onboarding() {
   }, []);
 
   const handleFinish = () => {
-    if(profileData && experienceLevel && selectedCompanies){
+    if (profileData && experienceLevel && selectedCompanies) {
       let payload = {
-        name:profileData.name,
+        name: profileData.name,
         is_experienced: profileData.isExperienced,
         resume_link: profileData.resumeLink,
         experience_level: experienceLevel,
         followedCompanies: selectedCompanies,
       } as UserRegistration;
 
-      if(payload.is_experienced){
+      if (payload.is_experienced) {
         payload = {
           ...payload,
           is_experienced: true,
           years_of_experience: Number(profileData.cgpaOrYoe),
-          company_name: profileData.collegeOrCompany
-        }
-      }else{
+          company_name: profileData.collegeOrCompany,
+        };
+      } else {
         payload = {
           ...payload,
           cgpa: profileData.cgpaOrYoe,
-          college_name:profileData.collegeOrCompany
-        }
+          college_name: profileData.collegeOrCompany,
+        };
       }
 
-      registerUser(payload,{
-          onSuccess:()=>{
-            completeOnboarding()
-            router.replace('/');
-          },
-          onError:(e)=>{
-            console.error(e)
-          }
-        })
+      registerUser(payload, {
+        onSuccess: () => {
+          completeOnboarding();
+          router.replace('/');
+        },
+        onError: (e) => {
+          console.error(e);
+        },
+      });
     }
-
-
   };
 
   const canContinue = useMemo(() => {
@@ -206,22 +173,27 @@ export default function Onboarding() {
   }, [step, profileData, experienceLevel]);
 
   const openInviteEmail = async () => {
-    await WebBrowser.openBrowserAsync('https://www.hiringbull.in/join-membership');
+    await WebBrowser.openBrowserAsync(
+      'https://www.hiringbull.in/join-membership'
+    );
   };
 
   return (
     <View className="flex-1 bg-white dark:bg-neutral-900">
       <FocusAwareStatusBar />
       <SafeAreaView className="flex-1">
-        {!isVerifiedUser && <Pressable className='p-0' onPress={openInviteEmail}>
-          <Text className='text-center text-xl mb-4 leading-5 bg-primary-200 py-3 px-2'>You have not received the invite.Kindly click 
-            here to get invite </Text>
-        </Pressable>}
-        <View className="flex-1 pt-4">
+        {!isVerifiedUser && (
+          <Pressable className="p-0" onPress={openInviteEmail}>
+            <Text className="text-center text-xl mb-4 leading-5 bg-primary-200 py-3 px-2">
+              You have not received the invite.Kindly click here to get invite{' '}
+            </Text>
+          </Pressable>
+        )}
+        <View className="flex-1 pt-4" key={step}>
           <View className="px-6">
             <StepIndicator currentStep={step} totalSteps={3} />
           </View>
-
+          {/* <View key={step}> */}
           {step === 1 ? (
             <Step0
               data={profileData}
@@ -243,15 +215,43 @@ export default function Onboarding() {
               onSelectAll={handleSelectAll}
             />
           )}
+          {/* </View> */}
         </View>
       </SafeAreaView>
 
-      {isVerifiedUser ? step === 1 ? (
-
-        <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
+      {isVerifiedUser ? (
+        step === 1 ? (
+          <View>
+            <View className="border-t border-neutral-200 bg-white px-6 pb-8 pt-4 dark:border-neutral-700 dark:bg-neutral-900">
+              <Pressable
+                onPress={handleContinue}
+                disabled={!canContinue}
+                className={`h-14 items-center justify-center rounded-xl ${
+                  canContinue ? 'bg-black dark:bg-white' : 'bg-neutral-300'
+                }`}
+              >
+                <Text
+                  className={`text-lg font-semibold ${
+                    canContinue
+                      ? 'text-white dark:text-black'
+                      : 'text-neutral-500'
+                  }`}
+                >
+                  Continue
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
           <View className="border-t border-neutral-200 bg-white px-6 pb-8 pt-4 dark:border-neutral-700 dark:bg-neutral-900">
+            {step === 3 && selectedCompanies.length > 0 && (
+              <Text className="mb-3 text-center text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                You will be notified for {selectedCompanies.length} companies
+                info
+              </Text>
+            )}
             <Pressable
-              onPress={handleContinue}
+              onPress={step < 3 ? handleContinue : handleFinish}
               disabled={!canContinue}
               className={`h-14 items-center justify-center rounded-xl ${
                 canContinue ? 'bg-black dark:bg-white' : 'bg-neutral-300'
@@ -259,39 +259,17 @@ export default function Onboarding() {
             >
               <Text
                 className={`text-lg font-semibold ${
-                  canContinue ? 'text-white dark:text-black' : 'text-neutral-500'
+                  canContinue
+                    ? 'text-white dark:text-black'
+                    : 'text-neutral-500'
                 }`}
               >
-                Continue
+                {step < 3 ? 'Continue' : 'Finish'}
               </Text>
             </Pressable>
           </View>
-         </KeyboardStickyView>
-      ) : (
-        <View className="border-t border-neutral-200 bg-white px-6 pb-8 pt-4 dark:border-neutral-700 dark:bg-neutral-900">
-          {step === 3 && selectedCompanies.length > 0 && (
-            <Text className="mb-3 text-center text-sm font-medium text-neutral-600 dark:text-neutral-400">
-              You will be notified for {selectedCompanies.length} companies info
-              🚀
-            </Text>
-          )}
-          <Pressable
-            onPress={step < 3 ? handleContinue : handleFinish}
-            disabled={!canContinue}
-            className={`h-14 items-center justify-center rounded-xl ${
-              canContinue ? 'bg-black dark:bg-white' : 'bg-neutral-300'
-            }`}
-          >
-            <Text
-              className={`text-lg font-semibold ${
-                canContinue ? 'text-white dark:text-black' : 'text-neutral-500'
-              }`}
-            >
-              {step < 3 ? 'Continue' : 'Finish'}
-            </Text>
-          </Pressable>
-        </View>
-      ):null}
+        )
+      ) : null}
     </View>
   );
 }

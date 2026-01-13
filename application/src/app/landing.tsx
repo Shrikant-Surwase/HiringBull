@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, ScrollView } from 'react-native';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
+// import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import {
   FocusAwareStatusBar,
   Pressable,
@@ -46,8 +46,8 @@ function FeatureCard({
   gradient: string[];
 }) {
   return (
-    <Animated.View
-      entering={FadeInUp.duration(500)}
+    <View
+      // entering={FadeInUp.duration(500)}
       className="mb-4 overflow-hidden rounded-3xl bg-white p-6 shadow-sm dark:bg-neutral-900/50"
     >
       <View className="mb-3 mr-8 size-14 items-center justify-center rounded-2xl bg-neutral-900 dark:bg-white">
@@ -59,7 +59,7 @@ function FeatureCard({
       <Text className="text-base leading-6 text-neutral-600 dark:text-neutral-400">
         {description}
       </Text>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -79,12 +79,12 @@ export default function Landing() {
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           <View className="flex-1 px-6">
             {/* Hero Section */}
-            <Animated.View
-              entering={FadeInDown.duration(600)}
+            <View
+              // entering={FadeInDown.duration(600)}
               className="mb-10 mt-16"
             >
               {/* Logo with glow effect */}
-              <View className="w-full h-[90px] px-6 flex flex-row justify-start items-center">
+              <View className="flex h-[90px] w-full flex-row items-center justify-start px-6">
                 <Image
                   source={require('assets/logo-big.png')}
                   style={{
@@ -119,7 +119,7 @@ export default function Landing() {
                 Early job alerts. Direct referrals.{'\n'}Better odds at landing
                 your dream role.
               </Text> */}
-            </Animated.View>
+            </View>
 
             {/* Features Grid */}
             <View className="flex-1">
