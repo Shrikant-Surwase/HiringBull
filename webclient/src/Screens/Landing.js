@@ -763,9 +763,9 @@ const Landing = () => {
 
           <div className="col">
             <div className="heading">Legal</div>
-            <a href="#terms">Terms</a>
-            <a href="#privacy">Privacy</a>
-            <a href="#refund">Refund Policy</a>
+            <a href="/terms">Terms</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/refund">Refund Policy</a>
           </div>
         </div>
 
