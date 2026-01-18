@@ -9,6 +9,7 @@ import Privacy from "./Screens/Privacy";
 import Refund from "./Screens/Refund";
 import Referral from "./Screens/Referral";
 import TrailJobs from "./Screens/TrailJobs";
+import TestPayment from "./Screens/TestPayment";
 
 
 
@@ -24,6 +25,7 @@ const App = () => {
         <Route path="/refund" element={<Refund />} />
         <Route path="/referral-program" element={<Referral />} />
         <Route path="/jobs" element={<TrailJobs />} />
+        <Route path="/test-payment" element={<TestPayment />} />
       </Routes>
     </Container>
   )
