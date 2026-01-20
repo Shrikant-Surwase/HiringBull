@@ -25,49 +25,76 @@ export const initClerk = clerkMiddleware();
 /**
  * 🔐 Require authenticated user
  * - Validates Clerk JWT / session
- * - Auto-creates user in DB
+ * - Creates user ONLY if not exists
+ * - Updates name/email ONLY if missing
  * - Attaches `req.user`
  */
 export const requireAuth = async (req, res, next) => {
   try {
     const auth = getAuth(req);
 
-    if (!auth || !auth.userId) {
+    if (!auth?.userId) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
     const clerkId = auth.userId;
 
-    // Defaults
+    // Try to find user first
+    let user = await prisma.user.findUnique({
+      where: { clerkId },
+    });
+
+    // Defaults (used only if needed)
     let email = `${clerkId}@no-email.clerk`;
     let name = "User";
 
-    // Fetch full user info from Clerk
+    // Fetch Clerk user safely
     try {
       const clerkUser = await getClerk().users.getUser(clerkId);
+
       email =
         clerkUser.emailAddresses?.[0]?.emailAddress ?? email;
-      name = clerkUser.firstName
-        ? `${clerkUser.firstName}${clerkUser.lastName ? " " + clerkUser.lastName : ""}`
-        : name;
+
+      if (clerkUser.firstName) {
+        name = clerkUser.firstName +
+          (clerkUser.lastName ? ` ${clerkUser.lastName}` : "");
+      }
     } catch (err) {
       log("Clerk user fetch failed:", err);
     }
 
-    // Upsert user in DB
-    const user = await prisma.user.upsert({
-      where: { clerkId },
-      update: {
-        ...(email && { email }),
-        ...(name && { name }),
-      },
-      create: {
-        clerkId,
-        email,
-        name,
-        active: true,
-      },
-    });
+    // 🆕 Create user if not exists
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          clerkId,
+          email,
+          name,
+          active: true,
+        },
+      });
+
+      req.user = user;
+      return next();
+    }
+
+    // 🔁 Update ONLY if fields are missing
+    const updates = {};
+
+    if (!user.email && email) {
+      updates.email = email;
+    }
+
+    if (!user.name && name) {
+      updates.name = name;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      user = await prisma.user.update({
+        where: { clerkId },
+        data: updates,
+      });
+    }
 
     if (!user.active) {
       return res.status(403).json({ message: "Account disabled" });
@@ -83,6 +110,7 @@ export const requireAuth = async (req, res, next) => {
 
 /**
  * 🔓 Optional auth (does NOT block)
+ * - Attaches `req.clerkUserId` if logged in
  */
 export const optionalAuth = (req, _res, next) => {
   const auth = getAuth(req);
