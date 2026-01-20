@@ -163,7 +163,9 @@ export default function Profile() {
               <View className="flex-row items-center gap-4">
                 <View className="size-16 items-center justify-center overflow-hidden rounded-full bg-primary-100">
                   <Image
-                    source={require('../../../../assets/images/experience/profile.png')}
+                    // source={require('../../../../assets/images/experience/profile.png')}
+                    source={'https://www.eyedesyn.com/wp-content/uploads/2015/10/flame.gif'}
+                    // source={'https://i.gifer.com/origin/a8/a87541948ce7297723eb5568b7ac83e5_w200.gif'}
                     style={{ width: '100%', height: '100%' }}
                     resizeMode="cover"
                   />
@@ -194,7 +196,7 @@ export default function Profile() {
               ))}
             </View>
 
-            <View className="rounded-xl border-2 border-primary-200 bg-yellow-300 p-4">
+            <View className="rounded-xl border border-black-100 bg-yellow-300 p-4">
               <View className="flex-row items-start gap-3">
                 <View className="mt-1 size-10 shrink-0 items-center justify-center rounded-full bg-primary-100">
                   <Ionicons name="gift-outline" size={20} color="#13803b" />
@@ -215,7 +217,7 @@ export default function Profile() {
                         setConfirmAction('copy');
                         modalRef.current?.present();
                       }}
-                      className="mt-3 flex-row items-center justify-between rounded-lg border border-primary-300 bg-primary-100 px-3 py-2"
+                      className="mt-3 flex-row items-center justify-between rounded-lg bg-yellow-400 px-3 py-2"
                     >
                       <Text className="text-sm font-medium text-primary-900">
                         {email}
