@@ -1,8 +1,11 @@
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
+import { Env } from '@env';
 import { authService } from '@/service/auth-service';
 
 
-const BASE_URL = 'https://api.hiringbull.org/';
+// API URL from environment variables
+// Defaults to production URL if not set
+const BASE_URL = Env.EXPO_PUBLIC_API_URL || 'https://api.hiringbull.org/';
 
 
 export const client = axios.create({
