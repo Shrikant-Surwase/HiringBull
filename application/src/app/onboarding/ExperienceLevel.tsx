@@ -108,11 +108,13 @@ function Step0({ data, onChange, onContinue, canContinue }: Props) {
                 ref={cgpaOrYoeRef}
                 placeholder={data.isExperienced ? 'e.g. 0.5' : 'e.g. 8.5'}
                 value={data.cgpaOrYoe}
+                keyboardType="decimal-pad"
                 onChangeText={(text) => {
-                  if (data.isExperienced) {
-                    const numericText = text.replace(/[^0-9.]/g, '');
-                    updateField('cgpaOrYoe', numericText);
-                  }
+                  const sanitized = text
+                    .replace(/[^0-9.]/g, '')
+                    .replace(/(\..*)\./g, '$1');
+
+                  updateField('cgpaOrYoe', sanitized);
                 }}
               />
 
