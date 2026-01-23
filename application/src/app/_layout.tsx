@@ -28,6 +28,8 @@ import {
 } from '@/lib';
 import { useThemeConfig } from '@/lib/use-theme-config';
 import { authService } from '@/service/auth-service';
+import { useNotificationPermissionPrompt } from '@/utils/useNotificationPermissionPrompt';
+import { NotificationPromptModal } from '@/utils/NotificationPromptModal';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -82,7 +84,8 @@ function RootNavigator() {
   const _isSubscribed = useOnboarding.use.isSubscribed();
 
   const [isLoadingUser, setIsLoadingUser] = useState(false);
-
+  const { modalVisible, setModalVisible } = useNotificationPermissionPrompt();
+  console.log('modalVisible', modalVisible);
   // Sync auth service with Clerk
   useEffect(() => {
     if (isSignedIn) {
@@ -97,6 +100,7 @@ function RootNavigator() {
 
   // Notifications should only be initialized for authenticated users
   const shouldInitNotifications = isAuthenticated;
+  console.log(shouldInitNotifications, isAuthenticated)
 
   //   temporary flags for testing
   //   const isFirstTime = false;
@@ -148,7 +152,7 @@ function RootNavigator() {
 
   return (
     <>
-      {shouldInitNotifications && <NotificationInitializer />}
+      {/* {shouldInitNotifications && <NotificationInitializer />} */}
       <Stack>
         <Stack.Protected guard={isFirstTime}>
           <Stack.Screen name="landing" options={{ headerShown: false }} />
@@ -181,6 +185,12 @@ function RootNavigator() {
         {/* SSO callback route - accessible during OAuth flow */}
         <Stack.Screen name="sso-callback" options={{ headerShown: false }} />
       </Stack>
+      {shouldInitNotifications && (
+        <NotificationPromptModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+        />
+      )}
     </>
   );
 }

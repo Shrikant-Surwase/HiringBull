@@ -1,8 +1,9 @@
 import { useUser } from '@clerk/clerk-expo';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
+import { type BottomSheetModal } from '@gorhom/bottom-sheet';
+import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, Image, Pressable, TextInput } from 'react-native';
+import { FlatList, Image, Pressable, type TextInput } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import {
@@ -28,42 +29,42 @@ const COMPANIES: Company[] = [
   {
     id: 'google',
     name: 'Google',
-    icon: "https://hiringbull-images.s3.ap-south-1.amazonaws.com/google.png",
+    icon: 'https://hiringbull-images.s3.ap-south-1.amazonaws.com/google.png',
   },
   {
     id: 'amazon',
     name: 'Amazon',
-    icon: "https://hiringbull-images.s3.ap-south-1.amazonaws.com/amazon.png",
+    icon: 'https://hiringbull-images.s3.ap-south-1.amazonaws.com/amazon.png',
   },
   {
     id: 'microsoft',
     name: 'Microsoft',
-    icon: "https://hiringbull-images.s3.ap-south-1.amazonaws.com/microsoft.png",
+    icon: 'https://hiringbull-images.s3.ap-south-1.amazonaws.com/microsoft.png',
   },
   {
     id: 'salesforce',
     name: 'Salesforce',
-    icon: "https://hiringbull-images.s3.ap-south-1.amazonaws.com/salesforce.png",
+    icon: 'https://hiringbull-images.s3.ap-south-1.amazonaws.com/salesforce.png',
   },
   {
     id: 'samsung',
     name: 'Samsung',
-    icon: "https://hiringbull-images.s3.ap-south-1.amazonaws.com/samsung.jpeg",
+    icon: 'https://hiringbull-images.s3.ap-south-1.amazonaws.com/samsung.jpeg',
   },
   {
     id: 'oracle',
     name: 'Oracle',
-    icon: "https://cabinetm-beta.s3.amazonaws.com/00000175-f643-6db2-8d63-54349eb41198.jpg",
+    icon: 'https://cabinetm-beta.s3.amazonaws.com/00000175-f643-6db2-8d63-54349eb41198.jpg',
   },
   {
     id: 'swiggy',
     name: 'Swiggy',
-    icon: "https://hiringbull-images.s3.ap-south-1.amazonaws.com/swiggy.png",
+    icon: 'https://hiringbull-images.s3.ap-south-1.amazonaws.com/swiggy.png',
   },
   {
     id: 'nvidia',
     name: 'NVIDIA',
-    icon: "https://hiringbull-images.s3.ap-south-1.amazonaws.com/nvidia.png",
+    icon: 'https://hiringbull-images.s3.ap-south-1.amazonaws.com/nvidia.png',
   },
 ];
 
@@ -88,8 +89,9 @@ function CompanyCard({
   return (
     <Pressable
       onPress={onPress}
-      className={`relative aspect-square flex-1 items-center justify-center rounded-xl border bg-white ${selected ? 'border-primary-600' : 'border-neutral-200'
-        }`}
+      className={`relative aspect-square flex-1 items-center justify-center rounded-xl border bg-white ${
+        selected ? 'border-primary-600' : 'border-neutral-200'
+      }`}
     >
       {selected && (
         <View className="absolute -right-2 -top-2 size-6 items-center justify-center rounded-full bg-primary-600">
@@ -97,10 +99,15 @@ function CompanyCard({
         </View>
       )}
 
-      <Image source={{ uri: company.icon }} className="size-10" resizeMode="contain" />
+      <Image
+        source={{ uri: company.icon }}
+        className="size-10"
+        resizeMode="contain"
+      />
     </Pressable>
   );
 }
+
 export default function Outreach() {
   const { user } = useUser();
   const { form, onSubmit } = useOutreachForm();
@@ -177,13 +184,6 @@ export default function Outreach() {
 
       {/* CONTENT */}
       <View className="flex-1 pt-4">
-        {/* <View className="mb-3 flex-row items-center gap-2 ml-4">
-          <View className="rounded-full bg-yellow-400 px-3 py-1">
-            <Text className="text-sm font-semibold">
-              {remaining} Outreach Left
-            </Text>
-          </View>
-        </View> */}
         {remaining === 0 ? (
           <View className="mb-3 ml-4 flex-row items-center">
             <View className="flex-row items-center gap-2 rounded-full bg-neutral-200 px-3 py-1.5">
@@ -196,7 +196,7 @@ export default function Outreach() {
         ) : (
           <View className="mb-3 ml-4 flex-row items-center">
             <View className="flex-row items-center gap-2 rounded-full bg-yellow-100 px-3 py-1.5">
-              <View className="h-6 w-6 items-center justify-center rounded-full bg-yellow-400">
+              <View className="size-6 items-center justify-center rounded-full bg-yellow-400">
                 <Ionicons name="flash" size={14} color="#000" />
               </View>
               <Text className="text-sm font-semibold text-yellow-900">
@@ -205,7 +205,6 @@ export default function Outreach() {
             </View>
           </View>
         )}
-
 
         <FlatList
           data={filteredCompanies}
@@ -225,25 +224,41 @@ export default function Outreach() {
               }}
             />
           )}
+          ListFooterComponent={() => (
+            <View>
+              <View className="self-start">
+                <Pressable
+                  onPress={() => router.push('/outreach/Requests')}
+                  className="flex-row items-center gap-2 rounded-lg bg-neutral-100 px-4 py-2"
+                >
+                  <Text className="font-medium text-neutral-900">
+                    Outreach & Replies
+                  </Text>
+                  <Ionicons name="arrow-forward" size={16} color="#111" />
+                </Pressable>
+              </View>
+            </View>
+          )}
         />
-        <View className="flex-row items-center rounded-lg bg-neutral-200 p-1 m-4">
+        <View className="m-4 flex-row items-center rounded-lg bg-neutral-200 p-1">
           <Ionicons name="information-circle" size={20} className="mr-2" />
-          <Text className="text-neutral-500 text-sm">
+          <Text className="text-sm text-neutral-500">
             3 outreach credits per month, reset monthly
           </Text>
         </View>
-        <View className="px-4 mt-2">
-          <Button
-            label={
-              selectedCompany
-                ? `Draft message to ${selectedCompany.name} Network`
-                : 'Select a company to draft message'
-            }
-            disabled={!selectedCompany || remaining === 0}
-            onPress={() => modalRef.current?.present()}
-          />
-        </View>
-
+        {remaining !== 0 && (
+          <View className="mt-2 px-4">
+            <Button
+              label={
+                selectedCompany
+                  ? `Draft message to ${selectedCompany.name} Network`
+                  : 'Select a company to draft message'
+              }
+              disabled={!selectedCompany || remaining === 0}
+              onPress={() => modalRef.current?.present()}
+            />
+          </View>
+        )}
       </View>
 
       {/* MODAL */}

@@ -86,15 +86,13 @@ export default function Login() {
   /* ----------------------------- Email Step ----------------------------- */
 
   // Email validation regex
-  const isValidEmail = (email: string) => {
+  const isValidEmail = (emailStr: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email.trim());
+    return emailRegex.test(emailStr.trim());
   };
 
   const handleContinue = async () => {
-    if (!email || !isSignInLoaded || !isSignUpLoaded) return;
-
-    // Validate email format
+    // --------- CLIENT SIDE VALIDATION ---------
     if (!email.trim()) {
       setError('Please enter your email');
       return;
@@ -105,10 +103,13 @@ export default function Login() {
       return;
     }
 
+    if (!isSignInLoaded || !isSignUpLoaded) return;
+
     showGlobalLoading();
     setError('');
 
     try {
+      // Try sign-in first
       const attempt = await signIn.create({ identifier: email.trim() });
 
       const factor = attempt.supportedFirstFactors?.find(
@@ -125,15 +126,21 @@ export default function Login() {
       setAuthMode('signIn');
       setStep('otp');
     } catch (e: any) {
+      // If user not found → Sign up flow
       if (e?.errors?.[0]?.code === 'form_identifier_not_found') {
-        await signUp.create({ emailAddress: email.trim() });
-        await signUp.prepareEmailAddressVerification({
-          strategy: 'email_code',
-        });
-        setAuthMode('signUp');
-        setStep('otp');
+        try {
+          await signUp.create({ emailAddress: email.trim() });
+          await signUp.prepareEmailAddressVerification({
+            strategy: 'email_code',
+          });
+
+          setAuthMode('signUp');
+          setStep('otp');
+        } catch {
+          setError('Unable to send verification code');
+        }
       } else {
-        setError('Unable to send code');
+        setError('Something went wrong. Please try again');
       }
     } finally {
       hideGlobalLoading();
@@ -143,7 +150,16 @@ export default function Login() {
   /* ----------------------------- OTP ----------------------------- */
 
   const handleVerify = async () => {
-    if (otp.length !== 6) return;
+    // --------- CLIENT SIDE VALIDATION ---------
+    if (!otp.trim()) {
+      setError('Please enter the 6-digit code');
+      return;
+    }
+
+    if (otp.length !== 6) {
+      setError('OTP must be 6 digits');
+      return;
+    }
 
     showGlobalLoading();
     setError('');
@@ -158,6 +174,7 @@ export default function Login() {
           code: otp,
         });
         console.log(' SignIn result status:', res.status, 'sessionId:', res.createdSessionId);
+
         if (res.status === 'complete' && setActiveSignIn) {
           console.log('Setting active session...');
           await setActiveSignIn({ session: res.createdSessionId });
@@ -174,6 +191,7 @@ export default function Login() {
         console.log(' SignUp result status:', res.status, 'sessionId:', res.createdSessionId);
         console.log(' SignUp missingFields:', res.missingFields);
         console.log(' SignUp unverifiedFields:', res.unverifiedFields);
+
         if (res.status === 'complete' && setActiveSignUp) {
           console.log(' Setting active session...');
           await setActiveSignUp({ session: res.createdSessionId });
@@ -204,16 +222,14 @@ export default function Login() {
         {/* ---------------- HERO ---------------- */}
         <View className="items-center pt-20 bg-yellow-50">
           <Image
-            // source={require('../../assets/images/experience/hero-logo.png')}
             source={require('../../assets/images/experience/HBLongLogo.png')}
             className="h-[80px] w-[160px]"
             resizeMode="contain"
           />
         </View>
-        
+
         <View className="items-center bg-yellow-50">
           <Image
-            // source={require('../../assets/images/experience/hero-logo.png')}
             source={require('../../assets/images/experience/appSample.png')}
             className="mt-6 h-[320px] w-full"
             resizeMode="contain"
@@ -233,26 +249,6 @@ export default function Login() {
             Find your dream job effortlessly
           </Text>
 
-          {/* GOOGLE */}
-          {/* <Pressable
-            onPress={handleGoogleLogin}
-            className="mt-8 flex-row items-center justify-center rounded-xl border border-neutral-200 py-4"
-          >
-            <Ionicons name="logo-google" size={20} />
-            <Text className="ml-3 text-base font-semibold">
-              Signup with Google
-            </Text>
-          </Pressable> */}
-
-          {/* DIVIDER */}
-          {/* <View className="my-6 flex-row items-center gap-3">
-            <View className="h-px flex-1 bg-neutral-200" />
-            <Text className="text-sm text-neutral-400">
-              or continue with email
-            </Text>
-            <View className="h-px flex-1 bg-neutral-200" />
-          </View> */}
-
           {/* EMAIL / OTP */}
 
           {step === 'email' ? (
@@ -263,7 +259,10 @@ export default function Login() {
               <Input
                 placeholder="example@gmail.com"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (error) setError('');
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -272,10 +271,9 @@ export default function Login() {
                   <Ionicons
                     name="information-circle"
                     size={20}
-                    color={'#ef4444'}
-                    className='mr-2'
+                    color="#ef4444"
+                    style={{ marginRight: 6 }}
                   />
-
                   <Text className="text-left text-sm text-red-500">
                     {error}
                   </Text>
@@ -284,7 +282,6 @@ export default function Login() {
 
               <Pressable
                 onPress={handleContinue}
-                disabled={!email}
                 className="mt-6 rounded-xl bg-neutral-900 py-4"
               >
                 <Text className="text-center text-lg font-bold text-white">
@@ -332,8 +329,8 @@ export default function Login() {
                   <Ionicons
                     name="information-circle"
                     size={20}
-                    color={'#ef4444'}
-                    className='mr-2'
+                    color="#ef4444"
+                    style={{ marginRight: 6 }}
                   />
                   <Text className="text-center text-sm text-red-500">
                     {error}
