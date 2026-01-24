@@ -188,6 +188,21 @@ const Landing = () => {
     setIsDiscountApplied(!isDiscountApplied);
   };
 
+  const smoothScrollTo = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+      let navbarHeight = 85; // Default height for other sections
+      if (elementId === 'features') {
+        navbarHeight = 60; // Account for black notification bar and partial white nav
+      }
+      const elementPosition = element.offsetTop - navbarHeight;
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <Container>
       <Navbar>
@@ -200,10 +215,10 @@ const Landing = () => {
             HiringBull
           </div>
           <div className="right">
-            <a href="#features">Features</a>
-            <a href="#compare">Compare</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#faq">FAQ</a>
+            <a href="#features" onClick={(e) => { e.preventDefault(); smoothScrollTo('features'); }} style={{ cursor: 'pointer' }}>Features</a>
+            <a href="#compare" onClick={(e) => { e.preventDefault(); smoothScrollTo('compare'); }} style={{ cursor: 'pointer' }}>Compare</a>
+            <a href="#pricing" onClick={(e) => { e.preventDefault(); smoothScrollTo('pricing'); }} style={{ cursor: 'pointer' }}>Pricing</a>
+            <a href="#faq" onClick={(e) => { e.preventDefault(); smoothScrollTo('faq'); }} style={{ cursor: 'pointer' }}>FAQ</a>
             <a href="/join-membership" className='type2'>Apply for Membership <OfflineBoltIcon /></a>
           </div>
         </div>
@@ -223,7 +238,7 @@ const Landing = () => {
           Apply for Membership <OfflineBoltIcon />
         </a>
 
-        <div className="dancing-scroll-action">
+        <div className="dancing-scroll-action" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
           <ExpandMoreIcon />
         </div>
       </Page1>
@@ -259,7 +274,49 @@ const Landing = () => {
         <div className="container1000">
           <div className="square-2">
             <div className="svgs">
-              <img src="https://cdn-icons-png.flaticon.com/512/12891/12891962.png" alt="" />
+              <div className="svg">
+                <svg
+                  width="56"
+                  height="56"
+                  viewBox="0 0 56 56"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 24C18 18.477 22.477 14 28 14C33.523 14 38 18.477 38 24V31.5C38 33.433 38.784 35.285 40.18 36.68L41 37.5H15L15.82 36.68C17.216 35.285 18 33.433 18 31.5V24Z"
+                    fill="#FFC107"
+                  />
+
+                  <path
+                    d="M24 40C24 42.209 25.791 44 28 44C30.209 44 32 42.209 32 40H24Z"
+                    fill="#FFB300"
+                  />
+
+                  <circle cx="28" cy="36.5" r="2" fill="#FFA000" />
+
+                  <path
+                    d="M22 24C22 21 24.5 18.5 28 18.5"
+                    stroke="white"
+                    stroke-opacity="0.6"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+
+                  <path
+                    d="M12 26C9 24 9 20 12 18"
+                    stroke="#FFC107"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                  />
+
+                  <path
+                    d="M44 26C47 24 47 20 44 18"
+                    stroke="#FFC107"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div>
             </div>
             <div className="title">
               Apply Before the Crowd Does - Get alerted when jobs go live - Only career page links
@@ -275,7 +332,27 @@ const Landing = () => {
           </div>
           <div className="square">
             <div className="svgs">
-              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScrFR--_rw_Vwik6x4ELXgo1QRTWZg-gzGyw&s" alt="" />
+              <div className="svg">
+                <svg
+                  width="56"
+                  height="56"
+                  viewBox="0 0 56 56"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <text
+                    x="28"
+                    y="36"
+                    text-anchor="middle"
+                    font-size="24"
+                    font-weight="800"
+                    fill="#FFC107"
+                    font-family="Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+                  >
+                    3×
+                  </text>
+                </svg>
+              </div>
             </div>
             <div className="title">
               Outreach with company employees and recruiters.
@@ -307,7 +384,27 @@ const Landing = () => {
           </div>
           <div className="square">
             <div className="svgs">
-              <img style={{ "width": "80px" }} src="https://png.pngtree.com/png-vector/20240607/ourmid/pngtree-golden-colour-number-1000-png-image_12648259.png" alt="" />
+              <div className="svg">
+                <svg
+                  width="56"
+                  height="56"
+                  viewBox="0 0 56 56"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <text
+                    x="28"
+                    y="36"
+                    text-anchor="middle"
+                    font-size="22"
+                    font-weight="800"
+                    fill="#FFC107"
+                    font-family="Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+                  >
+                    1000
+                  </text>
+                </svg>
+              </div>
             </div>
             <div className="title">
               Exclusive <br /> 1,000-member cap
@@ -320,25 +417,54 @@ const Landing = () => {
               <div className="tag">Exclusive Club</div>
             </div>
           </div>
-
           <div className="square">
             <div className="svgs">
-              <img src="https://static.vecteezy.com/system/resources/previews/016/716/480/non_2x/whatsapp-icon-free-png.png" alt="" />
-            </div>
+              <div className="svg">
+                <svg
+                  width="56"
+                  height="56"
+                  viewBox="0 0 56 56"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <text
+                    x="28"
+                    y="26"
+                    text-anchor="middle"
+                    font-size="16"
+                    font-weight="800"
+                    fill="#FFC107"
+                    font-family="Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+                  >
+                    100%
+                  </text>
 
+                  <text
+                    x="28"
+                    y="42"
+                    text-anchor="middle"
+                    font-size="16"
+                    font-weight="800"
+                    fill="#FFC107"
+                    font-family="Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+                  >
+                    OFF
+                  </text>
+                </svg>
+
+              </div>
+            </div>
             <div className="title">
-              No Job in 6 Months? We Escalate.
+              Get Placed. Get 100% Back.
             </div>
-
             <div className="desc">
-              If you don’t land a job or internship within 6 months of active participation, you’ll be added to a private group of professionals from 10+ companies for daily profile reviews, referrals, and hiring guidance.
+              If you're confident in landing a job or internship, this is effectively your free ticket get placed during mentorship and we refund your membership payment.
             </div>
-
+            <u><b>Terms apply</b> - eg. verify using official selection emails or offer letters.</u>
             <div className="tags">
-              <div className="tag">Exclusive Club</div>
+              <div className="tag">100% Money Back</div>
             </div>
           </div>
-
         </div>
 
         <div className="request-feature">
@@ -516,18 +642,9 @@ const Landing = () => {
               )}
             </div>
             <div className="advantage-points">
-              <div className="point">
-                <CheckCircleIcon /> All Starter features included
-              </div>
-
-              <div className="point">
-                <CheckCircleIcon /> Priority access to Outreach features
-              </div>
-
-              <div className="point">
-                <CheckCircleIcon /> Added to a WhatsApp group with peers to discuss job updates, interviews, and opportunities
-              </div>
-
+              <div className="point"><CheckCircleIcon /> All Starter features included</div>
+              <div className="point"><CheckCircleIcon /> <p>100% money-back guarantee if placed <u>Terms apply</u></p></div>
+              <div className="point"><CheckCircleIcon /> Priority support</div>
             </div>
             <a href="/join-membership" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
           </div>
@@ -570,17 +687,9 @@ const Landing = () => {
               )}
             </div>
             <div className="advantage-points">
-              <div className="point">
-                <CheckCircleIcon /> All Growth features included
-              </div>
-              <div className="point">
-                <CheckCircleIcon />
-                Private access to professionals from 10+ companies if not placed in 6 months
-              </div>
-              <div className="point">
-                <CheckCircleIcon />
-                1 free mock interview per month with a FAANG-level professional
-              </div>
+              <div className="point"><CheckCircleIcon /> All Growth features included</div>
+              <div className="point"><CheckCircleIcon /> Free mock interviews with FAANG employees</div>
+              <div className="point"><CheckCircleIcon /> Outreach feature priority</div>
             </div>
             <a href="/join-membership" className='apply-btn'>Apply for Membership <OfflineBoltIcon /></a>
           </div>
@@ -654,10 +763,10 @@ const Landing = () => {
 
           <div className="col">
             <div className="heading">Product</div>
-            <a href="#features">Features</a>
-            <a href="#compare">Compare</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#faq">FAQ</a>
+            <a href="#features" onClick={(e) => { e.preventDefault(); smoothScrollTo('features'); }} style={{ cursor: 'pointer' }}>Features</a>
+            <a href="#compare" onClick={(e) => { e.preventDefault(); smoothScrollTo('compare'); }} style={{ cursor: 'pointer' }}>Compare</a>
+            <a href="#pricing" onClick={(e) => { e.preventDefault(); smoothScrollTo('pricing'); }} style={{ cursor: 'pointer' }}>Pricing</a>
+            <a href="#faq" onClick={(e) => { e.preventDefault(); smoothScrollTo('faq'); }} style={{ cursor: 'pointer' }}>FAQ</a>
           </div>
 
           <div className="col">
@@ -686,7 +795,8 @@ const Landing = () => {
 export default Landing
 
 const Container = styled.div`
-  width: 100vw; 
+  width: 100vw;
+  padding-top: 40px;
 
   @media (max-width: 500px) {
     .no-mobile{
@@ -717,6 +827,12 @@ const Navbar = styled.div`
 
     font-size: 0.85rem;
     font-weight: 300;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 
     span {
       color: white;
@@ -960,8 +1076,24 @@ const Page1 = styled.div`
     left: 50%;
     transform: translateX(-50%);
     cursor: pointer;
+    transition: all 0.3s ease;
+    animation: float 3s ease-in-out infinite;
 
-    animation: scrollBounce 1.8s ease-in-out infinite;
+    &:hover {
+      transform: translateX(-50%) scale(1.1);
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translate(-50%, 0);
+      opacity: 0.8;
+    }
+    50% {
+      transform: translate(-50%, -15px);
+      opacity: 1;
+    }
   }
 
   @keyframes scrollBounce {
@@ -1630,8 +1762,7 @@ const PageBetween = styled.div`
 
 const Table = styled.div`
   width: 100%;
-  /* margin-top: 40px; */
-  scale: 0.85;
+  margin-top: 40px;
 
   /* Wrapper for mobile responsiveness */
   .comparison-wrapper {
