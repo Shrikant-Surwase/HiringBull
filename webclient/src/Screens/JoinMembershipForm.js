@@ -14,7 +14,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import InfoIcon from '@material-ui/icons/Info';
 
 const JoinMembershipForm = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2);
   const [isExperienced, setIsExperienced] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
@@ -119,6 +119,13 @@ const JoinMembershipForm = () => {
     return null;
   };
 
+  const [isDiscountApplied, setIsDiscountApplied] = useState(false);
+
+  const handleReferralClick = () => {
+    setIsDiscountApplied(!isDiscountApplied);
+  };
+
+
 
   return (
     <Container>
@@ -218,7 +225,6 @@ const JoinMembershipForm = () => {
               <h2>Beyond early access, HiringBull enables limited, high-signal outreach to verified employees and recruiters through curated communities. Outreach is capped to prevent spam and ensure that messages remain meaningful, relevant, and respectful of the people reviewing them.</h2>
 
               <h2>To maintain quality and fairness, every membership is manually reviewed and approved within 24–48 hours. If an application is not approved, the payment is automatically refunded, ensuring a risk-free and transparent experience for every applicant.</h2>
-              <a href='/' className="link">Explore all features in detail ↗</a>
               <div className="next-btn" onClick={() => setCurrentStep(2)}>Continue to Your Details →</div>
             </OneContent>
           ) : (
@@ -239,39 +245,62 @@ const JoinMembershipForm = () => {
                 {/* Full Name */}
                 <div className="input">
                   <div className="left">
-                    <div className="label">Full Name</div>
+                    <div className="label-row">
+                      <div className="label">Full Name</div>
+                      <div className="status">{renderStatus(formData.fullName)}</div>
+                    </div>
                     <input
                       type="text"
                       value={formData.fullName}
                       onChange={handleChange("fullName")}
                     />
                   </div>
-                  <div className="status">
-                    {renderStatus(formData.fullName)}
-                  </div>
                 </div>
 
                 {/* Email */}
                 <div className="input">
                   <div className="left">
-                    <div className="label">Email</div>
+                    <div className="label-row">
+                      <div className="label">Email</div>
+                      <div className="status">
+                        {renderStatus(formData.email, true, isValidEmail)}
+                      </div>
+                    </div>
                     <input
                       type="email"
                       value={formData.email}
                       onChange={handleChange("email")}
                     />
                   </div>
-                  <div className="status">
-                    {renderStatus(formData.email, true, isValidEmail)}
-                  </div>
                 </div>
 
+                {/* Phone */}
+                <div className="input">
+                  <div className="left">
+                    <div className="label-row">
+                      <div className="label">
+                        Phone (Optional, share if you want to join whatsapp grp)
+                      </div>
+                      <div className="status">{renderStatus(formData.phone, false)}</div>
+                    </div>
+                    <input
+                      type="number"
+                      value={formData.phone}
+                      onChange={handleChange("phone")}
+                    />
+                  </div>
+                </div>
 
                 {/* Social Profile */}
                 <div className="input">
                   <div className="left">
-                    <div className="label">
-                      Social Profile <span>(Portfolio / GitHub / LinkedIn)</span>
+                    <div className="label-row">
+                      <div className="label">
+                        Social Profile <span>(Portfolio / GitHub / LinkedIn)</span>
+                      </div>
+                      <div className="status">
+                        {renderStatus(formData.socialProfile, true, isValidUrl)}
+                      </div>
                     </div>
                     <input
                       type="url"
@@ -279,9 +308,6 @@ const JoinMembershipForm = () => {
                       value={formData.socialProfile}
                       onChange={handleChange("socialProfile")}
                     />
-                  </div>
-                  <div className="status">
-                    {renderStatus(formData.socialProfile, true, isValidUrl)}
                   </div>
                 </div>
 
@@ -301,58 +327,62 @@ const JoinMembershipForm = () => {
 
                 {/* Experienced Professional Fields */}
                 {isExperienced && (
-                  <>
-                    <div className="input">
-                      <div className="left">
+                  <div className="input">
+                    <div className="left">
+                      <div className="label-row">
                         <div className="label">Current Company</div>
-                        <input
-                          type="text"
-                          value={formData.currentCompany}
-                          onChange={handleChange("currentCompany")}
-                        />
+                        <div className="status">
+                          {renderStatus(formData.currentCompany)}
+                        </div>
                       </div>
-                      <div className="status">
-                        {renderStatus(formData.currentCompany)}
-                      </div>
+                      <input
+                        type="text"
+                        value={formData.currentCompany}
+                        onChange={handleChange("currentCompany")}
+                      />
                     </div>
-
-                    <div className="input">
-                      <div className="left">
-                        <div className="label">Years of Experience</div>
-                        <input
-                          type="number"
-                          value={formData.yearsOfExperience}
-                          onChange={handleChange("yearsOfExperience")}
-                        />
-                      </div>
-                      <div className="status">
-                        {renderStatus(formData.yearsOfExperience)}
-                      </div>
-                    </div>
-                  </>
+                  </div>
                 )}
+
+                {/* Why Membership */}
+                <div className="input">
+                  <div className="left">
+                    <div className="label-row">
+                      <div className="label">Why do you want the Memebership</div>
+                      <div className="status"></div>
+                    </div>
+                    <input type="text" />
+                  </div>
+                </div>
 
                 {/* Student / Fresher Fields */}
                 {!isExperienced && (
                   <>
                     <div className="input">
                       <div className="left">
-                        <div className="label">College Name</div>
+                        <div className="label-row">
+                          <div className="label">College Name</div>
+                          <div className="status">
+                            {renderStatus(formData.collegeName)}
+                          </div>
+                        </div>
                         <input
                           type="text"
                           value={formData.collegeName}
                           onChange={handleChange("collegeName")}
                         />
                       </div>
-                      <div className="status">
-                        {renderStatus(formData.collegeName)}
-                      </div>
                     </div>
 
                     <div className="input">
                       <div className="left">
-                        <div className="label">
-                          Field of Study <span>(Optional)</span>
+                        <div className="label-row">
+                          <div className="label">
+                            Field of Study <span>(Optional)</span>
+                          </div>
+                          <div className="status">
+                            {renderStatus(formData.fieldOfStudy, false)}
+                          </div>
                         </div>
                         <input
                           type="text"
@@ -360,22 +390,21 @@ const JoinMembershipForm = () => {
                           onChange={handleChange("fieldOfStudy")}
                         />
                       </div>
-                      <div className="status">
-                        {renderStatus(formData.fieldOfStudy, false)}
-                      </div>
                     </div>
 
                     <div className="input">
                       <div className="left">
-                        <div className="label">Expected Year of Passout</div>
+                        <div className="label-row">
+                          <div className="label">Expected Year of Passout</div>
+                          <div className="status">
+                            {renderStatus(formData.passoutYear)}
+                          </div>
+                        </div>
                         <input
                           type="number"
                           value={formData.passoutYear}
                           onChange={handleChange("passoutYear")}
                         />
-                      </div>
-                      <div className="status">
-                        {renderStatus(formData.passoutYear)}
                       </div>
                     </div>
                   </>
@@ -384,9 +413,14 @@ const JoinMembershipForm = () => {
                 {/* Tried Alternatives */}
                 <div className="input">
                   <div className="left">
-                    <div className="label">
-                      Have you tried free alternatives like LinkedIn, job portals, or WhatsApp
-                      groups? <span>(Yes / No)</span>
+                    <div className="label-row">
+                      <div className="label">
+                        Have you tried free alternatives like LinkedIn, job portals, or WhatsApp
+                        groups? <span>(Yes / No)</span>
+                      </div>
+                      <div className="status">
+                        {renderStatus(formData.triedAlternatives)}
+                      </div>
                     </div>
                     <input
                       type="text"
@@ -394,34 +428,46 @@ const JoinMembershipForm = () => {
                       onChange={handleChange("triedAlternatives")}
                     />
                   </div>
-                  <div className="status">
-                    {renderStatus(formData.triedAlternatives)}
-                  </div>
                 </div>
 
                 {/* Reason */}
                 <div className="input">
                   <div className="left">
-                    <div className="label">Why do you need HiringBull?</div>
+                    <div className="label-row">
+                      <div className="label">Why do you need HiringBull?</div>
+                      <div className="status">
+                        {formData.reason.length >= 80 ? (
+                          <CheckCircleIcon style={{ fill: "#eebf2f" }} />
+                        ) : submitted ? (
+                          <>
+                            <InfoIcon />
+                            <span>Minimum 80 characters</span>
+                          </>
+                        ) : null}
+                      </div>
+                    </div>
                     <textarea
                       placeholder="e.g. I apply late and miss openings, want early alerts, limited competition, or better visibility with employees."
                       value={formData.reason}
                       onChange={handleChange("reason")}
                     />
                   </div>
-
-                  <div className="status">
-                    {formData.reason.length >= 80 ? (
-                      <CheckCircleIcon style={{ fill: "#eebf2f" }} />
-                    ) : submitted ? (
-                      <>
-                        <InfoIcon />
-                        <span>Minimum 80 characters</span>
-                      </>
-                    ) : null}
-                  </div>
                 </div>
 
+                <p className="acknowledgement">
+                  Your membership is activated immediately. To maintain platform quality, all
+                  applications are reviewed manually within 24–48 hours. If your application
+                  isn’t approved, your membership will be canceled and your full payment will
+                  be refunded automatically — no questions asked.
+                </p>
+
+                <div className="checkbox-input">
+                  <div className="left">
+                    <label>
+                      <input type="checkbox" /> I have read the above
+                    </label>
+                  </div>
+                </div>
 
                 <div className="next-btn" onClick={handleNextPage2}>
                   Continue to Payment →
@@ -448,25 +494,44 @@ const JoinMembershipForm = () => {
                   </div>
 
                   <div className="container600">
+                    {/* --- STARTER PLAN --- */}
                     <div className="square-pricing">
                       <div className="title">Starter Plan - <i>1 Month</i></div>
                       <div className="desc">Best for trying HiringBull</div>
                       <div className="line"></div>
                       <div className="price">
                         <div className="current-amount">
-                          <span>₹199</span> / month
+                          {isDiscountApplied ? (
+                            <>
+                              <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '0.8em', marginRight: '5px' }}>₹249</span>
+                              <span>₹187</span>
+                            </>
+                          ) : (
+                            <span>₹249</span>
+                          )}
+                          / month
                         </div>
-                        <div className="total-amount">
+
+                        {/* <div className="total-amount">
                           ( 1 Month Access )
-                        </div>
+                        </div> */}
+
+                        {/* Savings Badge */}
+                        {isDiscountApplied && (
+                          <div style={{ color: '#16a34a', fontSize: '0.9rem', marginTop: '5px', fontWeight: 'bold' }}>
+                            You saved a total of ₹62
+                          </div>
+                        )}
                       </div>
                       <div className="advantage-points">
                         <div className="point"><CheckCircleIcon /> Early alerts from verified career pages you select</div>
                         <div className="point"><CheckCircleIcon /> Curated hiring signals from social posts</div>
                         <div className="point"><CheckCircleIcon /> Up to 3 outreach requests per month</div>
                       </div>
-                      <a href="/join-membership" className='apply-btn'>Get Starter</a>
+                      <a href="/join-membership" className='apply-btn'>Pay {isDiscountApplied ? "₹187" : "₹249"} <OfflineBoltIcon /></a>
                     </div>
+
+                    {/* --- GROWTH PLAN (Most Popular) --- */}
                     <div className="square-pricing recommended">
                       <div className="tag">Most Popular</div>
                       <div className="title">Growth Plan - <i>3 Months</i></div>
@@ -474,37 +539,100 @@ const JoinMembershipForm = () => {
                       <div className="line"></div>
                       <div className="price">
                         <div className="current-amount">
-                          <span>₹149</span> / month
+                          {isDiscountApplied ? (
+                            <>
+                              <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '0.8em', marginRight: '5px' }}>₹199</span>
+                              {/* 449 / 3 months approx 150 */}
+                              <span>₹150</span>
+                            </>
+                          ) : (
+                            <span>₹199</span>
+                          )}
+                          / month
                         </div>
-                        <div className="total-amount">
-                          ( 3 Month Access - <span>₹447</span> Total )
-                        </div>
+                        {/* <div className="total-amount">
+                          ( 3 Month Access -
+                          {isDiscountApplied ? (
+                            <>
+                              <span style={{ textDecoration: 'line-through', color: '#888', margin: '0 5px' }}>₹599</span>
+                              <span>₹449</span>
+                            </>
+                          ) : (
+                            <span>₹599</span>
+                          )}
+                          Total )
+                        </div> */}
+                        {/* Savings Badge */}
+                        {isDiscountApplied && (
+                          <div style={{ color: '#16a34a', fontSize: '0.9rem', marginTop: '5px', fontWeight: 'bold' }}>
+                            You saved a total of ₹150
+                          </div>
+                        )}
                       </div>
                       <div className="advantage-points">
-                        <div className="point"><CheckCircleIcon /> All Starter features included</div>
-                        <div className="point"><CheckCircleIcon /> <p>100% money-back guarantee if placed <u>Terms apply</u></p></div>
-                        <div className="point"><CheckCircleIcon /> Priority support</div>
+                        <div className="point">
+                          <CheckCircleIcon /> All Starter features included
+                        </div>
+
+                        <div className="point">
+                          <CheckCircleIcon /> Priority access to Outreach features
+                        </div>
+
+                        <div className="point">
+                          <CheckCircleIcon /> Added to a WhatsApp group with peers to discuss job updates, interviews, and opportunities
+                        </div>
+
                       </div>
-                      <a href="/join-membership" className='apply-btn'>Get Growth</a>
+                      <a href="/join-membership" className='apply-btn'>Pay ₹249 <OfflineBoltIcon /></a>
                     </div>
+
+                    {/* --- PRO PLAN --- */}
                     <div className="square-pricing">
                       <div className="title">Pro Plan - <i>6 Months</i></div>
                       <div className="desc">Maximum Advantage 🔥</div>
                       <div className="line"></div>
                       <div className="price">
                         <div className="current-amount">
-                          <span>₹119</span> / month
+                          {isDiscountApplied ? (
+                            <>
+                              <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '0.8em', marginRight: '5px' }}>₹167</span>
+                              {/* 749 / 6 months approx 125 */}
+                              <span>₹125</span>
+                            </>
+                          ) : (
+                            <span>₹167</span>
+                          )}
+                          / month
                         </div>
-                        <div className="total-amount">
-                          ( 6 Month Access - <span>₹714</span> Total )
-                        </div>
+                        {/* <div className="total-amount">
+                          ( 6 Month Access -
+                          {isDiscountApplied ? (
+                            <>
+                              <span style={{ textDecoration: 'line-through', color: '#888', margin: '0 5px' }}>₹999</span>
+                              <span>₹749</span>
+                            </>
+                          ) : (
+                            <span>₹999</span>
+                          )}
+                          Total )
+                        </div> */}
+                        {/* Savings Badge */}
+                        {isDiscountApplied && (
+                          <div style={{ color: '#16a34a', fontSize: '0.9rem', marginTop: '5px', fontWeight: 'bold' }}>
+                            You saved a total of ₹250
+                          </div>
+                        )}
                       </div>
                       <div className="advantage-points">
-                        <div className="point"><CheckCircleIcon /> All Growth features included</div>
-                        <div className="point"><CheckCircleIcon /> Free mock interviews with FAANG employees</div>
-                        <div className="point"><CheckCircleIcon /> Outreach feature priority</div>
+                        <div className="point">
+                          <CheckCircleIcon /> All Growth features included
+                        </div>
+                        <div className="point">
+                          <CheckCircleIcon />
+                          Private access to professionals from 10+ companies if not placed in 6 months
+                        </div>
                       </div>
-                      <a href="/join-membership" className='apply-btn'>Get Pro</a>
+                      <a href="/join-membership" className='apply-btn'>Pay 249 <OfflineBoltIcon /></a>
                     </div>
                   </div>
                 </OneContent>
@@ -519,7 +647,7 @@ const JoinMembershipForm = () => {
   )
 }
 
-export default JoinMembershipForm
+export default JoinMembershipForm;
 
 const Container = styled.div`
   width: 100vw; 
@@ -878,24 +1006,49 @@ const OneContent = styled.div`
       display: flex;
       flex-direction: column;
 
-      .label{
-        font-size: 0.85rem;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        letter-spacing: 0.1rem;
-        font-weight: 600;
-        
-        span{
-          text-transform: none;
-          font-weight: 300;
-          letter-spacing: 0rem;
-          font-style: italic;
+      .label-row{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+
+        .label{
+          font-size: 0.85rem;
+          text-transform: uppercase;
+          letter-spacing: 0.1rem;
+          font-weight: 600;
+          
+          span{
+            text-transform: none;
+            font-weight: 300;
+            letter-spacing: 0rem;
+            font-style: italic;
+          }
         }
+
+        .status{
+          min-width: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          
+
+          svg{
+            font-size: 1rem;
+            margin-right: 2.5px;
+          }
+          span{
+            font-size: 0.7rem;
+            text-align: right;
+          }
+        } 
       }
 
+
       input{
-        background-color: #fff;
-        border: 1px solid grey;
+        background-color: #fafafa;
+        border: 1px solid #d5d5d5;
         width: 100%;
         padding: 7.5px 10px;
         font-size: 0.85rem;
@@ -904,8 +1057,8 @@ const OneContent = styled.div`
       }
 
       textarea{
-        background-color: #fff;
-        border: 1px solid grey;
+        background-color: #fafafa;
+        border: 1px solid #d5d5d5;
         width: 100%;
         padding: 7.5px 10px;
         font-size: 0.85rem;
@@ -915,31 +1068,14 @@ const OneContent = styled.div`
       }
     }
 
-    .status{
-      position: relative;
-      margin-left: 50px;
-      width: 1.75rem;
-      /* border: 1px solid black; */
-      height: 100%;
-      margin-top: 30px;
-      
-      svg{
-        font-size: 1.5rem;
-        
-      }
-      
-      span{
-        position: absolute;
-        font-size: 0.75rem;
-        font-weight: 300;
-        font-style: italic;
-        left: 30px;
-        top: 3px;
-        width: 160px;
-      }
-      
-    } 
     
+    
+  }
+
+  .acknowledgement{
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 20px;
   }
 
   .checkbox-input{
@@ -962,12 +1098,11 @@ const OneContent = styled.div`
 
   .container600{
     width: 100%;
-
     margin: 40px 0;
 
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 460px;
+    grid-auto-rows: 400px;
     gap: 24px;
 
     box-sizing: border-box;
@@ -1045,11 +1180,13 @@ const OneContent = styled.div`
       }
 
       .advantage-points{
+        margin-top: 10px;
+        
         .point{
           display: flex;
-          align-items: center;
+          align-items: flex-start;
 
-          font-size: 0.85rem;
+          font-size: 0.78rem;
           font-weight: 300;
           margin-top: 10px;
 
@@ -1151,6 +1288,7 @@ const OneContent = styled.div`
     /* align-items: center; */
     margin-bottom: 30px;
     width: 100%;
+    
     .title{
       font-size: 1rem;
       font-weight: 300;
@@ -1160,21 +1298,19 @@ const OneContent = styled.div`
     }
 
     .input{
-      width: 80%;
+      width: 500px;
       display: flex;
-      align-items: center;
+      /* flex-direction: column; */
       
       input{
-        background-color: #fff;
-        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-        border: 1px solid #000;
+        background-color: #f5f5f5;
+        border: 1px solid #b2b0b0;
         width: 100%;
         padding: 7.5px 10px;
         font-size: 0.85rem;
         font-weight: 300;
-        letter-spacing: 0.1rem;
-        margin-right: 10px;
         border-radius: 10px;
+        margin-right: 20px;
       }
 
       button{
@@ -1183,9 +1319,8 @@ const OneContent = styled.div`
           border: none;
           color: white;
           padding: 9.5px 20px;
-          font-size: 0.85rem;
-          font-weight: 500;
-          letter-spacing: 0.1rem;
+          font-size: 0.75rem;
+          font-weight: 300;
           border-radius: 100px;
       }
     }
@@ -1251,8 +1386,8 @@ const OneContent = styled.div`
         }
 
         input{
-          background-color: #fff;
-          border: 1px solid grey;
+          background-color: #fafafa;
+          border: 1px solid #d5d5d5;
           width: 100%;
           padding: 7.5px 10px;
           font-size: 0.85rem;
@@ -1261,8 +1396,8 @@ const OneContent = styled.div`
         }
 
         textarea{
-          background-color: #fff;
-          border: 1px solid grey;
+          background-color: #fafafa;
+          border: 1px solid #d5d5d5;
           width: 100%;
           padding: 7.5px 10px;
           font-size: 0.85rem;
@@ -1271,30 +1406,6 @@ const OneContent = styled.div`
           height: 160px;
         }
       }
-
-      .status{
-        display: flex;
-        justify-content: flex-start;
-        width: auto;
-        margin-top: 5px;
-        width: 100%;
-        margin-left: 0;
-        
-        svg{
-          font-size: 1.25rem;
-          margin-top: 2px;
-          margin-right: 0;
-        }
-        
-        span{
-          position: relative;
-          width: auto;
-          /* border: 1px solid black; */
-          margin-left: -20px;
-        }
-        
-      } 
-      
     }
 
     .referral{
@@ -1311,29 +1422,7 @@ const OneContent = styled.div`
         flex-direction: column;
 
         input{
-          background-color: #fff;
-          box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-          border: 1px solid #000;
-          width: 100%;
-          padding: 7.5px 10px;
-          font-size: 0.85rem;
-          font-weight: 300;
-          letter-spacing: 0.1rem;
-          margin-right: 10px;
-          border-radius: 10px;
           margin-bottom: 10px;
-        }
-
-        button{
-            cursor: pointer;
-            background-color: black;
-            border: none;
-            color: white;
-            padding: 9.5px 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            letter-spacing: 0.1rem;
-            border-radius: 100px;
         }
       }
     }
