@@ -173,7 +173,12 @@ export default function Login() {
           strategy: 'email_code',
           code: otp,
         });
-        console.log(' SignIn result status:', res.status, 'sessionId:', res.createdSessionId);
+        console.log(
+          ' SignIn result status:',
+          res.status,
+          'sessionId:',
+          res.createdSessionId
+        );
 
         if (res.status === 'complete' && setActiveSignIn) {
           console.log('Setting active session...');
@@ -188,7 +193,12 @@ export default function Login() {
       if (authMode === 'signUp' && signUp) {
         console.log(' Attempting signUp.attemptEmailAddressVerification...');
         const res = await signUp.attemptEmailAddressVerification({ code: otp });
-        console.log(' SignUp result status:', res.status, 'sessionId:', res.createdSessionId);
+        console.log(
+          ' SignUp result status:',
+          res.status,
+          'sessionId:',
+          res.createdSessionId
+        );
         console.log(' SignUp missingFields:', res.missingFields);
         console.log(' SignUp unverifiedFields:', res.unverifiedFields);
 
@@ -317,12 +327,7 @@ export default function Login() {
               </View>
 
               {/* 6-box OTP Input */}
-              <OTPInput
-                value={otp}
-                onChange={setOtp}
-                length={6}
-                autoFocus
-              />
+              <OTPInput value={otp} onChange={setOtp} length={6} autoFocus />
               {error ? (
                 <View className="mt-4 flex-row items-center">
                   <Ionicons
@@ -332,20 +337,6 @@ export default function Login() {
                     style={{ marginRight: 6 }}
                   />
                   <Text className="text-left text-sm text-red-500">
-                    {error}
-                  </Text>
-                </View>
-              ) : null}
-
-              {error ? (
-                <View className="mt-4 flex-row items-center justify-center">
-                  <Ionicons
-                    name="information-circle"
-                    size={20}
-                    color={'#ef4444'}
-                    className="mr-2"
-                  />
-                  <Text className="text-center text-sm text-red-500">
                     {error}
                   </Text>
                 </View>

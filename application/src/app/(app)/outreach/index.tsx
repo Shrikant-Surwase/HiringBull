@@ -253,7 +253,7 @@ export default function Outreach() {
             <View>
               <View className="self-start">
                 <Pressable
-                  onPress={() => router.push('/outreach/Requests')}
+                  onPress={() => router.push('/outreach/requests')}
                   className="flex-row items-center gap-2 rounded-lg bg-neutral-100 px-4 py-2"
                 >
                   <Text className="font-medium text-neutral-900">
