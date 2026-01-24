@@ -1,47 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { FlatList, Image, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
-
 import { FocusAwareStatusBar } from '@/components/ui';
+import { useMyOutreachRequests } from '@/api/outreach/useMyOutreachRequests';
+import { hideGlobalLoading, showGlobalLoading } from '@/lib';
 type Company = {
   id: string;
   name: string;
   icon: string;
 };
-const MOCK_REQUESTS: OutreachRequest[] = [
-  {
-    id: '1',
-    company: {
-      id: 'c1',
-      name: 'Google',
-      icon: 'https://logo.clearbit.com/google.com',
-    },
-    sentAt: '12 Jan 2026',
-    status: 'delivered',
-  },
-  {
-    id: '2',
-    company: {
-      id: 'c2',
-      name: 'Netflix',
-      icon: 'https://logo.clearbit.com/netflix.com',
-    },
-    sentAt: '14 Jan 2026',
-    status: 'replied',
-  },
-];
-
-const MOCK_REPLIES = [
-  {
-    requestId: '2',
-    message:
-      'Thanks for reaching out! We are reviewing your profile and will get back soon.',
-  },
-];
+const formatDate = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+    : '';
 
 type OutreachRequest = {
   id: string;
@@ -91,7 +70,53 @@ type Tab = (typeof TABS)[number];
 const Request = () => {
   const [activeTab, setActiveTab] = useState<Tab>('Sent');
 
-  const repliedRequests = MOCK_REQUESTS.filter((r) => r.status === 'replied');
+  const { data, isLoading, isError, refetch, isFetching } =
+    useMyOutreachRequests();
+  const requests: OutreachRequest[] =
+    data?.map((item) => ({
+      id: item.id,
+      company: {
+        id: item.companyName.toLowerCase(),
+        name: item.companyName,
+        icon: `https://logo.clearbit.com/${item.companyName.toLowerCase()}.com`,
+      },
+      sentAt: formatDate(item.sentAt || item.createdAt),
+      status: item.status === 'REPLIED' ? 'replied' : 'delivered',
+    })) ?? [];
+  const repliedRequests = requests.filter((r) => r.status === 'replied');
+  console.log('Outreach Requests:', requests);
+  useEffect(() => {
+    if (isLoading) {
+      showGlobalLoading();
+    } else {
+      hideGlobalLoading();
+    }
+
+    return () => {
+      hideGlobalLoading();
+    };
+  }, [isLoading]);
+
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white px-6">
+        <Ionicons name="alert-circle-outline" size={40} color="#dc2626" />
+        <Text className="mt-3 text-lg font-semibold text-neutral-900">
+          Something went wrong
+        </Text>
+        <Text className="mt-1 text-center text-neutral-500">
+          Unable to load your outreach requests. Please try again.
+        </Text>
+
+        <Pressable
+          onPress={() => refetch()}
+          className="mt-4 rounded-lg bg-neutral-900 px-6 py-3"
+        >
+          <Text className="font-semibold text-white">Retry</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -141,12 +166,19 @@ const Request = () => {
       <View className="flex-1">
         {activeTab === 'Sent' && (
           <FlatList
-            data={MOCK_REQUESTS}
+            data={requests}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => <SentCard item={item} />}
+            refreshing={isFetching}
+            onRefresh={refetch}
             ItemSeparatorComponent={() => (
               <View className="mx-4 h-[1px] bg-neutral-200" />
             )}
+            ListEmptyComponent={
+              <Text className="mt-10 text-center text-neutral-400">
+                No outreach sent yet
+              </Text>
+            }
           />
         )}
 
@@ -154,16 +186,14 @@ const Request = () => {
           <FlatList
             data={repliedRequests}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              const reply = MOCK_REPLIES.find((r) => r.requestId === item.id);
-
-              return (
-                <View>
-                  <SentCard item={item} />
-                  {reply && <ReplyBubble message={reply.message} />}
-                </View>
-              );
-            }}
+            refreshing={isFetching}
+            onRefresh={refetch}
+            renderItem={({ item }) => (
+              <View>
+                <SentCard item={item} />
+                <ReplyBubble message="Recruiter has replied to your outreach" />
+              </View>
+            )}
             ItemSeparatorComponent={() => (
               <View className="mx-4 h-[1px] bg-neutral-200" />
             )}

@@ -244,7 +244,7 @@ export default function SocialPosts() {
             <View className="flex-1">
               <Input
                 isSearch
-                placeholder="Search Jobs"
+                placeholder="Search Posts"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />

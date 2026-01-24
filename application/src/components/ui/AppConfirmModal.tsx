@@ -1,13 +1,10 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import React, { forwardRef } from 'react';
 import { Dimensions, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Modal, Text, View } from '@/components/ui';
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// Set modal height dynamically based on screen height
-const MODAL_HEIGHT = SCREEN_HEIGHT * 0.35; // 25% of screen height
 
 type AppConfirmModalProps = {
   title: string;
@@ -32,6 +29,14 @@ export const AppConfirmModal = forwardRef<
   },
   ref
 ) {
+  const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+  const insets = useSafeAreaInsets();
+
+  const TAB_BAR_HEIGHT = 56;
+  const MODAL_HEIGHT = Math.min(
+    SCREEN_HEIGHT * 0.3,
+    SCREEN_HEIGHT - TAB_BAR_HEIGHT - insets.bottom - 32
+  );
   return (
     <Modal ref={ref} snapPoints={[MODAL_HEIGHT]}>
       <View className="flex-1 px-6">
