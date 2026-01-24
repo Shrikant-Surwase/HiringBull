@@ -241,11 +241,11 @@ export default function Login() {
           entering={FadeInUp.duration(400)}
           className="flex-1 rounded-t-3xl bg-white px-6 pt-8"
         >
-          <Text className="text-center text-3xl font-bold text-neutral-900">
+          <Text className="text-center font-['Montez'] text-3xl text-neutral-900">
             Welcome
           </Text>
 
-          <Text className="mt-2 my-5 text-center text-neutral-500">
+          <Text className="my-5 mt-2 text-center text-neutral-500">
             Find your dream job effortlessly
           </Text>
 
@@ -253,8 +253,8 @@ export default function Login() {
 
           {step === 'email' ? (
             <>
-              <Text className="mb-2 text-base font-semibold text-neutral-700">
-                Enter Email
+              <Text className="mb-2 text-base font-semibold text-neutral-500">
+                Enter Email Address
               </Text>
               <Input
                 placeholder="example@gmail.com"
@@ -323,14 +323,27 @@ export default function Login() {
                 length={6}
                 autoFocus
               />
+              {error ? (
+                <View className="mt-4 flex-row items-center">
+                  <Ionicons
+                    name="information-circle"
+                    size={20}
+                    color="#ef4444"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text className="text-left text-sm text-red-500">
+                    {error}
+                  </Text>
+                </View>
+              ) : null}
 
               {error ? (
                 <View className="mt-4 flex-row items-center justify-center">
                   <Ionicons
                     name="information-circle"
                     size={20}
-                    color="#ef4444"
-                    style={{ marginRight: 6 }}
+                    color={'#ef4444'}
+                    className="mr-2"
                   />
                   <Text className="text-center text-sm text-red-500">
                     {error}

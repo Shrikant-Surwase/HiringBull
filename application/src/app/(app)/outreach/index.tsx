@@ -18,6 +18,7 @@ import {
 } from '@/components/ui';
 import { useOutreachForm } from '@/lib/hooks/use-outreach-form';
 import { useSendLimitStore } from '@/lib/stores/send-limit-store';
+import { useSendOutreach } from '@/api/outreach/useSendOutreach';
 
 type Company = {
   id: string;
@@ -89,7 +90,7 @@ function CompanyCard({
   return (
     <Pressable
       onPress={onPress}
-      className={`relative aspect-square flex-1 items-center justify-center rounded-xl border bg-white ${
+      className={`relative aspect-square w-[22%] items-center justify-center rounded-xl border bg-white ${
         selected ? 'border-primary-600' : 'border-neutral-200'
       }`}
     >
@@ -127,6 +128,8 @@ export default function Outreach() {
   const canSendNow = canSend() && isFormValid;
 
   const messageRef = useRef<TextInput>(null);
+  const { mutate: sendOutreach, isPending } = useSendOutreach();
+
 
   useEffect(() => {
     resetIfNewMonth();
@@ -145,13 +148,35 @@ export default function Outreach() {
   }, [selectedCompany]);
   const modalRef = useRef<BottomSheetModal>(null);
   const handleSend = () => {
-    if (!canSendNow) return;
+    if (!canSendNow || !selectedCompany) return;
 
-    increment();
-    onSubmit();
-    reset({ email });
-    modalRef.current?.dismiss();
+    const values = form.getValues();
+    console.log('Sending outreach with values:', values);
+
+    sendOutreach(
+      {
+        email: values.email,
+        companyName: selectedCompany.name,
+        reason: values.reason,
+        jobId: values.jobId,
+        resumeLink: values.resumeLink,
+        message: values.message,
+      },
+      {
+        onSuccess: (res) => {
+          increment(); // consume credit
+          reset({ email }); // reset form except email
+          modalRef.current?.dismiss();
+          console.log('Outreach sent successfully', res.message);
+        },
+        onError: (error) => {
+          console.log('Outreach failed:', error);
+          console.log(error.response?.data);
+        },
+      }
+    );
   };
+
 
   const filteredCompanies = COMPANIES.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -209,7 +234,7 @@ export default function Outreach() {
         <FlatList
           data={filteredCompanies}
           numColumns={4}
-          columnWrapperStyle={{ gap: 12 }}
+          columnWrapperStyle={{ gap: 12, justifyContent: 'flex-start' }}
           contentContainerStyle={{
             gap: 12,
             padding: 12,
@@ -314,8 +339,8 @@ export default function Outreach() {
           />
 
           <Button
-            label="Send Message"
-            disabled={!canSendNow}
+            label={isPending ? 'Sending...' : 'Send Message'}
+            disabled={!canSendNow || isPending}
             onPress={handleSend}
             className="mt-4"
           />
