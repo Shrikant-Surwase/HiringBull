@@ -14,7 +14,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import InfoIcon from '@material-ui/icons/Info';
 
 const JoinMembershipForm = () => {
-  const [currentStep, setCurrentStep] = useState(2);
+  const [currentStep, setCurrentStep] = useState(1);
   const [isExperienced, setIsExperienced] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
