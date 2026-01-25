@@ -34,6 +34,23 @@ const JoinMembershipForm = () => {
     isDiscountApplied: false
   });
 
+  useEffect(() => {
+  // 🔧 TESTING ONLY — remove before prod
+  setFormData(prev => ({
+    ...prev,
+    fullName: "Test User",
+    email: "test.user@gmail.com",
+    phone: "9999999999",
+    socialProfile: "https://linkedin.com/in/testuser",
+    currentCompany: "Test Company",
+    yearsOfExperience: "2",
+    triedAlternatives: "Yes",
+    whyMembership: "Testing membership flow",
+    reason: "This is dummy data for testing purposes only. I want to test form validation and submission flow.",
+    acknowledged: true
+  }));
+}, []);
+
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
@@ -57,7 +74,7 @@ const JoinMembershipForm = () => {
 
   const validateField = (name, value) => {
     const newErrors = { ...errors };
-    
+
     switch (name) {
       case 'email':
         if (!isValidEmail(value)) {
@@ -87,14 +104,14 @@ const JoinMembershipForm = () => {
           delete newErrors[name];
         }
     }
-    
+
     setErrors(newErrors);
   };
 
   const handleChange = (key) => (e) => {
     const value = e.target.value;
     setFormData({ ...formData, [key]: value });
-    
+
     // Real-time validation
     if (submitted) {
       validateField(key, value);
@@ -119,31 +136,31 @@ const JoinMembershipForm = () => {
 
     // Validate all fields
     const newErrors = {};
-    
+
     if (!isValidEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     if (!isValidUrl(formData.socialProfile)) {
       newErrors.socialProfile = 'Please enter a valid URL';
     }
-    
+
     if (formData.reason.length < 80) {
       newErrors.reason = 'Please provide at least 80 characters';
     }
-    
+
     if (!formData.fullName.trim()) {
       newErrors.fullName = 'Full name is required';
     }
-    
+
     if (!formData.whyMembership.trim()) {
       newErrors.whyMembership = 'This field is required';
     }
-    
+
     if (!formData.triedAlternatives.trim()) {
       newErrors.triedAlternatives = 'This field is required';
     }
-    
+
     if (formData.experience === 'professional') {
       if (!formData.currentCompany.trim()) {
         newErrors.currentCompany = 'Current company is required';
@@ -159,18 +176,27 @@ const JoinMembershipForm = () => {
         newErrors.passoutYear = 'Passout year is required';
       }
     }
-    
+
+    if (!formData.acknowledged) {
+      newErrors.acknowledged = 'You must acknowledge before continuing';
+    }
+
     setErrors(newErrors);
 
-    const allValid = requiredFields.every(Boolean) && Object.keys(newErrors).length === 0;
+    const allValid =
+      requiredFields.every(Boolean) &&
+      Object.keys(newErrors).length === 0 &&
+      formData.acknowledged;
 
     console.log('====================================');
     console.log(formData);
     console.log('====================================');
 
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsSubmitting(false);
+
       if (allValid) {
+        await submitApplication(); // 🔥 API CALL
         setCurrentStep(3);
       }
     }, 1000);
@@ -228,6 +254,29 @@ const JoinMembershipForm = () => {
     }
   };
 
+  const submitApplication = async () => {
+    const payload = {
+      full_name: formData.fullName,
+      email: formData.email,
+      phone: formData.phone || "",
+      social_profile: formData.socialProfile,
+      is_experienced: formData.experience === "professional",
+      college_name: formData.experience === "student" ? formData.collegeName : "",
+      field_of_study: formData.fieldOfStudy || "",
+      passout_year: formData.passoutYear ? Number(formData.passoutYear) : null,
+      why_membership: formData.whyMembership,
+      tried_alternatives: formData.triedAlternatives,
+      reason: formData.reason,
+    };
+
+    await fetch("https://api.hiringbull.org/api/application", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+  };
 
 
   return (
@@ -397,7 +446,7 @@ const JoinMembershipForm = () => {
                       value={formData.phone}
                       onChange={handleChange("phone")}
                       aria-label="Phone number (optional)"
-                      placeholder="+91 98765 43210"
+                      placeholder="Your phone number"
                     />
                   </div>
                 </div>
@@ -428,7 +477,7 @@ const JoinMembershipForm = () => {
                 <div className="experience-selection">
                   <div className="question">Are you a?</div>
                   <div className="dropdown-container">
-                    <select 
+                    <select
                       value={formData.experience}
                       onChange={(e) => setFormData(prev => ({ ...prev, experience: e.target.value }))}
                       className="experience-dropdown"
@@ -468,8 +517,8 @@ const JoinMembershipForm = () => {
                       <div className="label">Why do you want the Membership</div>
                       <div className="status">{renderStatus(formData.whyMembership)}</div>
                     </div>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={formData.whyMembership}
                       onChange={handleChange("whyMembership")}
                       placeholder="Briefly explain your goals"
@@ -563,32 +612,32 @@ const JoinMembershipForm = () => {
                         value={formData.triedAlternatives}
                         onChange={(e) => handleChange("triedAlternatives")({ target: { value: e.target.value } })}
                       >
-                        <FormControlLabel 
-                          value="Yes" 
-                          control={<Radio sx={{ 
+                        <FormControlLabel
+                          value="Yes"
+                          control={<Radio sx={{
                             color: '#ffc600',
                             '&.Mui-checked': { color: '#ffc600' },
                             '& .MuiSvgIcon-root': { fontSize: 18 }
-                          }} />} 
-                          label="Yes" 
-                          sx={{ 
-                            '& .MuiFormControlLabel-label': { 
+                          }} />}
+                          label="Yes"
+                          sx={{
+                            '& .MuiFormControlLabel-label': {
                               fontSize: '0.85rem',
                               fontWeight: 400,
                               color: '#333'
                             }
                           }}
                         />
-                        <FormControlLabel 
-                          value="No" 
-                          control={<Radio sx={{ 
+                        <FormControlLabel
+                          value="No"
+                          control={<Radio sx={{
                             color: '#ffc600',
                             '&.Mui-checked': { color: '#ffc600' },
                             '& .MuiSvgIcon-root': { fontSize: 18 }
-                          }} />} 
-                          label="No" 
-                          sx={{ 
-                            '& .MuiFormControlLabel-label': { 
+                          }} />}
+                          label="No"
+                          sx={{
+                            '& .MuiFormControlLabel-label': {
                               fontSize: '0.85rem',
                               fontWeight: 400,
                               color: '#333'
@@ -635,17 +684,45 @@ const JoinMembershipForm = () => {
                 </p>
 
                 <div className="checkbox-input">
-                  <div className="left">
-                    <label>
-                      <input 
-                        type="checkbox" 
-                        checked={formData.acknowledged}
-                        onChange={(e) => setFormData(prev => ({ ...prev, acknowledged: e.target.checked }))}
-                        aria-label="I have read and acknowledge the terms"
-                      /> I have read the above
-                    </label>
-                  </div>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={formData.acknowledged}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFormData(prev => ({ ...prev, acknowledged: checked }));
+
+                        if (submitted && !checked) {
+                          setErrors(prev => ({
+                            ...prev,
+                            acknowledged: 'You must acknowledge before continuing'
+                          }));
+                        } else {
+                          setErrors(prev => {
+                            const { acknowledged, ...rest } = prev;
+                            return rest;
+                          });
+                        }
+                      }}
+                    />
+                    I have read the above
+                  </label>
+
+                  {submitted && errors.acknowledged && (
+                    <div className="status">
+                      <InfoIcon />
+                      <span>{errors.acknowledged}</span>
+                    </div>
+                  )}
                 </div>
+
+                {/* Global error banner */}
+                {submitted && Object.keys(errors).length > 0 && (
+                  <div className="form-error-banner">
+                    <InfoIcon />
+                    <span>You have some errors. Please review the form.</span>
+                  </div>
+                )}
 
                 <div className="next-btn" onClick={handleNextPage2} disabled={!formData.acknowledged || isSubmitting} role="button" tabIndex="0" onKeyDown={(e) => e.key === 'Enter' && handleNextPage2()}>
                   {isSubmitting ? "Processing..." : "Continue to Payment →"}
@@ -666,8 +743,8 @@ const JoinMembershipForm = () => {
                   <div className="referral">
                     <div className="title">Have a friend on HiringBull? Enter their membership registered email to get 25% off your plan</div>
                     <div className="input">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         placeholder="Friend's registered email"
                         value={formData.referralEmail}
                         onChange={(e) => setFormData(prev => ({ ...prev, referralEmail: e.target.value }))}
@@ -1048,9 +1125,7 @@ const Pagination = styled.div`
   /* border: 1px solid black; */
   display: flex;
   align-items: center;
-  justify-content: center;
 
-  margin: -40px auto 0 auto;
   width: fit-content;
   padding-top: 0px;
   
@@ -1129,16 +1204,16 @@ const OneContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: flex-start;
 
   /* Fixed height for overview step */
   &.overview-step {
     height: 100%;
-    justify-content: center;
-    align-items: center;
+    /* justify-content: center; */
+    /* align-items: center; */
     text-align: center;
     
     h1, h2 {
-      text-align: center;
       max-width: 800px;
       margin: 0 auto 20px auto;
     }
@@ -1382,16 +1457,15 @@ const OneContent = styled.div`
   }
 
   .checkbox-input{
+    width: 100%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
 
     margin: 25px 0 15px 0;
     padding-left: 2px;
 
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1rem;
-    font-weight: 600;
+    
 
     input{
       margin-right: 8px;
@@ -1403,7 +1477,30 @@ const OneContent = styled.div`
       display: flex;
       align-items: center;
       cursor: pointer;
+
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1rem;
+      font-weight: 600;
     }
+
+    .status{
+      min-width: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      
+
+      svg{
+        font-size: 1rem;
+        margin-right: 2.5px;
+      }
+
+      span{
+        font-size: 0.7rem;
+        text-align: right;
+      }
+    } 
   }
 
   .container600{
@@ -1650,6 +1747,26 @@ const OneContent = styled.div`
             transform: translateY(0);
           }
       }
+    }
+  }
+
+  .form-error-banner{
+    margin-top: 20px;
+    margin-bottom: -30px;
+    
+    display: flex;
+    align-items: center;
+
+    span{
+      color: red;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+
+    svg{
+      fill: red;
+      margin-right: 10px;
     }
   }
 
