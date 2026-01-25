@@ -73,7 +73,7 @@ export default function Landing() {
   };
 
   return (
-    <View className="flex-1 bg-neutral-50 dark:bg-black">
+    <View className="flex-1 bg-slate-50 dark:bg-black">
       <FocusAwareStatusBar />
       <SafeAreaView className="flex-1">
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>

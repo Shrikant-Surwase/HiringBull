@@ -25,10 +25,10 @@ function SocialPostCard({ post }: { post: SocialPost }) {
   }, [post.source_link]);
 
   return (
-    <View className="mb-4 rounded-xl border border-neutral-400 bg-white android:shadow-md ios:shadow-sm">
+    <View className="mb-4 rounded-xl border border-neutral-200 bg-white android:shadow-sm ios:shadow-sm">
       <View className="relative overflow-hidden p-5">
         {/* Decorative Quote Icon */}
-        <View className="absolute -right-4 -top-4 opacity-5">
+        <View className="absolute -right-0 -top-4 opacity-5">
           <MaterialCommunityIcons
             name="format-quote-close"
             size={80}
@@ -225,7 +225,7 @@ export default function SocialPosts() {
   }, [isFetchingNextPage, hasNextPage, allPosts.length]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
       <FocusAwareStatusBar />
       <View className="flex-1 pt-6">
         <View className="border-b border-neutral-200 bg-white px-5 pb-4 shadow-sm">
@@ -236,8 +236,8 @@ export default function SocialPosts() {
             Social Posts
           </Text>
           <Text className="my-2 text-base font-medium text-neutral-500">
-            AI summarized hiring posts from platforms like LinkedIn, X, and
-            Reddit. Find relevant opportunities without scrolling through noise.
+            AI summarized hiring related posts from platforms like LinkedIn, X, and
+            Reddit.
           </Text>
 
           <View className="flex-row items-center gap-2 mt-2">

@@ -28,7 +28,7 @@ function SettingsItemRow({ item }: { item: SettingsItem }) {
   return (
     <Pressable
       onPress={item.onPress}
-      className="android:shadow-md ios:shadow-sm mb-3 flex-row items-center justify-between rounded-xl border border-neutral-200 bg-white p-4 active:opacity-70"
+      className="mb-3 flex-row items-center justify-between rounded-xl border border-neutral-200 bg-white p-4 active:opacity-70"
     >
       <View className="flex-row items-center gap-3">
         <View
@@ -60,10 +60,10 @@ export default function Profile() {
   const { signOut } = useAuth();
   const { user } = useUser();
   const { navigate } = useRouter();
-  
+
   // Get user info from backend API (saved in Zustand store)
   const userInfo = useOnboarding.use.userInfo();
-  
+
   const handleLogout = () => {
     setConfirmAction('logout');
     modalRef.current?.present();
@@ -114,7 +114,8 @@ export default function Profile() {
     user?.firstName ||
     user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ||
     'User';
-  const email = userInfo?.email || user?.primaryEmailAddress?.emailAddress || '';
+  const email =
+    userInfo?.email || user?.primaryEmailAddress?.emailAddress || '';
   const initials = displayName
     .split(' ')
     .map((n) => n[0])
@@ -130,7 +131,6 @@ export default function Profile() {
         console.error('Logout error:', error);
       }
     }
-
   };
 
   return (
@@ -159,12 +159,14 @@ export default function Profile() {
               paddingTop: 20,
             }}
           >
-            <View className="android:shadow-md ios:shadow-sm mb-6 rounded-xl border border-neutral-200 bg-white p-5">
+            <View className="android:shadow-sm ios:shadow-sm mb-6 rounded-xl border border-neutral-300 bg-neutral-50 p-5">
               <View className="flex-row items-center gap-4">
                 <View className="size-16 items-center justify-center overflow-hidden rounded-full bg-primary-100">
                   <Image
                     // source={require('../../../../assets/images/experience/profile.png')}
-                    source={'https://www.eyedesyn.com/wp-content/uploads/2015/10/flame.gif'}
+                    source={
+                      'https://rosepng.com/wp-content/uploads/elementor/thumbs/screenshot-2024-09-09-144753-qtuln5wagd2o4t0vr294tmhlkofp8hcblr1ndokbl6.png'
+                    }
                     // source={'https://i.gifer.com/origin/a8/a87541948ce7297723eb5568b7ac83e5_w200.gif'}
                     style={{ width: '100%', height: '100%' }}
                     resizeMode="cover"
@@ -196,18 +198,34 @@ export default function Profile() {
               ))}
             </View>
 
-            <View className="rounded-xl border border-black-100 bg-yellow-300 p-4">
+            <View className="rounded-xl bg-yellow-300 p-4">
               <View className="flex-row items-start gap-3">
                 <View className="mt-1 size-10 shrink-0 items-center justify-center rounded-full bg-primary-100">
                   <Ionicons name="gift-outline" size={20} color="#13803b" />
                 </View>
                 <View className="flex-1">
-                  <Text className="mb-1 text-sm font-bold text-black">
+                  <Text className="mb-1 text-md font-bold text-black">
                     Refer & Earn
                   </Text>
                   <Text className="text-sm font-medium leading-5 text-black">
-                    Share HiringBull with friends and earn ₹100 when they sign
-                    up using your referral code.
+                    Share with friends and earn FLAT ₹50 when they sign up using
+                    your email as referral code.
+                  </Text>
+                  <Text
+                    onPress={() =>
+                      Linking.openURL(
+                        'https://hiringbull.org/referral/' + email
+                      )
+                    }
+                    className="font-semibold text-sm mt-2 text-neutral-900 underline"
+                  >
+                    Show my earnings
+                    <Ionicons
+                      className='no-underline'
+                      name="open-outline"
+                      size={14}
+                      color="#111"
+                    />
                   </Text>
 
                   {/* Referral code row */}
@@ -243,7 +261,6 @@ export default function Profile() {
           onConfirm={handleConfirm}
         />
       </SafeAreaView>
-      
     </>
   );
 }

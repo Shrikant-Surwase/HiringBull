@@ -70,7 +70,7 @@ export function JobCard({ job, onSave }: JobCardProps) {
   return (
     <>
       <View
-        className={`android:shadow-md ios:shadow-sm mb-4 rounded-xl border bg-white p-4 ${
+        className={`android:shadow-sm ios:shadow-sm mb-4 rounded-xl border bg-white p-4 ${
           isSaved ? 'border-neutral-400' : 'border-neutral-200'
         }`}
       >

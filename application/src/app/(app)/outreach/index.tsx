@@ -93,7 +93,7 @@ function CompanyCard({
   return (
     <Pressable
       onPress={onPress}
-      className={`relative aspect-square w-[22%] items-center justify-center rounded-xl border bg-white ${
+      className={`relative aspect-square w-[22%] items-center justify-center rounded-xl border bg-white android:shadow-sm ios:shadow-sm ${
         selected ? 'border-primary-600' : 'border-neutral-200'
       }`}
     >
@@ -205,8 +205,7 @@ export default function Outreach() {
         </Text>
 
         <Text className="mt-2 text-base text-neutral-500">
-          Reach employees from your target companies, we send it to WhatsApp
-          groups with company employees.
+          Reach employees, we send it to WhatsApp groups with company employees.
         </Text>
 
         <View className="mt-4">
@@ -220,7 +219,7 @@ export default function Outreach() {
       </View>
 
       {/* CONTENT */}
-      <View className="flex-1 pt-4">
+      <View className="flex-1 bg-slate-50 pt-4">
         {remaining === 0 ? (
           <View className="mb-3 ml-4 flex-row items-center">
             <View className="flex-row items-center gap-2 rounded-full bg-neutral-200 px-3 py-1.5">
@@ -263,10 +262,10 @@ export default function Outreach() {
           )}
           ListFooterComponent={() => (
             <View>
-              <View className="self-start">
+              <View className="self-start mt-2">
                 <Pressable
                   onPress={() => router.push('/outreach/requests')}
-                  className="flex-row items-center gap-2 rounded-lg bg-neutral-100 px-4 py-2"
+                  className="flex-row items-center gap-2 bg-neutral-200 rounded-xl px-4 py-2"
                 >
                   <Text className="font-medium text-neutral-900">
                     Outreach & Replies

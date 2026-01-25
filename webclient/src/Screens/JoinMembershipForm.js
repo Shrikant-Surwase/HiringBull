@@ -13,6 +13,8 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import InfoIcon from '@material-ui/icons/Info';
+import { CircularProgress } from '@material-ui/core';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 
 const JoinMembershipForm = () => {
   const [formData, setFormData] = useState({
@@ -35,26 +37,27 @@ const JoinMembershipForm = () => {
   });
 
   useEffect(() => {
-  // 🔧 TESTING ONLY — remove before prod
-  setFormData(prev => ({
-    ...prev,
-    fullName: "Test User",
-    email: "test.user@gmail.com",
-    phone: "9999999999",
-    socialProfile: "https://linkedin.com/in/testuser",
-    currentCompany: "Test Company",
-    yearsOfExperience: "2",
-    triedAlternatives: "Yes",
-    whyMembership: "Testing membership flow",
-    reason: "This is dummy data for testing purposes only. I want to test form validation and submission flow.",
-    acknowledged: true
-  }));
-}, []);
+    // 🔧 TESTING ONLY — remove before prod
+    setFormData(prev => ({
+      ...prev,
+      fullName: "Test User",
+      email: "test.user@gmail.com",
+      phone: "9999999999",
+      socialProfile: "https://linkedin.com/in/testuser",
+      currentCompany: "Test Company",
+      yearsOfExperience: "2",
+      triedAlternatives: "Yes",
+      whyMembership: "Testing membership flow",
+      reason: "This is dummy data for testing purposes only. I want to test form validation and submission flow.",
+      acknowledged: true
+    }));
+  }, []);
 
   const [errors, setErrors] = useState({});
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(3);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [referralStatus, setReferralStatus] = useState(null);
 
   useEffect(() => {
     window.scrollTo({
@@ -245,12 +248,31 @@ const JoinMembershipForm = () => {
   const isValidEmail = (value) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  const handleReferralClick = () => {
-    if (formData.referralEmail && isValidEmail(formData.referralEmail)) {
-      setFormData(prev => ({
-        ...prev,
-        isDiscountApplied: !prev.isDiscountApplied
-      }));
+  const handleReferralClick = async () => {
+    setReferralStatus("checking");
+    if (!formData.referralEmail || !isValidEmail(formData.referralEmail)) {
+      setReferralStatus("invalid");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `http://0.0.0.0:4000/api/public/referral/${formData.referralEmail}`
+      );
+      const data = await res.json();
+
+      if (data.valid) {
+        setReferralStatus("valid");
+        setFormData(prev => ({
+          ...prev,
+          isDiscountApplied: true
+        }));
+      } else {
+        setReferralStatus("invalid");
+      }
+    } catch (err) {
+      console.error(err);
+      setReferralStatus("invalid");
     }
   };
 
@@ -741,16 +763,44 @@ const JoinMembershipForm = () => {
                   </h2>
 
                   <div className="referral">
-                    <div className="title">Have a friend on HiringBull? Enter their membership registered email to get 25% off your plan</div>
+                    <div className="title">
+                      Have a friend on HiringBull? Enter their membership registered email to get 25% off your plan
+                    </div>
+
                     <div className="input">
                       <input
                         type="text"
                         placeholder="Friend's registered email"
                         value={formData.referralEmail}
-                        onChange={(e) => setFormData(prev => ({ ...prev, referralEmail: e.target.value }))}
+                        onChange={(e) => {
+                          setFormData(prev => ({ ...prev, referralEmail: e.target.value }));
+                          setReferralStatus(null); // reset on change
+                        }}
                       />
-                      <button onClick={handleReferralClick}>Apply</button>
+
+                      {
+                        referralStatus === "checking" ? (
+                          <CircularProgress size={18} />
+                        ) : referralStatus === "valid" ? (
+                          <CheckCircleOutlineIcon />
+                        ) : (
+                          <button onClick={handleReferralClick}>Apply</button>
+                        )
+                      }
                     </div>
+
+                    {/* STATUS MESSAGE */}
+                    {referralStatus === "valid" && (
+                      <div style={{ color: "#16a34a", marginTop: "6px", fontSize: "0.85rem" }}>
+                        ✅ Referral applied successfully
+                      </div>
+                    )}
+
+                    {referralStatus === "invalid" && (
+                      <div style={{ color: "#dc2626", marginTop: "6px", fontSize: "0.85rem" }}>
+                        ❌ Referral email not found
+                      </div>
+                    )}
                   </div>
 
                   <div className="container600">
@@ -778,7 +828,7 @@ const JoinMembershipForm = () => {
 
                         {/* Savings Badge */}
                         {formData.isDiscountApplied && (
-                          <div style={{ color: '#16a34a', fontSize: '0.9rem', marginTop: '5px', fontWeight: 'bold' }}>
+                          <div className='discount-value'>
                             You saved a total of ₹62
                           </div>
                         )}
@@ -824,7 +874,7 @@ const JoinMembershipForm = () => {
                         </div> */}
                         {/* Savings Badge */}
                         {formData.isDiscountApplied && (
-                          <div style={{ color: '#16a34a', fontSize: '0.9rem', marginTop: '5px', fontWeight: 'bold' }}>
+                          <div className='discount-value'>
                             You saved a total of ₹150
                           </div>
                         )}
@@ -878,7 +928,7 @@ const JoinMembershipForm = () => {
                         </div> */}
                         {/* Savings Badge */}
                         {formData.isDiscountApplied && (
-                          <div style={{ color: '#16a34a', fontSize: '0.9rem', marginTop: '5px', fontWeight: 'bold' }}>
+                          <div className='discount-value'>
                             You saved a total of ₹250
                           </div>
                         )}
@@ -1272,7 +1322,7 @@ const OneContent = styled.div`
 
   .input{
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
     margin-bottom: 25px;
 
@@ -1319,7 +1369,6 @@ const OneContent = styled.div`
           }
         } 
       }
-
 
       input{
         background-color: #fafafa;
@@ -1372,9 +1421,6 @@ const OneContent = styled.div`
         }
       }
     }
-
-    
-    
   }
 
   .acknowledgement{
@@ -1509,7 +1555,7 @@ const OneContent = styled.div`
 
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 400px;
+    grid-auto-rows: 410px;
     gap: 24px;
 
     box-sizing: border-box;
@@ -1584,6 +1630,13 @@ const OneContent = styled.div`
           font-feature-settings: "tnum";
           font-variant-numeric: tabular-nums;
         }
+      }
+
+      .discount-value{
+        font-size: 0.75rem;
+        color: #16a34a;
+        font-weight: 500;
+        margin-top: 5px;
       }
 
       .advantage-points{

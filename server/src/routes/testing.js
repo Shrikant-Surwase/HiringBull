@@ -91,9 +91,6 @@ router.get("/referral-income/:email", async (req, res) => {
   }
 });
 
-
-
-
 // router.post("/", async (req, res) => {
 //   try {
 //     const userId = "74bfaab4-2179-40e5-8e62-7e733495c096";

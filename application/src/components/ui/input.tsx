@@ -106,7 +106,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
         </Text>
       )}
       <View
-        className={`flex-row items-center ${isSearch ? 'rounded-full bg-neutral-50' : 'rounded-xl'} border-[0.5px] p-2 px-4`}
+        className={`flex-row items-center ${isSearch ? 'rounded-full bg-slate-50' : 'rounded-xl'} border-[0.5px] p-2 px-4`}
       >
         <NTextInput
           testID={testID}

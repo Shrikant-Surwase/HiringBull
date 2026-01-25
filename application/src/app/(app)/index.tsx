@@ -1,6 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { ActivityIndicator, FlatList, View as RNView, Animated, Easing } from 'react-native';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  View as RNView,
+  Animated,
+  Easing,
+} from 'react-native';
 import { Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -46,12 +58,12 @@ export default function Jobs() {
     isLoading,
     isFetching,
     refetch,
-    isError
+    isError,
   } = useFetchFollowedJobs();
 
   // Blinking animation for Live Jobs indicator
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  
+
   useEffect(() => {
     const pulse = Animated.loop(
       Animated.sequence([
@@ -83,9 +95,8 @@ export default function Jobs() {
   } | null>(null);
   const hasShownToastRef = React.useRef(false);
 
-
   useEffect(() => {
-    console.log(isFetching)
+    console.log(isFetching);
     if (isFetching && data && !hasShownToastRef.current) {
       hasShownToastRef.current = true;
     }
@@ -158,7 +169,9 @@ export default function Jobs() {
       // Filter by tags
       const jobTags = Array.from(new Set(job.tags || []));
       return selectedTags.some((tag) =>
-        jobTags.some((jobTag: string) => jobTag.toLowerCase() === tag.toLowerCase())
+        jobTags.some(
+          (jobTag: string) => jobTag.toLowerCase() === tag.toLowerCase()
+        )
       );
     });
   }, [allJobs, searchQuery, selectedTags]);
@@ -188,7 +201,9 @@ export default function Jobs() {
     if (isFetchingNextPage) {
       return (
         <RNView className="py-4">
-          <Text className="text-center text-sm text-neutral-400">Loading more...</Text>
+          <Text className="text-center text-sm text-neutral-400">
+            Loading more...
+          </Text>
         </RNView>
       );
     }
@@ -205,38 +220,36 @@ export default function Jobs() {
   }, [isFetchingNextPage, hasNextPage, allJobs.length]);
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-50" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
       <FocusAwareStatusBar />
       <View className="flex-1">
         {/* ============ HEADER SECTION ============ */}
         <View className="bg-white px-5 pb-5 pt-6 shadow-sm">
           {/* Title Row */}
-          <View className="flex-row items-center justify-between">
-            <View className="flex-1">
-              <Text
-                className="text-3xl text-neutral-900"
-                style={{ fontFamily: 'Montez' }}
-              >
-                Explore Jobs
-              </Text>
-            </View>
-            {/* Live Jobs Status Indicator - Blinking Dot + Sync Icon */}
-            <View className="flex-row items-center gap-2 rounded-full bg-neutral-100 px-3 py-1.5">
-              <Animated.View 
-                style={{ opacity: pulseAnim }}
-                className="h-2 w-2 rounded-full bg-green-500" 
-              />
+          <View className="flex-row items-center gap-3">
+            <Text
+              className="text-3xl text-neutral-900"
+              style={{ fontFamily: 'Montez' }}
+            >
+              Explore Jobs
+            </Text>
+
+            {/* Live Jobs Status Indicator */}
+            <View className="flex-row items-center gap-2 rounded-full bg-green-100 px-3 py-1.5">
               <Text className="text-xs font-medium text-neutral-600">
                 Live Jobs
               </Text>
-              <Ionicons name="sync-outline" size={12} color="#525252" />
+              <Animated.View
+                style={{ opacity: pulseAnim }}
+                className="h-2 w-2 rounded-full bg-green-500"
+              />
             </View>
           </View>
 
           {/* Description */}
           <Text className="mt-2 text-base leading-relaxed text-neutral-500">
-            Personalized job openings based on your experience and preferences.
-            New roles appear quickly, often within 10 minutes of being posted.
+            Job openings get notified based on your experience and preferences.
+            {/* New roles appear quickly, often within 10 minutes of being posted. */}
           </Text>
 
           {/* Search Bar - Pill Style */}
@@ -264,7 +277,7 @@ export default function Jobs() {
               className="flex-row items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2.5"
             >
               <Text className="text-sm font-medium text-neutral-700">
-                Edit your companies
+                Edit Companies
               </Text>
             </Pressable>
             <Pressable
@@ -272,28 +285,29 @@ export default function Jobs() {
               className="flex-row items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2.5"
             >
               <Text className="text-sm font-medium text-neutral-700">
-                Edit your experience
+                Edit Experience
               </Text>
             </Pressable>
           </View>
-
         </View>
 
         {/* ============ JOB RESULTS INFO ============ */}
         <View className="flex-row items-center justify-between px-5 py-3">
           <Text className="text-sm font-medium text-neutral-500">
-            {filteredJobs.length} jobs found
+            {filteredJobs.length} jobs found from last 30 days
           </Text>
           {selectedTags.length > 0 && (
             <Pressable onPress={() => setSelectedTags([])}>
-              <Text className="text-sm font-medium text-red-500">Clear filters</Text>
+              <Text className="text-sm font-medium text-red-500">
+                Clear filters
+              </Text>
             </Pressable>
           )}
         </View>
 
         {/* ============ JOB LIST ============ */}
         {!data ? (
-          <View className="flex-1 bg-neutral-50" />
+          <View className="flex-1 bg-slate-50" />
         ) : (
           <FlatList
             data={filteredJobs}
@@ -304,7 +318,7 @@ export default function Jobs() {
               paddingBottom: 20,
               paddingTop: 10,
             }}
-            className="bg-neutral-50"
+            className="bg-slate-50"
             refreshing={isRefreshing && !isFetchingNextPage}
             onRefresh={onRefresh}
             showsVerticalScrollIndicator={false}
@@ -324,9 +338,7 @@ export default function Jobs() {
             ListFooterComponent={renderFooter}
           />
         )}
-
       </View>
-
 
       <Modal
         ref={ref}
@@ -347,10 +359,11 @@ export default function Jobs() {
                   <Pressable
                     key={tag}
                     onPress={() => handleToggleTag(tag)}
-                    className={`rounded-lg border-2 px-4 py-2 ${isSelected
+                    className={`rounded-lg border-2 px-4 py-2 ${
+                      isSelected
                         ? 'border-primary-500 bg-primary-50'
                         : 'border-neutral-200 bg-white'
-                      }`}
+                    }`}
                   >
                     <View className="flex-row items-center gap-2">
                       <Checkbox
@@ -359,8 +372,9 @@ export default function Jobs() {
                         accessibilityLabel={`Filter by ${tag}`}
                       />
                       <Text
-                        className={`text-sm font-medium ${isSelected ? 'text-primary-700' : 'text-neutral-700'
-                          }`}
+                        className={`text-sm font-medium ${
+                          isSelected ? 'text-primary-700' : 'text-neutral-700'
+                        }`}
                       >
                         {tag}
                       </Text>
