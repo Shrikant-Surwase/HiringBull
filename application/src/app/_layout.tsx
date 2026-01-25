@@ -5,7 +5,6 @@ import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
-import AppLoading from 'expo-app-loading';
 import * as Font from 'expo-font';
 import { Stack } from 'expo-router';
 import { Slot } from 'expo-router';
@@ -141,36 +140,31 @@ function RootNavigator() {
   };
 
   useEffect(() => {
-    console.log(' isSignedIn changed:', isSignedIn);
     if (isSignedIn) {
-      console.log(' User is signed in, calling checkUserInfo...');
       checkUserInfo();
     }
   }, [isSignedIn]);
 
-  // Debug navigation guards
-  // console.log('Navigation State:', {
-  //   isFirstTime,
-  //   isAuthenticated,
-  //   isLoadingUser,
-  //   hasCompletedOnboarding,
-  //   isLoaded,
-  // });
-  const [loaded, setLoaded] = useState(false);
-  const loadFonts = async () => {
-    console.log('Loading fonts...');
-    await Font.loadAsync({
-      Montez: require('../../assets/fonts/Montez-Regular.ttf'),
-    });
-  };
-  // if (!loaded)
-  //   return (
-  //     <AppLoading
-  //       startAsync={loadFonts}
-  //       onFinish={() => setLoaded(true)}
-  //       onError={console.warn}
-  //     />
-  //   );
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadFonts = async () => {
+      try {
+        await Font.loadAsync({
+          Montez: require('../../assets/fonts/Montez-Regular.ttf'),
+        });
+      } finally {
+        setFontsLoaded(true);
+        SplashScreen.hideAsync();
+      }
+    };
+
+    loadFonts();
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // SplashScreen stays visible
+  }
   return (
     <>
       {shouldInitNotifications && <NotificationInitializer />}
@@ -189,6 +183,9 @@ function RootNavigator() {
         </Stack.Protected>
 
         <Stack.Protected guard={hasCompletedOnboarding}>
+          <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        </Stack.Protected>
+        <Stack.Protected guard={hasCompletedOnboarding}>
           <Stack.Screen name="payment" options={{ headerShown: false }} />
           <Stack.Screen
             name="edit-experience"
@@ -198,10 +195,6 @@ function RootNavigator() {
             name="edit-companies"
             options={{ headerShown: false }}
           />
-        </Stack.Protected>
-
-        <Stack.Protected guard={hasCompletedOnboarding}>
-          <Stack.Screen name="(app)" options={{ headerShown: false }} />
         </Stack.Protected>
 
         {/* SSO callback route - accessible during OAuth flow */}
