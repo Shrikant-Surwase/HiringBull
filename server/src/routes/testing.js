@@ -30,63 +30,127 @@ router.get("/", (req, res) => {
   });
 });
 
-router.post("/", async (req, res) => {
+router.get("/referral/:email", async (req, res) => {
   try {
-    const userId = "74bfaab4-2179-40e5-8e62-7e733495c096";
-    const { email, companyName, reason, jobId, resumeLink, message } = req.body;
-
-    const result = await prisma.$transaction(async (tx) => {
-      // 1️⃣ Fetch token count
-      const user = await tx.user.findUnique({
-        where: { id: userId },
-        select: { tokens_left: true },
-      });
-
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      // 2️⃣ Enforce token availability
-      if (user.tokens_left <= 0) {
-        return { error: "NO_TOKENS" };
-      }
-
-      // 3️⃣ Decrement token
-      await tx.user.update({
-        where: { id: userId },
-        data: {
-          tokens_left: { decrement: 1 },
-        },
-      });
-
-      // 4️⃣ Create outreach request
-      const outreach = await tx.outreachRequest.create({
-        data: {
-          userId,
-          email,
-          companyName,
-          reason,
-          jobId,
-          resumeLink,
-          message,
-        },
-      });
-
-      return { outreach };
+    const user = await prisma.user.findUnique({
+      where: { email: req.params.email },
     });
 
-    if (result?.error === "NO_TOKENS") {
-      return res.status(403).json({
-        message: "No tokens left",
+    if (user) {
+      return res.json({
+        status: "ok",
+        valid: true,
+        message: "User found. Referral is valid.",
       });
     }
 
-    return res.status(201).json(result.outreach);
+    return res.status(404).json({
+      status: "error",
+      valid: false,
+      message: "User not found.",
+    });
+
   } catch (error) {
-    console.error("Create outreach error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: "Something went wrong.",
+    });
   }
 });
+
+router.get("/referral-income/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const result = await prisma.payment.aggregate({
+      where: {
+        referredByEmail: email,
+      },
+      _count: {
+        _all: true,
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+    return res.json({
+      status: "ok",
+      email,
+      totalPeopleReferred: result._count._all,
+      totalReferralIncome: result._sum.amount || 0,
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: "Something went wrong",
+    });
+  }
+});
+
+
+
+
+// router.post("/", async (req, res) => {
+//   try {
+//     const userId = "74bfaab4-2179-40e5-8e62-7e733495c096";
+//     const { email, companyName, reason, jobId, resumeLink, message } = req.body;
+
+//     const result = await prisma.$transaction(async (tx) => {
+//       // 1️⃣ Fetch token count
+//       const user = await tx.user.findUnique({
+//         where: { id: userId },
+//         select: { tokens_left: true },
+//       });
+
+//       if (!user) {
+//         throw new Error("User not found");
+//       }
+
+//       // 2️⃣ Enforce token availability
+//       if (user.tokens_left <= 0) {
+//         return { error: "NO_TOKENS" };
+//       }
+
+//       // 3️⃣ Decrement token
+//       await tx.user.update({
+//         where: { id: userId },
+//         data: {
+//           tokens_left: { decrement: 1 },
+//         },
+//       });
+
+//       // 4️⃣ Create outreach request
+//       const outreach = await tx.outreachRequest.create({
+//         data: {
+//           userId,
+//           email,
+//           companyName,
+//           reason,
+//           jobId,
+//           resumeLink,
+//           message,
+//         },
+//       });
+
+//       return { outreach };
+//     });
+
+//     if (result?.error === "NO_TOKENS") {
+//       return res.status(403).json({
+//         message: "No tokens left",
+//       });
+//     }
+
+//     return res.status(201).json(result.outreach);
+//   } catch (error) {
+//     console.error("Create outreach error:", error);
+//     return res.status(500).json({ message: "Internal server error" });
+//   }
+// });
 
 // const getMyTestOutreachRequests = async (req, res) => {
 //   try {
