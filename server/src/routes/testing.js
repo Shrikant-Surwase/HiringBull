@@ -30,6 +30,64 @@ router.get("/", (req, res) => {
   });
 });
 
+router.post("/", async (req, res) => {
+  try {
+    const userId = "74bfaab4-2179-40e5-8e62-7e733495c096";
+    const { email, companyName, reason, jobId, resumeLink, message } = req.body;
+
+    const result = await prisma.$transaction(async (tx) => {
+      // 1️⃣ Fetch token count
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { tokens_left: true },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // 2️⃣ Enforce token availability
+      if (user.tokens_left <= 0) {
+        return { error: "NO_TOKENS" };
+      }
+
+      // 3️⃣ Decrement token
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          tokens_left: { decrement: 1 },
+        },
+      });
+
+      // 4️⃣ Create outreach request
+      const outreach = await tx.outreachRequest.create({
+        data: {
+          userId,
+          email,
+          companyName,
+          reason,
+          jobId,
+          resumeLink,
+          message,
+        },
+      });
+
+      return { outreach };
+    });
+
+    if (result?.error === "NO_TOKENS") {
+      return res.status(403).json({
+        message: "No tokens left",
+      });
+    }
+
+    return res.status(201).json(result.outreach);
+  } catch (error) {
+    console.error("Create outreach error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 // const getMyTestOutreachRequests = async (req, res) => {
 //   try {
 //     const userId = "f24a52f9-be4c-4291-a8eb-fd12e5dc5573";

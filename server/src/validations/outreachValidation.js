@@ -5,7 +5,7 @@ export const createOutreach = {
     email: Joi.string().email().required(),
     companyName: Joi.string().required(),
     reason: Joi.string().required(),
-    jobId: Joi.string().uuid().optional(),
+    jobId: Joi.string().optional(),
     resumeLink: Joi.string().uri().optional(),
     message: Joi.string().optional(),
   }),
