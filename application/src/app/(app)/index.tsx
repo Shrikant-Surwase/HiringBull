@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, View as RNView } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { ActivityIndicator, FlatList, View as RNView, Animated, Easing } from 'react-native';
 import { Pressable, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { type Job as ApiJob, JobCard } from '@/components/job-card';
 import {
@@ -36,6 +37,7 @@ const FILTER_TAGS = [
 ];
 
 export default function Jobs() {
+  const router = useRouter();
   const {
     data,
     fetchNextPage,
@@ -47,6 +49,29 @@ export default function Jobs() {
     isError
   } = useFetchFollowedJobs();
 
+  // Blinking animation for Live Jobs indicator
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.3,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [pulseAnim]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -130,9 +155,10 @@ export default function Jobs() {
 
       if (!selectedTags.length) return true;
 
+      // Filter by tags
       const jobTags = Array.from(new Set(job.tags || []));
       return selectedTags.some((tag) =>
-        jobTags.some((jobTag) => jobTag.toLowerCase() === tag.toLowerCase())
+        jobTags.some((jobTag: string) => jobTag.toLowerCase() === tag.toLowerCase())
       );
     });
   }, [allJobs, searchQuery, selectedTags]);
@@ -179,42 +205,95 @@ export default function Jobs() {
   }, [isFetchingNextPage, hasNextPage, allJobs.length]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-neutral-50" edges={['top']}>
       <FocusAwareStatusBar />
-      <View className="flex-1 pt-6">
-        <View className="border-b border-neutral-200 bg-white px-5 pb-4 shadow-sm">
-          <Text
-            className="text-3xl text-neutral-900"
-            style={{ fontFamily: 'Montez' }}
-          >
-            Explore Jobs
-          </Text>
-          <Text className="my-4 text-base font-medium text-neutral-500">
+      <View className="flex-1">
+        {/* ============ HEADER SECTION ============ */}
+        <View className="bg-white px-5 pb-5 pt-6 shadow-sm">
+          {/* Title Row */}
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text
+                className="text-3xl text-neutral-900"
+                style={{ fontFamily: 'Montez' }}
+              >
+                Explore Jobs
+              </Text>
+            </View>
+            {/* Live Jobs Status Indicator - Blinking Dot + Sync Icon */}
+            <View className="flex-row items-center gap-2 rounded-full bg-neutral-100 px-3 py-1.5">
+              <Animated.View 
+                style={{ opacity: pulseAnim }}
+                className="h-2 w-2 rounded-full bg-green-500" 
+              />
+              <Text className="text-xs font-medium text-neutral-600">
+                Live Jobs
+              </Text>
+              <Ionicons name="sync-outline" size={12} color="#525252" />
+            </View>
+          </View>
+
+          {/* Description */}
+          <Text className="mt-2 text-base leading-relaxed text-neutral-500">
             Personalized job openings based on your experience and preferences.
             New roles appear quickly, often within 10 minutes of being posted.
           </Text>
-          <View className="mt-2 flex-row items-center gap-2">
+
+          {/* Search Bar - Pill Style */}
+          <View className="mt-4 flex-row items-center gap-3">
             <View className="flex-1">
               <Input
                 isSearch
-                placeholder="Search Jobs"
+                placeholder="Search jobs, companies..."
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
             </View>
-
             <Pressable
               onPress={handleFilterPress}
-              className="items-center justify-center rounded-xl bg-neutral-900"
-              style={{ width: 48, height: 48 }}
+              className="h-12 w-12 items-center justify-center rounded-full bg-neutral-900"
             >
-              <Ionicons name="options-outline" size={24} color="#ffffff" />
+              <Ionicons name="options-outline" size={20} color="#ffffff" />
             </Pressable>
           </View>
+
+          {/* Edit Navigation Buttons */}
+          <View className="mt-4 flex-row gap-3">
+            <Pressable
+              onPress={() => router.push('/edit-companies')}
+              className="flex-row items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2.5"
+            >
+              <Text className="text-sm font-medium text-neutral-700">
+                Edit your companies
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/edit-experience')}
+              className="flex-row items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2.5"
+            >
+              <Text className="text-sm font-medium text-neutral-700">
+                Edit your experience
+              </Text>
+            </Pressable>
+          </View>
+
         </View>
 
+        {/* ============ JOB RESULTS INFO ============ */}
+        <View className="flex-row items-center justify-between px-5 py-3">
+          <Text className="text-sm font-medium text-neutral-500">
+            {filteredJobs.length} jobs found
+          </Text>
+          {selectedTags.length > 0 && (
+            <Pressable onPress={() => setSelectedTags([])}>
+              <Text className="text-sm font-medium text-red-500">Clear filters</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {/* ============ JOB LIST ============ */}
         {!data ? (
-          <View className="flex-1" />
+          <View className="flex-1 bg-neutral-50" />
         ) : (
           <FlatList
             data={filteredJobs}
@@ -225,6 +304,7 @@ export default function Jobs() {
               paddingBottom: 20,
               paddingTop: 10,
             }}
+            className="bg-neutral-50"
             refreshing={isRefreshing && !isFetchingNextPage}
             onRefresh={onRefresh}
             showsVerticalScrollIndicator={false}
