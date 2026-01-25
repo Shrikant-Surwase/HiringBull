@@ -234,3 +234,35 @@ model WebRegistration {
 
   @@index([email])
 }
+
+model application {
+  id              String   @id @default(uuid())
+
+  full_name       String
+  email           String   @unique
+  phone           String?
+
+  social_profile  String
+
+  is_experienced  Boolean  @default(false)
+  current_company String?
+
+  college_name    String?
+  field_of_study  String?
+  passout_year    Int?
+
+  why_membership  String
+  tried_alternatives String?
+  reason          String
+
+  status          String   @default("PENDING")
+  admin_reply     String?
+
+  created_at      DateTime @default(now())
+  reviewed_at     DateTime?
+  updated_at      DateTime @updatedAt
+
+  @@index([status])
+  @@index([email])
+  @@index([created_at])
+}
