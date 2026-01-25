@@ -8,6 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMyOutreachRequests } from '@/api/outreach/useMyOutreachRequests';
 import { FocusAwareStatusBar } from '@/components/ui';
 import { hideGlobalLoading, showGlobalLoading } from '@/lib';
+
+import { COMPANIES } from '.';
 type Company = {
   id: string;
   name: string;
@@ -113,7 +115,9 @@ const Request = () => {
       company: {
         id: item.companyName.toLowerCase(),
         name: item.companyName,
-        icon: `https://logo.clearbit.com/${item.companyName.toLowerCase()}.com`,
+        icon:
+          COMPANIES.find((c) => c.id === item.companyName.toLowerCase())
+            ?.icon || '',
       },
       sentAt: formatDate(item.sentAt || item.createdAt),
       status: item.status === 'REPLIED' ? 'replied' : 'delivered',

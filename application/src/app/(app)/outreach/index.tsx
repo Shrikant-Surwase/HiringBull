@@ -27,7 +27,7 @@ type Company = {
   icon: any;
 };
 
-const COMPANIES: Company[] = [
+export const COMPANIES: Company[] = [
   {
     id: 'google',
     name: 'Google',
