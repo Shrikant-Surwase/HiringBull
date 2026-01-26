@@ -37,24 +37,18 @@ const JoinMembershipForm = () => {
   });
 
   useEffect(() => {
-    // 🔧 TESTING ONLY — remove before prod
-    setFormData(prev => ({
-      ...prev,
-      fullName: "Test User",
-      email: "test.user@gmail.com",
-      phone: "9999999999",
-      socialProfile: "https://linkedin.com/in/testuser",
-      currentCompany: "Test Company",
-      yearsOfExperience: "2",
-      triedAlternatives: "Yes",
-      whyMembership: "Testing membership flow",
-      reason: "This is dummy data for testing purposes only. I want to test form validation and submission flow.",
-      acknowledged: true
-    }));
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   const [errors, setErrors] = useState({});
-  const [currentStep, setCurrentStep] = useState(3);
+  const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [referralStatus, setReferralStatus] = useState(null);
@@ -257,7 +251,7 @@ const JoinMembershipForm = () => {
 
     try {
       const res = await fetch(
-        `http://0.0.0.0:4000/api/public/referral/${formData.referralEmail}`
+        `https://api.hiringbull.org/api/public/referral/${formData.referralEmail}`
       );
       const data = await res.json();
 
@@ -300,6 +294,106 @@ const JoinMembershipForm = () => {
     });
   };
 
+  const startPayment = async ({ amount, planType }) => {
+    try {
+      console.log("🟡 START PAYMENT");
+      console.log("📧 User email:", formData.email);
+      console.log("💰 Amount (₹):", amount);
+      console.log("📦 Plan:", planType);
+
+      if (!formData.email) {
+        alert("Please enter your email before payment");
+        return;
+      }
+
+      // 1️⃣ CREATE ORDER
+      const res = await fetch(
+        "https://api.hiringbull.org/api/payment/create-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            amount, // rupees
+            planType,
+            referralCode: formData.isDiscountApplied
+              ? formData.referralEmail
+              : null,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("❌ Create order failed:", errText);
+        alert("Unable to initiate payment");
+        return;
+      }
+
+      const data = await res.json();
+
+      console.log("✅ Order created:", data);
+
+      // 2️⃣ OPEN RAZORPAY CHECKOUT
+      const options = {
+        key: data.key, // LIVE KEY from backend
+        amount: data.amountInPaise, // paise
+        currency: "INR",
+        order_id: data.orderId,
+        name: "HiringBull",
+        description: `${planType} Membership`,
+        prefill: {
+          name: formData.fullName || "",
+          email: formData.email,
+          contact: formData.phone || "",
+        },
+        handler: async (response) => {
+          try {
+            console.log("🟢 Payment success:", response);
+
+            // 3️⃣ VERIFY PAYMENT
+            const verifyRes = await fetch(
+              "https://api.hiringbull.org/api/payment/verify",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(response),
+              }
+            );
+
+            const verifyData = await verifyRes.json();
+
+            if (!verifyRes.ok || !verifyData.success) {
+              console.error("❌ Verification failed:", verifyData);
+              alert("Payment verification failed");
+              return;
+            }
+
+            console.log("✅ Payment verified");
+
+            // Optional but recommended
+            await submitApplication();
+
+            setCurrentStep(4);
+          } catch (err) {
+            console.error("❌ Verification error:", err);
+            alert("Payment completed but verification failed");
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            console.warn("⚠️ User closed payment popup");
+          },
+        },
+        theme: { color: "#ffc600" },
+      };
+
+      new window.Razorpay(options).open();
+    } catch (err) {
+      console.error("❌ Payment error:", err);
+      alert("Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <Container>
@@ -838,7 +932,17 @@ const JoinMembershipForm = () => {
                         <div className="point"><CheckCircleIcon /> Curated hiring signals from social posts</div>
                         <div className="point"><CheckCircleIcon /> Up to 3 outreach requests per month</div>
                       </div>
-                      <a href="/join-membership" className='apply-btn'>Pay {formData.isDiscountApplied ? "₹187" : "₹249"} <OfflineBoltIcon /></a>
+                      <button
+                        className="apply-btn"
+                        onClick={() =>
+                          startPayment({
+                            amount: formData.isDiscountApplied ? 187 : 249,
+                            planType: "STARTER",
+                          })
+                        }
+                      >
+                        Pay {formData.isDiscountApplied ? "₹187" : "₹249"} <OfflineBoltIcon />
+                      </button>
                     </div>
 
                     {/* --- GROWTH PLAN (Most Popular) --- */}
@@ -893,7 +997,18 @@ const JoinMembershipForm = () => {
                         </div>
 
                       </div>
-                      <a href="/join-membership" className='apply-btn'>Pay {formData.isDiscountApplied ? "₹187" : "₹249"} <OfflineBoltIcon /></a>
+                      <button
+                        className="apply-btn"
+                        onClick={() =>
+                          startPayment({
+                            amount: formData.isDiscountApplied ? 449 : 599,
+                            planType: "GROWTH",
+                          })
+                        }
+                      >
+                        Pay {formData.isDiscountApplied ? "₹449" : "₹599"} <OfflineBoltIcon />
+                      </button>
+
                     </div>
 
                     {/* --- PRO PLAN --- */}
@@ -942,7 +1057,17 @@ const JoinMembershipForm = () => {
                           Private access to professionals from 10+ companies if not placed in 6 months
                         </div>
                       </div>
-                      <a href="/join-membership" className='apply-btn'>Pay 249 <OfflineBoltIcon /></a>
+                      <button
+                        className="apply-btn"
+                        onClick={() =>
+                          startPayment({
+                            amount: formData.isDiscountApplied ? 749 : 999,
+                            planType: "PRO",
+                          })
+                        }
+                      >
+                        Pay ₹{formData.isDiscountApplied ? 749 : 999} <OfflineBoltIcon />
+                      </button>
                     </div>
                   </div>
                 </OneContent>
