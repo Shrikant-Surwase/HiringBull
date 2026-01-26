@@ -164,6 +164,10 @@ export default function Outreach() {
           queryClient.invalidateQueries({
             queryKey: ['users', 'me'],
           });
+          queryClient.invalidateQueries({
+            queryKey: ['outreach', 'me'],
+          });
+
           reset({ email }); // reset form except email
           modalRef.current?.dismiss();
           showToast({
