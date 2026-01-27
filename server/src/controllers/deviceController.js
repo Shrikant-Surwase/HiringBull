@@ -28,22 +28,28 @@ export const addDevice = catchAsync(async (req, res) => {
     const { token, type } = req.body;
     const userId = req.user.id;
 
-    const existingDevice = await prisma.device.findUnique({
+    // 1. Remove all devices of this user
+    await prisma.device.deleteMany({
+        where: { userId },
+    });
+
+    // 2. Remove this token if it exists anywhere
+    await prisma.device.deleteMany({
         where: { token },
     });
 
-    if (existingDevice && existingDevice.userId === userId) {
-        return res.status(httpStatus.OK).json(existingDevice);
-    }
-
-    const device = await prisma.device.upsert({
-        where: { token },
-        update: { userId, type },
-        create: { token, type, userId },
+    // 3. Create fresh device
+    const device = await prisma.device.create({
+        data: {
+            token,
+            type,
+            userId,
+        },
     });
 
-    res.status(httpStatus.OK).json(device);
+    res.status(httpStatus.CREATED).json(device);
 });
+
 
 /**
  * @swagger
@@ -68,26 +74,15 @@ export const removeDevice = catchAsync(async (req, res) => {
     const { token } = req.params;
     const userId = req.user.id;
 
-    const device = await prisma.device.findUnique({
-        where: { token },
-    });
+    const device = await prisma.device.findUnique({ where: { token } });
 
-    if (!device) {
-        const error = new Error('Device not found');
+    if (!device || device.userId !== userId) {
+        const error = new Error('Device not found or unauthorized');
         error.statusCode = httpStatus.NOT_FOUND;
         throw error;
     }
 
-    if (device.userId !== userId) {
-        const error = new Error('Unauthorized to remove this device');
-        error.statusCode = httpStatus.FORBIDDEN;
-        throw error;
-    }
-
-    await prisma.device.delete({
-        where: { token },
-    });
-
+    await prisma.device.delete({ where: { token } });
     res.status(httpStatus.NO_CONTENT).send();
 });
 
