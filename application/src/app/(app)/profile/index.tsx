@@ -13,7 +13,7 @@ import {
   View,
 } from '@/components/ui';
 import { AppConfirmModal } from '@/components/ui/AppConfirmModal';
-import { resetOnboarding, useOnboarding } from '@/lib';
+import { resetOnboarding, useNotifications, useOnboarding } from '@/lib';
 
 type SettingsItem = {
   label: string;
@@ -57,12 +57,15 @@ function SettingsItemRow({ item }: { item: SettingsItem }) {
 type ConfirmAction = 'logout' | 'copy';
 
 export default function Profile() {
-  const { signOut } = useAuth();
+  const { signOut, getToken } = useAuth();
   const { user } = useUser();
   const { navigate } = useRouter();
+  const { expoPushToken } = useNotifications();
+  console.log("push notifcaton",expoPushToken)
 
   // Get user info from backend API (saved in Zustand store)
   const userInfo = useOnboarding.use.userInfo();
+  // console.log(userInfo)
 
   const handleLogout = () => {
     setConfirmAction('logout');
@@ -121,9 +124,13 @@ export default function Profile() {
     userInfo?.email || user?.primaryEmailAddress?.emailAddress || '';
   const handleConfirm = async () => {
     if (confirmAction === 'logout') {
+      console.log('check device token', expoPushToken);
       try {
+        console.log('in try catch');
         await signOut();
-        resetOnboarding();
+
+        console.log('This is step 1', expoPushToken);
+        resetOnboarding(expoPushToken);
       } catch (error) {
         console.error('Logout error:', error);
       }
