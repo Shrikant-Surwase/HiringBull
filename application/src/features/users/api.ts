@@ -39,7 +39,6 @@ export const resetUser = async (token: string) => {
   const res = await client.delete<DeviceResponse>(
     `/api/users/devices/${token}`
   );
-  console.log("loout api calll")
 
   return res.data;
 };
