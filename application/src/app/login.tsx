@@ -1,4 +1,4 @@
-import { useAuth, useSignIn, useSignUp, useSSO } from '@clerk/clerk-expo';
+import { useSignIn, useSignUp, useSSO } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import * as AuthSession from 'expo-auth-session';
 import { useRouter } from 'expo-router';
@@ -11,7 +11,7 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 import { FocusAwareStatusBar, Input, Text, View } from '@/components/ui';
 import { OTPInput } from '@/components/ui/otp-input';
 import { useRegisterDevice } from '@/features/users';
-import { hideGlobalLoading, showGlobalLoading, useNotifications } from '@/lib';
+import { hideGlobalLoading, showGlobalLoading } from '@/lib';
 import getOrCreateDeviceId from '@/utils/getOrCreatedId';
 
 /* ----------------------------- Utils ----------------------------- */
@@ -167,7 +167,6 @@ export default function Login() {
     showGlobalLoading();
     setError('');
 
-
     const deviceId = await getOrCreateDeviceId();
 
     try {
@@ -191,13 +190,9 @@ export default function Login() {
       }
 
       if (authMode === 'signUp' && signUp) {
-
         const res = await signUp.attemptEmailAddressVerification({ code: otp });
-       
-        
 
         if (res.status === 'complete' && setActiveSignUp) {
-
           await setActiveSignUp({ session: res.createdSessionId });
 
           const deviceType = Platform.OS === 'ios' ? 'ios' : 'android';
@@ -217,7 +212,11 @@ export default function Login() {
       hideGlobalLoading();
     }
   };
-
+  useEffect(() => {
+    if (otp.length === 6) {
+      handleVerify();
+    }
+  }, [otp]);
   /* ----------------------------- UI ----------------------------- */
 
   return (

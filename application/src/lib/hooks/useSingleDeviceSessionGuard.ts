@@ -28,7 +28,7 @@ export function useSingleDeviceSessionGuard() {
         nextState === 'active'
       ) {
         queryClient.invalidateQueries({
-          queryKey: ['users', 'devices'],
+          queryKey: ['users', 'me'],
         });
         setShouldCheck(true);
       }
