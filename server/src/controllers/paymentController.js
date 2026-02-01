@@ -169,12 +169,10 @@ export const verifyPayment = async (req, res) => {
       });
 
       // activate membership
+      // activate membership (correct)
       await tx.membershipApplication.update({
         where: { email: payment.email },
         data: {
-          paymentStatus: "SUCCESS",
-          paidAt: new Date(),
-          planType: payment.planType,
           membershipStart: new Date(),
           membershipEnd: getMembershipEndDate(payment.planType),
           status: "ACTIVE",

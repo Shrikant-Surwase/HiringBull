@@ -277,34 +277,25 @@ model application {
 model MembershipApplication {
   id               String   @id @default(uuid())
 
-  // Applicant info (from form)
+  // Applicant info
   full_name        String
   email            String   @unique
   phone            String?
   social_profile   String
   reason           String
 
-  // Payment linkage
-  paymentId        String?
-  orderId          String?
-  paidAmount       Float?
-  paymentStatus    PaymentStatus @default(PENDING)
-  paidAt           DateTime?
-
-  // Membership lifecycle
+  // Membership lifecycle (used later)
   membershipStart  DateTime?
   membershipEnd    DateTime?
   planType         PlanType?
 
-  // Admin / system
+  // System state
   status           String   @default("PENDING") // PENDING | ACTIVE | REJECTED | EXPIRED
-  admin_note       String?
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   @@index([email])
   @@index([status])
-  @@index([paymentStatus])
   @@index([createdAt])
 }
