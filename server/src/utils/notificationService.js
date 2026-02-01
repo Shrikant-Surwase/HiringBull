@@ -5,15 +5,28 @@ const expo = new Expo({
   useFcmV1: true,
 });
 
-export const sendNotificationsToDevices = async (devices, title, body, data = {}) => {
-  if (devices.length === 0) {
+/**
+ * Send notifications to a list of devices safely
+ */
+export const sendNotificationsToDevices = async (
+  devices,
+  title,
+  body,
+  data = {}
+) => {
+  console.log('\n================ PUSH SEND START ================');
+  console.log(`Total devices received: ${devices.length}`);
+
+  if (!devices.length) {
+    console.log('No devices to notify');
     return { sent: 0, errors: 0 };
   }
 
+  /** 1️⃣ Build messages */
   const messages = [];
   for (const device of devices) {
     if (!Expo.isExpoPushToken(device.token)) {
-      console.error(`Push token ${device.token} is not a valid Expo push token`);
+      console.error('❌ Invalid Expo token:', device.token);
       continue;
     }
 
@@ -24,52 +37,92 @@ export const sendNotificationsToDevices = async (devices, title, body, data = {}
       body,
       data: {
         ...data,
-        url: '/(app)/profile'
-      }
+        url: '/(app)/profile',
+      },
     });
   }
 
-  if (messages.length === 0) {
+  console.log(`Valid Expo tokens: ${messages.length}`);
+
+  if (!messages.length) {
+    console.log('No valid tokens after filtering');
     return { sent: 0, errors: 0 };
   }
 
+  /** 2️⃣ Chunk messages (Expo max ≈ 100 per chunk) */
   const chunks = expo.chunkPushNotifications(messages);
+
   let sentCount = 0;
   let errorCount = 0;
+  const receiptIds = [];
 
-  for (const chunk of chunks) {
+  /** 3️⃣ Send chunks with throttling */
+  for (const [index, chunk] of chunks.entries()) {
     try {
-      const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-      ticketChunk.forEach((ticket) => {
+      console.log(
+        `🚀 Sending chunk ${index + 1}/${chunks.length} (size: ${chunk.length})`
+      );
+
+      const tickets = await expo.sendPushNotificationsAsync(chunk);
+
+      tickets.forEach((ticket, i) => {
         if (ticket.status === 'ok') {
           sentCount++;
+          if (ticket.id) receiptIds.push(ticket.id);
         } else {
           errorCount++;
+          console.error('❌ Ticket error:', ticket.message, ticket.details);
         }
       });
-        await new Promise((res) => setTimeout(res, 1000));
+
+      // 🔥 Safe adaptive throttle (≈300–400 notifications/sec)
+      await new Promise((res) => setTimeout(res, 300));
     } catch (error) {
-      console.error('Error sending push notifications:', error);
+      console.error('🔥 Chunk send failure:', error);
       errorCount += chunk.length;
     }
   }
 
+  /** 4️⃣ Fetch receipts (important for prod debugging) */
+  if (receiptIds.length) {
+    console.log('\n📬 Fetching push receipts...');
+    try {
+      const receipts = await expo.getPushNotificationReceiptsAsync(receiptIds);
+
+      for (const [id, receipt] of Object.entries(receipts)) {
+        if (receipt.status === 'error') {
+          console.error('❌ Receipt error:', id, receipt.message, receipt.details);
+        }
+      }
+    } catch (error) {
+      console.error('🔥 Receipt fetch failed:', error);
+    }
+  }
+
+  console.log('================ PUSH SEND END =================');
+  console.log(`✅ Sent: ${sentCount}`);
+  console.log(`❌ Failed: ${errorCount}`);
+  console.log('===============================================\n');
+
   return { sent: sentCount, errors: errorCount };
 };
 
+/**
+ * Send job notification to followers of a company
+ */
 export const sendJobNotificationToFollowers = async (companyId, jobData) => {
   const prisma = (await import('../prismaClient.js')).default;
 
+  console.log('\n================ JOB PUSH START ================');
+  console.log(`Company: ${jobData.company}`);
+  console.log(`Job: ${jobData.title}`);
+  console.log(`Segment: ${jobData.segment || 'ALL'}`);
+
   const whereClause = {
-    followedCompanies: {
-      some: {
-        id: companyId
-      }
-    },
-    active: true
+    followedCompanies: { some: { id: companyId } },
+    active: true,
   };
 
-  // Filter by experience level if job has a segment
   if (jobData.segment) {
     whereClause.experience_level = jobData.segment;
   }
@@ -78,59 +131,33 @@ export const sendJobNotificationToFollowers = async (companyId, jobData) => {
     where: whereClause,
     select: {
       id: true,
-      email: true,
       name: true,
-      experience_level: true,
+      email: true,
       devices: {
         select: {
           token: true,
-          type: true
-        }
-      }
-    }
+          type: true,
+        },
+      },
+    },
   });
 
-  if (users.length === 0) {
-    console.log('\n===========================================');
-    console.log('📢 JOB NOTIFICATION - No matching users');
-    console.log('===========================================');
-    console.log(`Company: ${jobData.company} (ID: ${companyId})`);
-    console.log(`Job: ${jobData.title}`);
-    console.log(`Segment: ${jobData.segment || 'N/A'}`);
-    console.log(`Reason: No active users found who follow this company with matching experience level`);
-    console.log('===========================================\n');
+  if (!users.length) {
+    console.log('No matching users found');
     return { totalUsers: 0, sent: 0, errors: 0 };
   }
 
-  console.log('\n===========================================');
-  console.log('📢 JOB NOTIFICATION - Sending to followers');
-  console.log('===========================================');
-  console.log(`Company: ${jobData.company} (ID: ${companyId})`);
-  console.log(`Job: ${jobData.title}`);
-  console.log(`Segment: ${jobData.segment || 'N/A'}`);
-  console.log(`Total users to notify: ${users.length}`);
-  console.log('-------------------------------------------');
-  console.log('USERS TO NOTIFY:');
-  users.forEach((user, index) => {
-    console.log(`${index + 1}. User ID: ${user.id}`);
-    console.log(`   Email: ${user.email}`);
-    console.log(`   Name: ${user.name || 'N/A'}`);
-    console.log(`   Experience Level: ${user.experience_level || 'N/A'}`);
-    console.log(`   Devices: ${user.devices.length} (${user.devices.map(d => d.type || 'unknown').join(', ') || 'none'})`);
-    if (user.devices.length > 0) {
-      console.log(`   Device Tokens: ${user.devices.map(d => d.token.substring(0, 20) + '...').join(', ')}`);
-    }
-    console.log('');
-  });
-  console.log('===========================================\n');
+  console.log(`Total users matched: ${users.length}`);
 
-  const allDevices = users.flatMap(user => user.devices);
+  const allDevices = users.flatMap((u) => u.devices);
+
+  console.log(`Total devices found: ${allDevices.length}`);
 
   const notificationData = {
     type: 'new_job',
     jobId: jobData.id,
     companyId: jobData.companyId,
-    companyName: jobData.company
+    companyName: jobData.company,
   };
 
   const result = await sendNotificationsToDevices(
@@ -140,15 +167,14 @@ export const sendJobNotificationToFollowers = async (companyId, jobData) => {
     notificationData
   );
 
-  console.log('\n===========================================');
-  console.log('📢 NOTIFICATION RESULT');
-  console.log('===========================================');
-  console.log(`Notifications sent: ${result.sent}`);
-  console.log(`Notifications failed: ${result.errors}`);
-  console.log('===========================================\n');
+  console.log('================ JOB PUSH END ==================');
+  console.log(`Users: ${users.length}`);
+  console.log(`Sent: ${result.sent}`);
+  console.log(`Errors: ${result.errors}`);
+  console.log('===============================================\n');
 
   return {
     totalUsers: users.length,
-    ...result
+    ...result,
   };
 };

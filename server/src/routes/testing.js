@@ -8,6 +8,7 @@ import express from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import prisma from "../prismaClient.js";
+import { Expo } from 'expo-server-sdk';
 
 const router = express.Router();
 
@@ -30,89 +31,146 @@ router.get("/", (req, res) => {
   });
 });
 
-router.get("/referral/:email", async (req, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { email: req.params.email },
-    });
+const expo = new Expo({
+  accessToken: process.env.EXPO_ACCESS_TOKEN,
+  useFcmV1: true,
+});
 
-    if (user) {
-      return res.json({
-        status: "ok",
-        valid: true,
-        message: "User found. Referral is valid.",
-      });
+router.post('/debug/push', async (req, res) => {
+  const { token } = req.body;
+
+  console.log('\n================ DEBUG PUSH =================');
+  console.log('Token received:', token);
+  console.log('============================================');
+
+  if (!token || !Expo.isExpoPushToken(token)) {
+    console.error('❌ Invalid Expo push token');
+    return res.status(400).json({ error: 'Invalid Expo push token' });
+  }
+
+  const message = {
+    to: token,
+    sound: 'default',
+    title: 'Hello world!',
+    body: 'HiringBull is now live 🚀',
+    data: { test: true },
+  };
+
+  try {
+    console.log('🚀 Sending push...');
+    const tickets = await expo.sendPushNotificationsAsync([message]);
+
+    console.log('\n🎫 TICKETS');
+    console.log(JSON.stringify(tickets, null, 2));
+
+    const receiptIds = tickets.filter(t => t.id).map(t => t.id);
+
+    if (receiptIds.length > 0) {
+      console.log('\n⏳ Waiting for receipts...');
+      await new Promise(r => setTimeout(r, 2000));
+
+      const receipts = await expo.getPushNotificationReceiptsAsync(receiptIds);
+
+      console.log('\n📬 RECEIPTS');
+      console.log(JSON.stringify(receipts, null, 2));
+    } else {
+      console.warn('⚠️ No receipt IDs returned');
     }
 
-    return res.status(404).json({
-      status: "error",
-      valid: false,
-      message: "User not found.",
+    res.json({
+      success: true,
+      tickets,
     });
-
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: "error",
-      message: "Something went wrong.",
-    });
+  } catch (err) {
+    console.error('🔥 PUSH ERROR');
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 });
 
-router.get("/referral-income/:email", async (req, res) => {
-  try {
-    const { email } = req.params;
+// router.get("/referral/:email", async (req, res) => {
+//   try {
+//     const user = await prisma.user.findUnique({
+//       where: { email: req.params.email },
+//     });
 
-    const result = await prisma.payment.aggregate({
-      where: {
-        referredByEmail: email,
-      },
-      _count: {
-        _all: true,
-      },
-      _sum: {
-        amount: true,
-      },
-    });
+//     if (user) {
+//       return res.json({
+//         status: "ok",
+//         valid: true,
+//         message: "User found. Referral is valid.",
+//       });
+//     }
 
-    return res.json({
-      status: "ok",
-      email,
-      totalPeopleReferred: result._count._all,
-      totalReferralIncome: result._sum.amount || 0,
-    });
+//     return res.status(404).json({
+//       status: "error",
+//       valid: false,
+//       message: "User not found.",
+//     });
 
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: "error",
-      message: "Something went wrong",
-    });
-  }
-});
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       status: "error",
+//       message: "Something went wrong.",
+//     });
+//   }
+// });
 
-router.delete("/test-delete-user", async (req, res) => {
-  try {
-    const HARD_CODED_USER_ID = "f24a52f9-be4c-4291-a8eb-fd12e5dc5573"; // replace if needed
+// router.get("/referral-income/:email", async (req, res) => {
+//   try {
+//     const { email } = req.params;
 
-    const result = await prisma.device.deleteMany({
-      where: { userId: HARD_CODED_USER_ID },
-    });
+//     const result = await prisma.payment.aggregate({
+//       where: {
+//         referredByEmail: email,
+//       },
+//       _count: {
+//         _all: true,
+//       },
+//       _sum: {
+//         amount: true,
+//       },
+//     });
 
-    return res.status(200).json({
-      status: "ok",
-      userId: HARD_CODED_USER_ID,
-      deletedDevices: result.count,
-    });
+//     return res.json({
+//       status: "ok",
+//       email,
+//       totalPeopleReferred: result._count._all,
+//       totalReferralIncome: result._sum.amount || 0,
+//     });
 
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: "error",
-      message: "Something went wrong",
-    });
-  }
-});
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       status: "error",
+//       message: "Something went wrong",
+//     });
+//   }
+// });
+
+// router.delete("/test-delete-user", async (req, res) => {
+//   try {
+//     const HARD_CODED_USER_ID = "f24a52f9-be4c-4291-a8eb-fd12e5dc5573"; // replace if needed
+
+//     const result = await prisma.device.deleteMany({
+//       where: { userId: HARD_CODED_USER_ID },
+//     });
+
+//     return res.status(200).json({
+//       status: "ok",
+//       userId: HARD_CODED_USER_ID,
+//       deletedDevices: result.count,
+//     });
+
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       status: "error",
+//       message: "Something went wrong",
+//     });
+//   }
+// });
 
 // router.post("/", async (req, res) => {
 //   try {
