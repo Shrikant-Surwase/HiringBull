@@ -17,6 +17,20 @@ const razorpay = new Razorpay({
 });
 
 /**
+ * Helper: get membership end date
+ */
+const getMembershipEndDate = (planType) => {
+  const daysMap = {
+    ONE_MONTH: 30,
+    THREE_MONTH: 90,
+    SIX_MONTH: 180,
+  };
+
+  const days = daysMap[planType];
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+};
+
+/**
  * =========================
  * CREATE ORDER (NO AUTH)
  * =========================
@@ -30,42 +44,29 @@ export const createOrder = async (req, res) => {
 
     // 1️⃣ Basic validation
     if (!email || !planType || amount == null) {
-      console.log("❌ Missing required fields");
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     const dbPlanType = PLAN_TYPE_MAP[planType];
     if (!dbPlanType) {
-      console.log("❌ Invalid planType:", planType);
       return res.status(400).json({ error: "Invalid plan type" });
     }
 
     const numericAmount = Number(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      console.log("❌ Invalid amount:", amount);
       return res.status(400).json({ error: "Invalid amount" });
     }
 
-    console.log("✅ Parsed values:", {
-      email,
-      numericAmount,
-      planType,
-      dbPlanType,
-      referralCode,
-    });
-
-    // 2️⃣ Idempotency check
-    console.log("🔍 Checking existing PENDING payment...");
+    // 2️⃣ Idempotency (reuse pending payment)
     const existingPayment = await prisma.payment.findFirst({
       where: {
-        referredByEmail: email,
+        email,
         planType: dbPlanType,
         status: "PENDING",
       },
     });
 
     if (existingPayment) {
-      console.log("♻️ Reusing existing order:", existingPayment.orderId);
       return res.json({
         orderId: existingPayment.orderId,
         amountInPaise: Math.round(existingPayment.amount * 100),
@@ -73,36 +74,30 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // 3️⃣ Create Razorpay order (PAISE)
+    // 3️⃣ Create Razorpay order
     const amountInPaise = Math.round(numericAmount * 100);
-    console.log("🧾 Creating Razorpay order for:", amountInPaise, "paise");
-
     const order = await razorpay.orders.create({
       amount: amountInPaise,
       currency: "INR",
       receipt: `hb_${Date.now()}`,
     });
 
-    console.log("✅ Razorpay order created:", order.id);
-
-    // 4️⃣ Save to DB (RUPEES)
+    // 4️⃣ Save payment (PENDING)
     await prisma.payment.create({
       data: {
         orderId: order.id,
-        amount: numericAmount, // RUPEES
+        amount: numericAmount,
         planType: dbPlanType,
-        referredByEmail: email,
+        email,
         referralCode: referralCode || null,
         referralApplied: Boolean(referralCode),
         status: "PENDING",
       },
     });
 
-    console.log("💾 Payment saved to DB (PENDING)");
-
     return res.json({
       orderId: order.id,
-      amountInPaise: order.amount, // Razorpay expects paise
+      amountInPaise: order.amount,
       key: process.env.RAZORPAY_KEY_ID,
     });
   } catch (err) {
@@ -127,52 +122,32 @@ export const verifyPayment = async (req, res) => {
       razorpay_signature,
     } = req.body;
 
-    // 1️⃣ Validate body
-    if (
-      !razorpay_order_id ||
-      !razorpay_payment_id ||
-      !razorpay_signature
-    ) {
-      console.log("❌ Missing Razorpay fields");
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({ success: false });
     }
 
-    // 2️⃣ Fetch payment from DB
-    console.log("🔍 Fetching payment for orderId:", razorpay_order_id);
-    const payment = await prisma.payment.findFirst({
+    // 1️⃣ Fetch payment
+    const payment = await prisma.payment.findUnique({
       where: { orderId: razorpay_order_id },
     });
 
     if (!payment) {
-      console.log("❌ Payment not found in DB");
       return res.status(404).json({ success: false });
     }
 
-    console.log("📄 Payment found:", {
-      id: payment.id,
-      status: payment.status,
-      amount: payment.amount,
-    });
-
-    // 3️⃣ Idempotency
+    // 2️⃣ Idempotency
     if (payment.status === "SUCCESS") {
-      console.log("♻️ Payment already SUCCESS");
       return res.json({ success: true });
     }
 
-    // 4️⃣ Verify signature
+    // 3️⃣ Verify Razorpay signature
     const body = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_SECRET)
       .update(body)
       .digest("hex");
 
-    console.log("🔐 Expected signature:", expectedSignature);
-    console.log("🔐 Received signature:", razorpay_signature);
-
     if (expectedSignature !== razorpay_signature) {
-      console.log("❌ Signature mismatch — marking FAILED");
-
       await prisma.payment.update({
         where: { id: payment.id },
         data: { status: "FAILED" },
@@ -181,19 +156,31 @@ export const verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false });
     }
 
-    // 5️⃣ Mark SUCCESS
-    console.log("✅ Signature verified — marking SUCCESS");
+    // 4️⃣ SUCCESS → update payment + activate membership (atomic)
+    await prisma.$transaction(async (tx) => {
+      // update payment
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          paymentId: razorpay_payment_id,
+          signature: razorpay_signature,
+          status: "SUCCESS",
+        },
+      });
 
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: {
-        paymentId: razorpay_payment_id,
-        signature: razorpay_signature,
-        status: "SUCCESS",
-      },
+      // activate membership
+      await tx.membershipApplication.update({
+        where: { email: payment.email },
+        data: {
+          paymentStatus: "SUCCESS",
+          paidAt: new Date(),
+          planType: payment.planType,
+          membershipStart: new Date(),
+          membershipEnd: getMembershipEndDate(payment.planType),
+          status: "ACTIVE",
+        },
+      });
     });
-
-    console.log("🎉 Payment marked SUCCESS");
 
     return res.json({ success: true });
   } catch (err) {

@@ -173,30 +173,31 @@ model Device {
 
 model Payment {
   id              String        @id @default(uuid())
-  orderId         String
+  orderId         String        @unique
   paymentId       String?
   signature       String?
   amount          Float
   status          PaymentStatus @default(PENDING)
 
+  email           String        
+
   userId          String?
-  user            User?          @relation(fields: [userId], references: [id])
+  user            User?         @relation(fields: [userId], references: [id])
 
   planType        PlanType
 
-  // 🔑 Referral fields
-  referralCode    String?
-  referredByEmail String?
-  referralDiscount Float?       // e.g. 50
-  referralApplied Boolean       @default(false)
+  referralCode     String?
+  referredByEmail  String?
+  referralDiscount Float?
+  referralApplied  Boolean       @default(false)
 
   createdAt       DateTime      @default(now())
 
-  @@index([userId])
+  @@index([email])
   @@index([orderId])
-  @@index([referralCode])
   @@index([planType])
 }
+
 
 model OutreachRequest {
   id           String   @id @default(uuid())
@@ -271,4 +272,39 @@ model application {
   @@index([status])
   @@index([email])
   @@index([created_at])
+}
+
+model MembershipApplication {
+  id               String   @id @default(uuid())
+
+  // Applicant info (from form)
+  full_name        String
+  email            String   @unique
+  phone            String?
+  social_profile   String
+  reason           String
+
+  // Payment linkage
+  paymentId        String?
+  orderId          String?
+  paidAmount       Float?
+  paymentStatus    PaymentStatus @default(PENDING)
+  paidAt           DateTime?
+
+  // Membership lifecycle
+  membershipStart  DateTime?
+  membershipEnd    DateTime?
+  planType         PlanType?
+
+  // Admin / system
+  status           String   @default("PENDING") // PENDING | ACTIVE | REJECTED | EXPIRED
+  admin_note       String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
 }

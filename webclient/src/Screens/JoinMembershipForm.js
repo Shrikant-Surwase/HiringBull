@@ -22,15 +22,7 @@ const JoinMembershipForm = () => {
     email: "",
     phone: "",
     socialProfile: "",
-    collegeName: "",
-    fieldOfStudy: "",
-    passoutYear: "",
-    currentCompany: "",
-    yearsOfExperience: "",
-    triedAlternatives: "",
     reason: "",
-    whyMembership: "",
-    experience: "professional", // Added experience field
     referralEmail: "",
     acknowledged: false,
     isDiscountApplied: false
@@ -116,86 +108,44 @@ const JoinMembershipForm = () => {
     }
   };
 
-  const handleNextPage2 = () => {
+  const handleNextPage2 = async () => {
     setSubmitted(true);
     setIsSubmitting(true);
     setMainError(null);
 
     const newErrors = {};
 
-    // Common fields
     if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
+      newErrors.fullName = "Required";
     }
 
     if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Enter a valid email";
     }
 
     if (!isValidUrl(formData.socialProfile)) {
-      newErrors.socialProfile = 'Please enter a valid URL';
+      newErrors.socialProfile = "Valid link required";
     }
 
-    if (!formData.triedAlternatives.trim()) {
-      newErrors.triedAlternatives = 'This field is required';
-    }
-
-    if (!formData.whyMembership.trim()) {
-      newErrors.whyMembership = 'This field is required';
-    }
-
-    if (formData.reason.length < 80) {
-      newErrors.reason = 'Please provide at least 80 characters';
-    }
-
-    // 🔁 EXPERIENCE-SPECIFIC VALIDATION
-    // if (formData.experience === 'professional') {
-    //   if (!formData.currentCompany.trim()) {
-    //     newErrors.currentCompany = 'Current company is required';
-    //   }
-    //   if (!formData.yearsOfExperience.trim()) {
-    //     newErrors.yearsOfExperience = 'Years of experience is required';
-    //   }
-    // }
-
-    if (formData.experience === 'student') {
-      if (!formData.collegeName.trim()) {
-        newErrors.collegeName = 'College name is required';
-      }
-      if (!formData.passoutYear.trim()) {
-        newErrors.passoutYear = 'Passout year is required';
-      }
+    if (formData.reason.trim().length < 25) {
+      newErrors.reason = "Just 1–2 lines is enough";
     }
 
     if (!formData.acknowledged) {
-      newErrors.acknowledged = 'You must acknowledge before continuing';
+      newErrors.acknowledged = "Please confirm";
     }
 
     setErrors(newErrors);
 
-    const allValid = Object.keys(newErrors).length === 0;
+    if (Object.keys(newErrors).length > 0) {
+      setIsSubmitting(false);
+      return;
+    }
 
-    console.log("📦 Form data:", formData);
-    console.log("❌ Errors:", newErrors);
-
-    setTimeout(async () => {
-      try {
-        setIsSubmitting(false);
-
-        if (!allValid) return;
-
-        await submitApplication();
-        setCurrentStep(3);
-      } catch (err) {
-        console.error("❌ submitApplication failed:", err);
-        setMainError(
-          err?.message ||
-          "Something went wrong while submitting your application. Please try again."
-        );
-      }
-    }, 1000);
+    await submitApplication();
+    setCurrentStep(3);
+    setIsSubmitting(false);
   };
-
   const renderStatus = (value, required = true, validator = null) => {
     const hasValue = value && (value.trim().length > 0);
     const isValid = validator ? validator(value) : hasValue;
@@ -268,28 +218,42 @@ const JoinMembershipForm = () => {
   };
 
   const submitApplication = async () => {
-    const payload = {
-      full_name: formData.fullName,
-      email: formData.email,
-      phone: formData.phone || "",
-      social_profile: formData.socialProfile,
-      is_experienced: formData.experience === "professional",
-      college_name: formData.experience === "student" ? formData.collegeName : "",
-      field_of_study: formData.fieldOfStudy || "",
-      passout_year: formData.passoutYear ? Number(formData.passoutYear) : null,
-      why_membership: formData.whyMembership,
-      tried_alternatives: formData.triedAlternatives,
-      reason: formData.reason,
-    };
+    try {
+      const payload = {
+        full_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone || "",
+        social_profile: formData.socialProfile,
+        reason: formData.reason
+      };
 
-    await fetch("https://api.hiringbull.org/api/application", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+      const res = await fetch("https://api.hiringbull.org/api/application", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      // ❌ HTTP error (4xx / 5xx)
+      if (!res.ok) {
+        let errorMessage = "Failed to submit application";
+
+        try {
+          const data = await res.json();
+          errorMessage = data?.message || errorMessage;
+        } catch {
+          // response not JSON
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      return await res.json(); // optional, if backend returns data
+    } catch (err) {
+      console.error("❌ submitApplication error:", err);
+      throw err; // VERY IMPORTANT → lets caller show error UI
+    }
   };
+
 
   const startPayment = async ({ amount, planType }) => {
     try {
@@ -497,10 +461,8 @@ const JoinMembershipForm = () => {
                 </h1>
 
                 <h2>
-                  This information helps us review your application and ensure the membership
-                  reaches people from diverse backgrounds who genuinely benefit from the
-                  platform. Your information is private, securely handled, and never shared
-                  without your consent.
+                  This information helps us review your application quickly.
+                  Your details are private, securely handled, and never shared.
                 </h2>
 
                 {/* Full Name */}
@@ -514,9 +476,8 @@ const JoinMembershipForm = () => {
                       type="text"
                       value={formData.fullName}
                       onChange={handleChange("fullName")}
-                      aria-label="Full name"
-                      aria-required="true"
                       placeholder="Enter your full name"
+                      aria-required="true"
                     />
                   </div>
                 </div>
@@ -534,19 +495,18 @@ const JoinMembershipForm = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange("email")}
-                      aria-label="Email address"
-                      aria-required="true"
                       placeholder="your.email@example.com"
+                      aria-required="true"
                     />
                   </div>
                 </div>
 
-                {/* Phone */}
+                {/* Phone (Optional) */}
                 <div className="input">
                   <div className="left">
                     <div className="label-row">
                       <div className="label">
-                        Phone (Optional, share if you want to join whatsapp grp)
+                        Phone <span>(Optional – WhatsApp alerts)</span>
                       </div>
                       <div className="status">{renderStatus(formData.phone, false)}</div>
                     </div>
@@ -554,8 +514,7 @@ const JoinMembershipForm = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={handleChange("phone")}
-                      aria-label="Phone number (optional)"
-                      placeholder="Your phone number"
+                      placeholder="Phone number (optional)"
                     />
                   </div>
                 </div>
@@ -565,7 +524,7 @@ const JoinMembershipForm = () => {
                   <div className="left">
                     <div className="label-row">
                       <div className="label">
-                        Social Profile <span>(Portfolio / GitHub / LinkedIn)</span>
+                        Profile <span>(LinkedIn / GitHub / Portfolio)</span>
                       </div>
                       <div className="status">
                         {renderStatus(formData.socialProfile, true, isValidUrl)}
@@ -573,188 +532,11 @@ const JoinMembershipForm = () => {
                     </div>
                     <input
                       type="url"
-                      placeholder="https://"
                       value={formData.socialProfile}
                       onChange={handleChange("socialProfile")}
-                      aria-label="Social profile URL"
+                      placeholder="https://linkedin.com/in/..."
                       aria-required="true"
                     />
-                  </div>
-                </div>
-
-                {/* Experience Selection */}
-                <div className="experience-selection">
-                  <div className="question">Are you a?</div>
-                  <div className="dropdown-container">
-                    <select
-                      value={formData.experience}
-                      onChange={(e) => setFormData(prev => ({ ...prev, experience: e.target.value }))}
-                      className="experience-dropdown"
-                    >
-                      <option value="student">🎓 Student</option>
-                      <option value="professional">💼 Working Professional</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Experienced Professional Fields */}
-                {formData.experience === 'professional' && (
-                  <div className="input">
-                    <div className="left">
-                      <div className="label-row">
-                        <div className="label">Current Company</div>
-                        <div className="status">
-                          {renderStatus(formData.currentCompany)}
-                        </div>
-                      </div>
-                      <input
-                        type="text"
-                        value={formData.currentCompany}
-                        onChange={handleChange("currentCompany")}
-                        aria-label="Current company"
-                        aria-required="true"
-                        placeholder="Company name"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Why Membership */}
-                <div className="input">
-                  <div className="left">
-                    <div className="label-row">
-                      <div className="label">Why do you want the Membership</div>
-                      <div className="status">{renderStatus(formData.whyMembership)}</div>
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.whyMembership}
-                      onChange={handleChange("whyMembership")}
-                      placeholder="Briefly explain your goals"
-                      aria-label="Why you want the membership"
-                      aria-required="true"
-                    />
-                  </div>
-                </div>
-
-                {/* Student / Fresher Fields */}
-                {formData.experience === 'student' && (
-                  <>
-                    <div className="input">
-                      <div className="left">
-                        <div className="label-row">
-                          <div className="label">College Name</div>
-                          <div className="status">
-                            {renderStatus(formData.collegeName)}
-                          </div>
-                        </div>
-                        <input
-                          type="text"
-                          value={formData.collegeName}
-                          onChange={handleChange("collegeName")}
-                          aria-label="College name"
-                          aria-required="true"
-                          placeholder="Your college name"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="input">
-                      <div className="left">
-                        <div className="label-row">
-                          <div className="label">
-                            Field of Study <span>(Optional)</span>
-                          </div>
-                          <div className="status">
-                            {renderStatus(formData.fieldOfStudy, false)}
-                          </div>
-                        </div>
-                        <input
-                          type="text"
-                          value={formData.fieldOfStudy}
-                          onChange={handleChange("fieldOfStudy")}
-                          aria-label="Field of study (optional)"
-                          placeholder="Computer Science, Engineering, etc."
-                        />
-                      </div>
-                    </div>
-
-                    <div className="input">
-                      <div className="left">
-                        <div className="label-row">
-                          <div className="label">Expected Year of Passout</div>
-                          <div className="status">
-                            {renderStatus(formData.passoutYear)}
-                          </div>
-                        </div>
-                        <input
-                          type="number"
-                          value={formData.passoutYear}
-                          onChange={handleChange("passoutYear")}
-                          aria-label="Expected year of passout"
-                          aria-required="true"
-                          placeholder="2024"
-                          min="2020"
-                          max="2030"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Tried Alternatives */}
-                <div className="input">
-                  <div className="left">
-                    <div className="label-row">
-                      <div className="label">
-                        Have you tried free alternatives like LinkedIn, job portals, or WhatsApp
-                        groups?
-                      </div>
-                      <div className="status">
-                        {renderStatus(formData.triedAlternatives)}
-                      </div>
-                    </div>
-                    <FormControl component="fieldset" className="mui-radio-group">
-                      <RadioGroup
-                        row
-                        name="triedAlternatives"
-                        value={formData.triedAlternatives}
-                        onChange={(e) => handleChange("triedAlternatives")({ target: { value: e.target.value } })}
-                      >
-                        <FormControlLabel
-                          value="Yes"
-                          control={<Radio sx={{
-                            color: '#ffc600',
-                            '&.Mui-checked': { color: '#ffc600' },
-                            '& .MuiSvgIcon-root': { fontSize: 18 }
-                          }} />}
-                          label="Yes"
-                          sx={{
-                            '& .MuiFormControlLabel-label': {
-                              fontSize: '0.85rem',
-                              fontWeight: 400,
-                              color: '#333'
-                            }
-                          }}
-                        />
-                        <FormControlLabel
-                          value="No"
-                          control={<Radio sx={{
-                            color: '#ffc600',
-                            '&.Mui-checked': { color: '#ffc600' },
-                            '& .MuiSvgIcon-root': { fontSize: 18 }
-                          }} />}
-                          label="No"
-                          sx={{
-                            '& .MuiFormControlLabel-label': {
-                              fontSize: '0.85rem',
-                              fontWeight: 400,
-                              color: '#333'
-                            }
-                          }}
-                        />
-                      </RadioGroup>
-                    </FormControl>
                   </div>
                 </div>
 
@@ -762,59 +544,38 @@ const JoinMembershipForm = () => {
                 <div className="input">
                   <div className="left">
                     <div className="label-row">
-                      <div className="label">Why do you need HiringBull?</div>
-                      <div className="status">
-                        {formData.reason.length >= 80 ? (
-                          <CheckCircleIcon style={{ fill: "#eebf2f" }} />
-                        ) : submitted ? (
-                          <>
-                            <InfoIcon />
-                            <span>Minimum 80 characters</span>
-                          </>
-                        ) : null}
+                      <div className="label">
+                        What problem are you trying to solve with HiringBull?
                       </div>
                     </div>
                     <textarea
-                      placeholder="e.g. I apply late and miss openings, want early alerts, limited competition, or better visibility with employees."
                       value={formData.reason}
                       onChange={handleChange("reason")}
-                      aria-label="Why do you need HiringBull"
+                      placeholder="1–2 lines is enough (early alerts, less competition, etc.)"
                       aria-required="true"
-                      minLength="80"
                     />
                   </div>
                 </div>
 
+                {/* Info Text */}
                 <p className="acknowledgement">
-                  Your membership is activated immediately. To maintain platform quality, all
-                  applications are reviewed manually within 24–48 hours. If your application
-                  isn’t approved, your membership will be canceled and your full payment will
-                  be refunded automatically — no questions asked.
+                  Membership activates immediately after payment. Applications are reviewed within 24–48 hours, and if not approved, your payment is automatically refunded — no questions asked. Currently, HiringBull is focused on supporting candidates with less than 3 years of professional experience.
                 </p>
 
+                {/* Acknowledgement */}
                 <div className="checkbox-input">
                   <label>
                     <input
                       type="checkbox"
                       checked={formData.acknowledged}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setFormData(prev => ({ ...prev, acknowledged: checked }));
-
-                        if (submitted && !checked) {
-                          setErrors(prev => ({
-                            ...prev,
-                            acknowledged: 'You must acknowledge before continuing'
-                          }));
-                        } else {
-                          setErrors(prev => {
-                            const { acknowledged, ...rest } = prev;
-                            return rest;
-                          });
-                        }
-                      }}
+                      onChange={(e) =>
+                        setFormData(prev => ({
+                          ...prev,
+                          acknowledged: e.target.checked
+                        }))
+                      }
                     />
-                    I have read the above
+                    I understand the membership and refund policy
                   </label>
 
                   {submitted && errors.acknowledged && (
@@ -825,15 +586,25 @@ const JoinMembershipForm = () => {
                   )}
                 </div>
 
-                {/* Global error banner */}
+                {/* Global Error */}
                 {submitted && Object.keys(errors).length > 0 && (
                   <div className="form-error-banner">
                     <InfoIcon />
-                    <span>{mainError ? mainError : "You have some errors. Please review the form."}</span>
+                    <span>
+                      {mainError || "Please fix the highlighted fields to continue."}
+                    </span>
                   </div>
                 )}
 
-                <div className="next-btn" onClick={handleNextPage2} disabled={!formData.acknowledged || isSubmitting} role="button" tabIndex="0" onKeyDown={(e) => e.key === 'Enter' && handleNextPage2()}>
+                {/* CTA */}
+                <div
+                  className="next-btn"
+                  role="button"
+                  tabIndex="0"
+                  onClick={handleNextPage2}
+                  onKeyDown={(e) => e.key === "Enter" && handleNextPage2()}
+                  disabled={!formData.acknowledged || isSubmitting}
+                >
                   {isSubmitting ? "Processing..." : "Continue to Payment →"}
                 </div>
               </OneContent>

@@ -12,6 +12,7 @@ import outreachRoutes from './outreachRoutes.js';
 import authTestRoutes from './authTest.js'; 
 import freeJobsRoutes from './freeJobsRoutes.js'; 
 import applicationRoutes from './applicationRoutes.js'
+import membershipRoutes from './membershipRoutes.js'
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.use('/public', testingRoutes);
 router.use('/webhooks', webhookRoutes);
 router.use('/free-jobs', freeJobsRoutes);
 router.use('/application', applicationRoutes);
+router.use('/membership', membershipRoutes); 
 
 // 🔐 Auth test route (Clerk only)
 router.use('/auth', authTestRoutes); // ✅ NEW

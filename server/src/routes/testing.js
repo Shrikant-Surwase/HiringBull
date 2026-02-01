@@ -91,6 +91,29 @@ router.get("/referral-income/:email", async (req, res) => {
   }
 });
 
+router.delete("/test-delete-user", async (req, res) => {
+  try {
+    const HARD_CODED_USER_ID = "f24a52f9-be4c-4291-a8eb-fd12e5dc5573"; // replace if needed
+
+    const result = await prisma.device.deleteMany({
+      where: { userId: HARD_CODED_USER_ID },
+    });
+
+    return res.status(200).json({
+      status: "ok",
+      userId: HARD_CODED_USER_ID,
+      deletedDevices: result.count,
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: "Something went wrong",
+    });
+  }
+});
+
 // router.post("/", async (req, res) => {
 //   try {
 //     const userId = "74bfaab4-2179-40e5-8e62-7e733495c096";
