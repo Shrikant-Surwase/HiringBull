@@ -113,7 +113,7 @@ export const createOrder = async (req, res) => {
  */
 export const verifyPayment = async (req, res) => {
   console.log("\n🟢 VERIFY PAYMENT HIT");
-  console.log("📥 Body:", req.body);
+  console.log("📥 Raw body:", JSON.stringify(req.body, null, 2));
 
   try {
     const {
@@ -123,31 +123,49 @@ export const verifyPayment = async (req, res) => {
     } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      console.log("❌ Missing Razorpay fields");
       return res.status(400).json({ success: false });
     }
 
-    // 1️⃣ Fetch payment
+    // 1️⃣ Fetch payment from DB
     const payment = await prisma.payment.findUnique({
       where: { orderId: razorpay_order_id },
     });
 
+    console.log("🔍 Order ID from frontend:", razorpay_order_id);
+    console.log("🔍 Payment from DB:", payment);
+
     if (!payment) {
+      console.log("❌ No payment found for orderId");
       return res.status(404).json({ success: false });
     }
 
     // 2️⃣ Idempotency
     if (payment.status === "SUCCESS") {
+      console.log("♻️ Payment already marked SUCCESS");
       return res.json({ success: true });
     }
 
-    // 3️⃣ Verify Razorpay signature
+    // 3️⃣ Signature verification
     const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_SECRET)
       .update(body)
       .digest("hex");
 
+    console.log("🔐 Signature debug:");
+    console.log("   body used:", body);
+    console.log("   expected :", expectedSignature);
+    console.log("   received :", razorpay_signature);
+    console.log(
+      "   secret   :",
+      process.env.RAZORPAY_SECRET?.slice(0, 6) + "..."
+    );
+
     if (expectedSignature !== razorpay_signature) {
+      console.log("❌ SIGNATURE MISMATCH → marking payment FAILED");
+
       await prisma.payment.update({
         where: { id: payment.id },
         data: { status: "FAILED" },
@@ -156,9 +174,12 @@ export const verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false });
     }
 
-    // 4️⃣ SUCCESS → update payment + activate membership (atomic)
+    console.log("✅ Signature verified");
+
+    // 4️⃣ SUCCESS → update payment + activate membership
     await prisma.$transaction(async (tx) => {
-      // update payment
+      console.log("🧾 Updating payment → SUCCESS");
+
       await tx.payment.update({
         where: { id: payment.id },
         data: {
@@ -168,10 +189,13 @@ export const verifyPayment = async (req, res) => {
         },
       });
 
-      // activate membership
-      // activate membership (correct)
-      await tx.membershipApplication.update({
-        where: { email: payment.email },
+      console.log("👤 Activating membership for:", payment.email);
+
+      await tx.membershipApplication.updateMany({
+        where: {
+          email: payment.email,
+          status: "PENDING", // safety guard
+        },
         data: {
           membershipStart: new Date(),
           membershipEnd: getMembershipEndDate(payment.planType),
@@ -180,9 +204,11 @@ export const verifyPayment = async (req, res) => {
       });
     });
 
+    console.log("🎉 Payment verified + membership activated");
     return res.json({ success: true });
   } catch (err) {
     console.error("🔥 VERIFY PAYMENT ERROR:", err);
     return res.status(500).json({ success: false });
   }
 };
+

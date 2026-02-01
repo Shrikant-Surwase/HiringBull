@@ -227,7 +227,7 @@ const JoinMembershipForm = () => {
         reason: formData.reason
       };
 
-      const res = await fetch("https://api.hiringbull.org/api/application", {
+      const res = await fetch("https://api.hiringbull.org/api/membership", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -254,20 +254,8 @@ const JoinMembershipForm = () => {
     }
   };
 
-
   const startPayment = async ({ amount, planType }) => {
     try {
-      console.log("🟡 START PAYMENT");
-      console.log("📧 User email:", formData.email);
-      console.log("💰 Amount (₹):", amount);
-      console.log("📦 Plan:", planType);
-
-      if (!formData.email) {
-        alert("Please enter your email before payment");
-        return;
-      }
-
-      // 1️⃣ CREATE ORDER
       const res = await fetch(
         "https://api.hiringbull.org/api/payment/create-order",
         {
@@ -275,7 +263,7 @@ const JoinMembershipForm = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: formData.email,
-            amount, // rupees
+            amount,
             planType,
             referralCode: formData.isDiscountApplied
               ? formData.referralEmail
@@ -285,34 +273,26 @@ const JoinMembershipForm = () => {
       );
 
       if (!res.ok) {
-        const errText = await res.text();
-        console.error("❌ Create order failed:", errText);
         alert("Unable to initiate payment");
         return;
       }
 
       const data = await res.json();
 
-      console.log("✅ Order created:", data);
-
-      // 2️⃣ OPEN RAZORPAY CHECKOUT
       const options = {
-        key: data.key, // LIVE KEY from backend
-        amount: data.amountInPaise, // paise
+        key: data.key,
+        amount: data.amountInPaise,
         currency: "INR",
         order_id: data.orderId,
         name: "HiringBull",
         description: `${planType} Membership`,
         prefill: {
-          name: formData.fullName || "",
+          name: formData.fullName,
           email: formData.email,
           contact: formData.phone || "",
         },
         handler: async (response) => {
           try {
-            console.log("🟢 Payment success:", response);
-
-            // 3️⃣ VERIFY PAYMENT
             const verifyRes = await fetch(
               "https://api.hiringbull.org/api/payment/verify",
               {
@@ -325,33 +305,23 @@ const JoinMembershipForm = () => {
             const verifyData = await verifyRes.json();
 
             if (!verifyRes.ok || !verifyData.success) {
-              console.error("❌ Verification failed:", verifyData);
               alert("Payment verification failed");
               return;
             }
 
-            console.log("✅ Payment verified");
-
-            // Optional but recommended
-            await submitApplication();
-
+            // ✅ DONE — membership already activated in backend
             setCurrentStep(4);
           } catch (err) {
-            console.error("❌ Verification error:", err);
+            console.error(err);
             alert("Payment completed but verification failed");
           }
-        },
-        modal: {
-          ondismiss: () => {
-            console.warn("⚠️ User closed payment popup");
-          },
         },
         theme: { color: "#ffc600" },
       };
 
       new window.Razorpay(options).open();
     } catch (err) {
-      console.error("❌ Payment error:", err);
+      console.error(err);
       alert("Something went wrong. Please try again.");
     }
   };
